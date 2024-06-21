@@ -221,6 +221,13 @@ typedef mesa_port_admin_state_t meba_port_admin_state_t;
         (MEBA_PORT_CAP_2_5G_TRI_SPEED     | \
          MEBA_PORT_CAP_COPPER)
 
+// Board capabilities for EDS2 platform
+#ifdef MEPA_DEMO_EDS2
+#define MEBA_EDS2_CAP   \
+        (MEBA_PORT_CAP_1G_PHY | MEBA_PORT_CAP_1G_FDX | MEBA_PORT_CAP_FLOW_CTRL | MEBA_PORT_CAP_SFP_1G | \
+         MEBA_PORT_CAP_DUAL_FIBER_1000X | MEBA_PORT_CAP_10M_HDX | MEBA_PORT_CAP_10M_FDX | \
+         MEBA_PORT_CAP_100M_HDX | MEBA_PORT_CAP_100M_FDX)
+#endif
 // Bit-mask containing the port capabilities
 typedef uint64_t meba_port_cap_t;
 

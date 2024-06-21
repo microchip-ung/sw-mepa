@@ -22,7 +22,7 @@ static mscc_appl_trace_module_t trace_module = {
 };
 
 #define MALIBU_SPECIFIC_CHECK (0x8250)
-#ifdef EDS2_SUPPORT_EN
+#ifdef MEPA_DEMO_EDS2
 #define COMA_MODE_GPIO_NUM 64
 #else
 #define COMA_MODE_GPIO_NUM 33

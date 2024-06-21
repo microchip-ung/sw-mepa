@@ -20,6 +20,7 @@ Switches.
 
 [cols="1,1,1", options="header"]
 |===
-| PHY       | SKU     | Host Interface
-|           |         | 
+| PHY         | SKU          | Host Interface
+| LAN8814     | 8814/8804    | QSGMII
+| LAN884x     | 8840         | RGMII
 |===

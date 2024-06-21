@@ -275,9 +275,10 @@ void change_root(const char *dev) {
 
     while (1) {
         res = stat(dev, &st);
-        if (res == 0)
+        if (res == 0) {
+            usleep(100);
             break;
-
+        }
         if (cnt > 100000) {
             warn("Timeout. Device %s not found\n", dev);
             warn("\n");
@@ -296,7 +297,6 @@ void change_root(const char *dev) {
         usleep(100);
         cnt += 1;
     }
-
     FATAL(mount(dev, "/mnt", "ext4", 0, 0), "Failed to mount next rootfs");
     FATAL(chdir("/mnt"), "Failed to change dir");
     FATAL(pivot_root("/mnt", "/mnt/mnt"), "pivot_root failed");

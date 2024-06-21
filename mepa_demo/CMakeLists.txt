@@ -115,7 +115,7 @@ target_sources(mepa_demo_examples_lib INTERFACE ${EXAMPLE_SRC} ${EXAMPLE_SRC_MEP
 macro(APP_TARGET)
     set(options )
     set(oneValueArgs NAME MESA MEBA)
-    set(multiValueArgs DEFS)
+    set(multiValueArgs APP_TARGET_DEFINES)
     cmake_parse_arguments(A "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     option(${A_NAME} "Build the MESA DEMO application for ${MESA}" OFF)
     mark_as_advanced(${A_NAME})
@@ -132,6 +132,8 @@ macro(APP_TARGET)
                 ${A_MESA}
                 ${A_MEBA}_static
             )
+    target_compile_options(mepa_demo_lib PUBLIC ${A_APP_TARGET_DEFINES})
+    target_compile_options(mepa_demo_examples_lib INTERFACE ${A_APP_TARGET_DEFINES})
     set_target_properties(${A_NAME} PROPERTIES OUTPUT_NAME "mesa-demo-${A_MESA}")
 
     if (${A_NAME})
@@ -253,11 +255,9 @@ macro(IMG_TARGET)
     endif()
 endmacro()
 
-APP_TARGET(NAME app_vsc7558TSN         MESA vsc7558TSN         MEBA meba_sparx5         DEFS -DMEPA_DEMO_EDSx)
-APP_TARGET(NAME app_vsc7558MSEC        MESA vsc7558MSEC        MEBA meba_sparx5_macsec  DEFS -DMEPA_DEMO_EDSx)
-APP_TARGET(NAME app_lan966x            MESA lan966x            MEBA meba_lan966x)
-APP_TARGET(NAME app_lan966x_lm         MESA lan966x_lm         MEBA meba_lan966x)
-APP_TARGET(NAME app_lan966x_ad         MESA lan966x_ad         MEBA meba_lan966x)
+APP_TARGET(NAME app_vsc7558TSN         MESA vsc7558TSN         MEBA meba_sparx5 DEFS -DMEPA_DEMO_EDSx)
+APP_TARGET(NAME app_vsc7558MSEC        MESA vsc7558MSEC        MEBA meba_sparx5_macsec -DMEPA_DEMO_EDSx)
+APP_TARGET(NAME app_lan966x            MESA lan966x            MEBA meba_eds2 APP_TARGET_DEFINES -DMEPA_DEMO_EDS2)
 
 #if (CMAKE_SYSTEM_PROCESSOR STREQUAL "mipsel")
 #    IMG_TARGET(NAME mipsel_vsc7428         TYPE mfi  APP app_vsc7428  MACHINE luton_pcb091   )
@@ -317,9 +317,9 @@ elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7l")
         IMG_TARGET(NAME armv7_lan9662     TYPE fit    APP app_lan966x         MACHINE lan966x)
     endif ()
 
-    IMG_TARGET(NAME armv7_lan966x         TYPE fit    APP app_lan966x         MACHINE lan966x)
-    IMG_TARGET(NAME armv7_lan966x_lm      TYPE fit    APP app_lan966x_lm      MACHINE lan966x)
-    IMG_TARGET(NAME armv7_lan966x_ad      TYPE fit    APP app_lan966x_ad      MACHINE lan966x)
+    IMG_TARGET(NAME armv7_lan966x         TYPE ext4   APP app_lan966x         MACHINE lan966x)
+    #IMG_TARGET(NAME armv7_lan966x_lm      TYPE fit    APP app_lan966x_lm      MACHINE lan966x)
+    #IMG_TARGET(NAME armv7_lan966x_ad      TYPE fit    APP app_lan966x_ad      MACHINE lan966x)
 
 
     #IMG_TARGET(NAME armv7_vsc7428         TYPE fit    APP app_vsc7428         MACHINE BeagleBoneBlack)

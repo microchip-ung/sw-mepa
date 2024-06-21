@@ -58,7 +58,7 @@ end.parse!
 
 #pp $o
 
-$p_mepa = File.expand_path "#{$o[:src]}/../"
+$p_mepa = File.expand_path "#{$o[:src]}/.."
 $bsp = File.expand_path $o[:bsp]
 #puts "BSP-TOP: #{$bsp}"
 #puts "MEPA-TOP: #{$p_mepa}"
@@ -98,25 +98,31 @@ $machines = {
           {
             :file => "#{$bsp}/arm-cortex_a8-linux-gnu/xstax/release/lan966x-mesa-pcb8291.dtb",
             :overlays => [
-                { :name => "lan9662_ung8291_0_at_lan966x", :file => "#{$p_mepa}/meba/dt/meba_lan966x_8291_0.dtso"},
+              { :name => "lan9662_ung8291_0_at_lan966x", :file => "#{$p_mepa}/board-configs/dt/meba_lan966x_8291_0.dtso"},
             ]
           },
           {
             :file => "#{$bsp}/arm-cortex_a8-linux-gnu/xstax/release/lan966x-mesa-pcb8309.dtb",
             :overlays => [
-                { :name => "lan9662_ung8309_0_at_lan966x", :file => "#{$p_mepa}/meba/dt/meba_lan966x_8309_0.dtso"},
+              { :name => "lan9662_ung8309_0_at_lan966x", :file => "#{$p_mepa}/board-configs/dt/meba_lan966x_8309_0.dtso"},
+            ]
+          },
+          {
+            :file => "#{$bsp}/arm-cortex_a8-linux-gnu/xstax/release/lan966x-appl-pcb8385.dtb",
+            :overlays => [
+              { :name => "lan9668_ung8385_0_at_lan966x", :file => "#{$p_mepa}/board-configs/dt/meba_lan966x_8385_0.dtso"},
             ]
           },
           {
             :file => "#{$bsp}/arm-cortex_a8-linux-gnu/xstax/release/lan966x-mesa-pcb8290.dtb",
             :overlays => [
-                { :name => "lan9668_ung8290_0_at_lan966x", :file => "#{$p_mepa}/meba/dt/meba_lan966x_8290_0.dtso"},
+              { :name => "lan9668_ung8290_0_at_lan966x", :file => "#{$p_mepa}/board-configs/dt/meba_lan966x_8290_0.dtso"},
             ]
           },
           {
             :file => "#{$bsp}/arm-cortex_a8-linux-gnu/xstax/release/lan966x-mesa-pcb8281.dtb",
             :overlays => [
-                { :name => "lan9668_ung8281_0_at_lan966x", :file => "#{$p_mepa}/meba/dt/meba_lan966x_8281_0.dtso"},
+              { :name => "lan9668_ung8281_0_at_lan966x", :file => "#{$p_mepa}/board-configs/dt/meba_lan966x_8281_0.dtso"},
             ]
           },
         ],
@@ -400,6 +406,7 @@ def install file, base_dir
     end
 end
 
+
 def basic_rootfs install_dir
     sys "rm -rf #{install_dir}"
     sys "mkdir -p #{install_dir}"
@@ -413,6 +420,12 @@ def basic_rootfs install_dir
     sys "mv #{install_dir}/etc/init.pool/rcK        #{install_dir}/etc/init.d/."
     sys "mv #{install_dir}/etc/init.pool/S01syslogd #{install_dir}/etc/init.d/."
     sys "mv #{install_dir}/etc/init.pool/S02klogd   #{install_dir}/etc/init.d/."
+    if $o[:name] == "armv7_lan966x"
+        eds2_env = "export pcb=pcb8385_0"
+        sys "touch #{install_dir}/etc/profile.d/env.sh"
+        sys "chmod -x #{install_dir}/etc/profile.d/env.sh"
+        sys "echo #{eds2_env} >> #{install_dir}/etc/profile.d/env.sh"
+    end
 
     $o[:install].each do |i|
         install i, install_dir

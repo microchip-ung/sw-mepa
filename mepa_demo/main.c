@@ -3,6 +3,7 @@
 
 
 #include <stdio.h>
+#include <ctype.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -213,26 +214,27 @@ static mesa_rc i2c_write(const mesa_port_no_t port_no,
 static mesa_bool_t int_from_str(const char *s, int *res)
 {
     long int tmp;
-
+    int i = 0;
     // Get the number only
-    while (*s) {
-        if(*s >= '0' && *s <= '9') {
-            break;
-        } else {
-            s++;
-        }
-    }
-
+    char local[6];
     if (strlen(s) == 0) {
         return 0;
     }
+    memset(local, 0, 5 * sizeof(char));
 
-    tmp = strtol(s, 0, 10);
+    while (*s) {
+        if(isdigit(*s)) {
+            local[i] = *s;
+            i++;
+        }
+        s++;
+    }
+    local[i] = '\n';
 
-    if (tmp < 1 || tmp > 9999) {
+    tmp = strtol(local, 0, 10);
+    if (tmp < 1 || tmp > 99999) {
         return 0;
     }
-
     *res = tmp;
     return 1;
 }
@@ -530,6 +532,20 @@ static mesa_rc board_conf_get(const char *tag, char *buf, size_t bufsize, size_t
         break;
 
     case MESA_CHIP_FAMILY_LAN966X:
+        if (!get_env("pcb",&REF_BOARD_PCB)) {
+            T_D("using default board type");
+        }
+        if ((REF_BOARD_PCB / 10) == 8385 || REF_BOARD_PCB == 8385) {
+            board  = "EDS2";
+            target = 0x9668;
+            if ((REF_BOARD_PCB / 10) == 8385) {
+                type = REF_BOARD_PCB / 10;
+            } else {
+                type = REF_BOARD_PCB;
+            }
+            mux_mode = REF_BOARD_PCB % 10;
+            T_D("board_name %s, target %x type %d mux_mode:%d", board, target, type, mux_mode);
+        }
         // Device-tree is expected
         break;
     case MESA_CHIP_FAMILY_LAN969X:
@@ -1030,7 +1046,6 @@ int fd_read_register(int fd, fd_read_callback_t cb, void *ref)
         T_E("illegal fd: %d", fd);
         return -1;
     }
-
     for (i = 0; i < FD_REG_MAX; i++) {
         reg = &fd_reg_table[i];
         if (reg->fd == fd) {
@@ -1205,7 +1220,6 @@ int main(int argc, char **argv)
 
     // Parse options
     main_parse_options(argc, argv);
-
     if (!run_in_foreground) {
         if (daemon(0, 1) < 0) {
             T_E("daemon failed");
@@ -1219,8 +1233,16 @@ int main(int argc, char **argv)
 
     memset(&board_info, 0, sizeof(board_info));
     
-    rc = spi_io_init(SPI_USER_REG, "/dev/spidev0.1",SPI_FREQ, SPI_PAD);
-    rc = spi_io_init(SPI_USER_FPGA, "/dev/spidev0.2", SPI_FREQ, SPI_PAD);
+    if (SPI_REG_IO_SLOT1) {
+        rc = spi_io_init(SPI_USER_REG, "/dev/spidev0.1",SPI_FREQ, SPI_PAD);
+        board_info.mepa_spi_slot1_reg_read = mepa_phy_spi_read;
+        board_info.mepa_spi_slot1_reg_write = mepa_phy_spi_write;
+    }
+    if (SPI_REG_IO_SLOT2) {
+        rc = spi_io_init(SPI_USER_FPGA, "/dev/spidev0.2", SPI_FREQ, SPI_PAD);
+        board_info.mepa_spi_slot2_reg_read = mepa_phy_spi_read;
+        board_info.mepa_spi_slot2_reg_write = mepa_phy_spi_write;
+    }
     {
         rc = uio_reg_io_init();
         reg_read = uio_reg_read;

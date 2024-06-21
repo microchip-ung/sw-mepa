@@ -406,6 +406,7 @@ static mesa_rc port_status_poll(mesa_port_no_t port_no)
     mesa_rc              rc;
 
     T_N("Enter, port %d", port_no);
+    memset(ps, 0, sizeof(mesa_port_status_t));
     if (!entry->in_bound_status) {
         status.link = ps->link;
         if ((rc = meba_phy_status_poll(meba_global_inst, port_no, &status)) == MESA_RC_OK) {
@@ -421,7 +422,7 @@ static mesa_rc port_status_poll(mesa_port_no_t port_no)
         }
     } else if ((rc = meba_port_status_get(meba_global_inst, port_no, ps)) != MESA_RC_OK) {
         memset(ps, 0 , sizeof(mesa_port_status_t));
-        T_E("meba_port_status_get(%u) failed", port_no);
+        T_E("meba_phy_status_poll(%u) failed", port_no);
     }
     T_N("Exit, port %d", port_no);
     return rc;
