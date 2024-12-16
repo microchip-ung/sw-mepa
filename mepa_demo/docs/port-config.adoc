@@ -47,7 +47,7 @@ Steps involved in the port-config aplication are:
 
 	1. Creating the Dev `mepa_drv_create` 
 	2. Attaching the Dev `cli_cmd_dev_attach`
-	3. Configuring the Dev `cli_cmd_phy_conf`
+	3. Configuring the Dev `cli_cmd_phy_conf` or `cli_parm_speed_select`
 	4. Deleting the Dev    `mepa_drv_del`
 
 
@@ -122,6 +122,12 @@ eg: The port_no in EDSX correspond to a serdes port for 25G slot1 the applicatio
 The configuration is passed to the respective port from the file_name, the file consists of 
 mepa_conf_t structure in the json format. the json string should start with the json object
 "port_config"
+
+        mepa-cmd phy speed <port_list> [10hdx|10fdx|100hdx|100fdx|1000fdx|10g|25g]
+
+User can either use `dev conf` command or `phy speed` command to configure the Dev of the Port,
+This `phy speed` command will configure the Fixed Speed to the port by hardcoding few parameters of
+the structure `mepa_conf_t`
 
  
 == Deleting the Dev

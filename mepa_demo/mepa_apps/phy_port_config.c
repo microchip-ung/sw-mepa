@@ -44,6 +44,8 @@ typedef struct {
     mesa_port_interface_t interface;
     mepa_bool_t           file;
     char                  filename[30];
+    mesa_port_speed_t     speed;
+    mepa_bool_t           fdx;
 } port_cli_req_t;
 
 meba_inst_t meba_phy_inst;
@@ -317,6 +319,63 @@ static void cli_cmd_fpp_get(cli_req_t *req)
     return;
 }
 
+static void cli_cmd_force_speed(cli_req_t *req)
+{
+    mepa_rc rc;
+    demo_phy_info_t phy_family;
+    port_cli_req_t *mreq = req->module_req;
+    mepa_conf_t  conf;
+    mepa_port_no_t  port_no;
+
+    for(int iport = 0; iport < 20; iport++) {
+        port_no = iport2uport(iport);
+        if (req->port_list[port_no] == 0) {
+            continue;
+        }
+        if(meba_phy_inst->phy_devices[iport] == NULL) {
+            cli_printf(" Dev is Not Created for the port : %d\n", iport);
+            continue;
+        }
+        if ((rc = phy_family_detect(meba_phy_inst, iport, &phy_family)) != MEPA_RC_OK) {
+            T_E("\n Error in Detecting PHY Family on Port %d\n", iport);
+            continue;
+        }
+        if(phy_family.family == PHY_FAMILY_MALIBU_10G) {
+            if(mreq->speed != MESA_SPEED_10G && mreq->speed != MESA_SPEED_1G) {
+                T_E("\n Error: Speed Not Support on Port %d\n", iport);
+                continue;
+            }
+        }
+        memset(&conf, 0, sizeof(mepa_conf_t));
+
+        if ((rc = mepa_conf_get(meba_phy_inst->phy_devices[iport], &conf)) != MESA_RC_OK) {
+            T_E("\n mepa_conf_get failed on port %d\n", iport);
+            continue;
+        }
+        conf.speed = mreq->speed;
+        conf.fdx = mreq->fdx;
+        if(phy_family.family == PHY_FAMILY_VIPER || phy_family.family == PHY_FAMILY_TESLA || phy_family.family == PHY_FAMILY_LAN8814) {
+            conf.flow_control = 1;
+            conf.admin.enable = 1;  
+            conf.mac_if_aneg_ena = 1;
+            conf.man_neg = MEPA_MANUAL_NEG_DISABLED;
+            conf.mdi_mode = MEPA_MEDIA_MODE_AUTO;
+            conf.force_ams_mode_sel = MEPA_PHY_MEDIA_FORCE_AMS_SEL_NORMAL;
+        } else if(phy_family.family == PHY_FAMILY_MALIBU_10G) {
+            conf.conf_10g.oper_mode = (mreq->speed == MESA_SPEED_10G) ? MEPA_PHY_LAN_MODE : MEPA_PHY_1G_MODE;
+            conf.conf_10g.interface_mode = MEPA_PHY_SFI_XFI;
+            conf.conf_10g.h_media = MEPA_MEDIA_TYPE_SR;
+            conf.conf_10g.l_media = MEPA_MEDIA_TYPE_SR;
+            conf.conf_10g.channel_high_to_low = 1;
+        }
+        if ((rc = mepa_conf_set(meba_phy_inst->phy_devices[iport], &conf)) != MESA_RC_OK) {
+            T_E("mepa_conf_set failed on port %u", iport);
+            continue;
+        }
+    }
+    return;
+}
+
 static cli_cmd_t cli_cmd_table[] = {
     {
         "Dev Create [<port_no>]",
@@ -355,6 +414,11 @@ static cli_cmd_t cli_cmd_table[] = {
         "Get the Frame Preemption Status on PHY",
         cli_cmd_fpp_get
     },
+    {
+        "phy speed <port_list> [10hdx|10fdx|100hdx|100fdx|1000fdx|10g|25g]",
+        "Configure Forced Fixed Speed of PHY",
+        cli_cmd_force_speed,
+    },
 
 };
 
@@ -391,6 +455,35 @@ static int cli_parm_keyword(cli_req_t *req)
 
 }
 
+static int cli_parm_speed_select(cli_req_t *req)
+{ 
+    port_cli_req_t *mreq = req->module_req;
+
+    if (!strncasecmp(req->cmd, "10hdx", strlen(req->cmd))) {
+        mreq->speed = MESA_SPEED_10M;
+        mreq->fdx   = 0;
+    } else if (!strncasecmp(req->cmd, "10fdx", strlen(req->cmd))) {
+        mreq->speed = MESA_SPEED_10M;
+        mreq->fdx   = 1;
+    } else if (!strncasecmp(req->cmd, "100hdx", strlen(req->cmd))) {
+        mreq->speed = MESA_SPEED_100M;
+        mreq->fdx   = 0;
+    } else if (!strncasecmp(req->cmd, "100fdx", strlen(req->cmd))) {
+        mreq->speed = MESA_SPEED_100M;
+        mreq->fdx   = 1;
+    } else if (!strncasecmp(req->cmd, "1000fdx", strlen(req->cmd))) {
+        mreq->speed = MESA_SPEED_1G;
+        mreq->fdx   = 1;
+    } else if (!strncasecmp(req->cmd, "10g", strlen(req->cmd))) {
+        mreq->speed = MESA_SPEED_10G;
+        mreq->fdx   = 1;
+    } else if (!strncasecmp(req->cmd, "25g", strlen(req->cmd))) {
+        mreq->speed = MESA_SPEED_25G;
+        mreq->fdx   = 1;
+    }
+    return 0;
+}
+
 static cli_parm_t cli_parm_table[] = {
     {
         "qsgmii|sfi|sgmii",
@@ -421,6 +514,18 @@ static cli_parm_t cli_parm_table[] = {
         "filename       :  filename)\n",
         CLI_PARM_FLAG_NO_TXT | CLI_PARM_FLAG_SET,
         cli_parm_keyword
+    },
+    {
+        "10hdx|10fdx|100hdx|100fdx|1000fdx|10g|25g",
+        "10hdx   : 10  Mbps Half Duplex"
+        "10fdx   : 10  Mbps Full Duplex"
+        "100hdx  : 100 Mbps Half Duplex"
+        "100fdx  : 100 Mbps Full Duplex"
+        "1000fdx : 1   Gbps Full Duplex"
+        "10g     : 10  Gbps Full Duplex"
+        "25g     : 25  Gbps Full Duplex",
+        CLI_PARM_FLAG_NO_TXT | CLI_PARM_FLAG_SET,
+        cli_parm_speed_select,
     },
 };
 
