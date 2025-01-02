@@ -9,6 +9,9 @@
 #include "meba_generic.h"
 
 
+/* Malibu 10G SKU */
+#define MEBA_10GPHY_8258  0x8258
+
 mepa_rc meba_mmd_read(struct mepa_callout_ctx           *ctx,
                       const uint8_t                      mmd,
                       const uint16_t                     addr,
@@ -72,11 +75,19 @@ static void meba_phy_config(meba_inst_t inst, const vtss_inst_t vtss_instance, m
     phy_reset.reset_point = MEPA_RESET_POINT_PRE;
     meba_phy_reset(inst, port_no, &phy_reset);
 
+    /* Default Reset Point */
+    phy_reset.reset_point = MEPA_RESET_POINT_DEFAULT;
+    meba_phy_reset(inst, port_no, &phy_reset);
+
+    /* Post Reset Point */
+    phy_reset.reset_point = MEPA_RESET_POINT_POST;
+    meba_phy_reset(inst, port_no, &phy_reset);
+
     /* PHY Info Get */
     meba_phy_info_get(inst, port_no, &phy_info);
 
     /* Port Configuration */
-    if(phy_info.part_number == 0x8258) {
+    if(phy_info.part_number == MEBA_10GPHY_8258) {
         m10g_mode_conf(vtss_instance, inst, port_no, base_port_no);
     }
 } 
