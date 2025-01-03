@@ -1094,17 +1094,16 @@ mesa_rc mepa_spi_reg_read_write (void *chip,
     uint32_t slot2_end = EDSX_25G_SLOT2_END;
 
     uint32_t port_cnt = MEBA_WRAP(meba_capability, appl_init.board_inst, MEBA_CAP_BOARD_PORT_MAP_COUNT);
-
     /* SFP Slots Port Numbers when EDSX Port Count is 9 */
     if(port_cnt == EDSX_PORT_CNT_9) {
         slot1_start = EDSX_SLOT1_START_PORT_CNT_9;
-        slot1_end = EDSX_SLOT1_START_PORT_CNT_9 + 4;
+        slot1_end = EDSX_SLOT1_START_PORT_CNT_9 + 3;
         slot2_start =  EDSX_SLOT2_START_PORT_CNT_9;
-        slot2_end = EDSX_SLOT2_START_PORT_CNT_9 + 4;
+        slot2_end = EDSX_SLOT2_START_PORT_CNT_9 + 3;
     }
- 
+
     if((port_no >= slot1_start && port_no <= slot1_end) ) {
-        ch_no = (port_no == 0)?0:(slot1_end - port_no);
+        ch_no = (slot1_end - port_no);
         if(read){
             addr = ch_no << 21 | dev << 16 | reg_num;
             spi_read(SPI_USER_REG, addr, data);
@@ -1116,7 +1115,7 @@ mesa_rc mepa_spi_reg_read_write (void *chip,
         }
     }
     if((port_no >= slot2_start && port_no <= slot2_end)) {
-        ch_no = (port_no == 0)?0:(slot2_end - port_no);
+        ch_no = (slot2_end - port_no);
         if(read){
             addr = ch_no << 21 | dev << 16 | reg_num;
             spi_read(SPI_USER_FPGA, addr, data);
@@ -1136,8 +1135,8 @@ mesa_rc mepa_phy_spi_read (struct mepa_callout_ctx *ctx,
                             uint8_t             dev,
                             uint16_t            reg_num,
                             uint32_t            *const data){
-         
-     return mepa_spi_reg_read_write(ctx, (port_no==0)?ctx->port_no:port_no, 1, dev, reg_num, data);
+
+     return mepa_spi_reg_read_write(ctx, port_no, 1, dev, reg_num, data);
 }
 
 mesa_rc mepa_phy_spi_write (struct mepa_callout_ctx *ctx,
@@ -1145,7 +1144,7 @@ mesa_rc mepa_phy_spi_write (struct mepa_callout_ctx *ctx,
                             uint8_t             dev,
                             uint16_t            reg_num,
                             uint32_t            *const data){
-     return mepa_spi_reg_read_write(ctx, (port_no==0)?ctx->port_no:port_no, 0, dev, reg_num, data);
+     return mepa_spi_reg_read_write(ctx, port_no, 0, dev, reg_num, data);
 }
 
 #if 0

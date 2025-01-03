@@ -185,7 +185,7 @@ static vtss_rc vtss_macsec_port_mem_alloc(const mepa_callout_t    *callout,
 {
     vtss_state_t *vtss_state = *inst;
     u32 max_secy,max_sa, max_sc;
-    u32 phy_id = mepa_phy_id_get(callout, callout_ctx);
+    u32 phy_id = mepa_phy_id_get(callout, callout_ctx, port_no);
     mepa_bool_t is_phy_1g;
     vtss_macsec_internal_secy_t *secy;
     vtss_macsec_internal_secy_t *macsec_conf_secy = NULL;

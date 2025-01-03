@@ -1530,10 +1530,10 @@ static mesa_rc fa_reset(meba_inst_t inst, meba_reset_point_t reset)
 
             if(slot_map[board->port_cfg].sfp_slot1_port >= 0) {
                 for(int port = start_port_slot1; port < (start_port_slot1 + 4); port++) /* slot 1 scanning */
-                    phy_25g_slot1_scan(inst, board->port[port].board_port, &board->port[port].map, start_port_slot1);
+                    phy_25g_slot1_scan(inst, port, &board->port[port].map, start_port_slot1);
             } if(slot_map[board->port_cfg].sfp_slot2_port >= 0) {
                 for(int port = start_port_slot2; port < (start_port_slot2 + 4); port++) /* slot 2 scanning */
-                    phy_25g_slot2_scan(inst, board->port[port].board_port, &board->port[port].map, start_port_slot2);
+                    phy_25g_slot2_scan(inst, port, &board->port[port].map, start_port_slot2);
             }
             break;
 
@@ -1682,10 +1682,10 @@ static mesa_rc fa_reset(meba_inst_t inst, meba_reset_point_t reset)
 
             if(slot_map[board->port_cfg].sfp_slot1_port >= 0) {
                 for(int port = start_port_slot1; port < (start_port_slot1 + 4); port++) /* slot 1 scanning */
-                    phy_25g_slot1_scan(inst, board->port[port].board_port, &board->port[port].map, start_port_slot1);
+                    phy_25g_slot1_scan(inst, port, &board->port[port].map, start_port_slot1);
             } if(slot_map[board->port_cfg].sfp_slot2_port >= 0) {
                 for(int port = start_port_slot2; port < (start_port_slot2 + 4); port++) /* slot 2 scanning */
-                    phy_25g_slot2_scan(inst, board->port[port].board_port, &board->port[port].map, start_port_slot2);
+                    phy_25g_slot2_scan(inst, port, &board->port[port].map, start_port_slot2);
             }
             break;
     }
