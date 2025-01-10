@@ -866,7 +866,7 @@ mepa_rc mepa_eee_status_get(struct mepa_device *dev, uint8_t *const advertisemen
  *   MEPA_RC_NOT_IMPLEMENTED when not supported. \n
  *   MEPA_RC_OK on success.
  **/
-mepa_rc mepa_start_of_frame_conf_set(struct mepa_device *dev, mepa_start_of_frame_conf_t *const conf);
+mepa_rc mepa_start_of_frame_conf_set(struct mepa_device *dev, const mepa_start_of_frame_conf_t *const conf);
 
 /**
  * \brief PHY get SOF value

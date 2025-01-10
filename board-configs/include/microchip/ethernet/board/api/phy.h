@@ -150,7 +150,7 @@ mepa_rc meba_phy_chip_temp_get(meba_inst_t inst, mepa_port_no_t port_no, int16_t
 mepa_rc meba_phy_sqi_read(meba_inst_t inst, mepa_port_no_t port_no, uint32_t *const value);
 
 // Set the SOF value
-mepa_rc meba_phy_start_of_frame_conf_set(meba_inst_t inst, mepa_port_no_t port_no, mepa_start_of_frame_conf_t *const value);
+mepa_rc meba_phy_start_of_frame_conf_set(meba_inst_t inst, mepa_port_no_t port_no, const mepa_start_of_frame_conf_t *const value);
 
 // Get the SOF value
 mepa_rc meba_phy_start_of_frame_conf_get(meba_inst_t inst, mepa_port_no_t port_no, mepa_start_of_frame_conf_t *const value);

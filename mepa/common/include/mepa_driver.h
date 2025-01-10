@@ -625,7 +625,7 @@ typedef mepa_rc (*mepa_driver_sqi_read_t)(struct mepa_device *dev, uint32_t *con
  *   MEPA_RC_NOT_IMPLEMENTED when not supported. \n
  *   MEPA_RC_OK on success.
  **/
-typedef mepa_rc (*mepa_driver_start_of_frame_write_t)(struct mepa_device *dev, mepa_start_of_frame_conf_t *const conf);
+typedef mepa_rc (*mepa_driver_start_of_frame_write_t)(struct mepa_device *dev, const mepa_start_of_frame_conf_t *const conf);
 
 /**
  * \brief PHY get SOF value

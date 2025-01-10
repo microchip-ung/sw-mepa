@@ -1229,7 +1229,7 @@ mepa_rc mepa_sqi_read(struct mepa_device *dev, uint32_t *const value)
     return dev->drv->mepa_driver_sqi_read(dev, value);
 }
 
-mepa_rc mepa_start_of_frame_conf_set(struct mepa_device *dev, mepa_start_of_frame_conf_t *const conf)
+mepa_rc mepa_start_of_frame_conf_set(struct mepa_device *dev, const mepa_start_of_frame_conf_t *const conf)
 {
     if (!dev->drv->mepa_driver_start_of_frame_conf_set) {
         return MESA_RC_NOT_IMPLEMENTED;

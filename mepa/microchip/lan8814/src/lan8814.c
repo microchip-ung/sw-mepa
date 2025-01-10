@@ -1690,7 +1690,7 @@ static mepa_rc lan8814_port_flow_mapping_get(uint8_t packet_idx, mepa_bool_t ing
     return MEPA_RC_OK;
 }
 
-static mepa_rc lan8814_start_of_frame_conf_set(mepa_device_t *dev, mepa_start_of_frame_conf_t *const sof_conf)
+static mepa_rc lan8814_start_of_frame_conf_set(mepa_device_t *dev, const mepa_start_of_frame_conf_t *const sof_conf)
 {
     phy_data_t *data = (phy_data_t *)dev->data;
     mepa_gpio_conf_t gpio_conf;

@@ -619,7 +619,7 @@ mepa_rc meba_phy_sqi_read(meba_inst_t inst, mepa_port_no_t port_no, uint32_t *co
 }
 
 // Set the sof parameters
-mepa_rc meba_phy_start_of_frame_conf_set(meba_inst_t inst, mepa_port_no_t port_no, mepa_start_of_frame_conf_t *const conf)
+mepa_rc meba_phy_start_of_frame_conf_set(meba_inst_t inst, mepa_port_no_t port_no, const mepa_start_of_frame_conf_t *const conf)
 {
     if ((port_no < 0) || (port_no >= inst->phy_device_cnt)) {
         return MESA_RC_ERR_INV_PORT_BOARD;
