@@ -483,6 +483,19 @@ static mepa_rc lan8814_poll(mepa_device_t *dev, mepa_status_t *status)
     phy_data_t *data = (phy_data_t *) dev->data;
 
     MEPA_ENTER(dev);
+    //MEPA-835: Downshift happens when port is put into power down. Return the link status as slow 
+    if (!data->conf.admin.enable) {
+         T_D(MEPA_TRACE_GRP_GEN,"Polling cannot be done as Port %d is powered Down", data->port_no);
+         memset(status, 0, sizeof(mepa_status_t));
+         data->link_status = status->link;
+         data->speed_status = status->speed;
+         data->fdx_status   = status->fdx;
+         data->loop_cnt = 0;
+         data->aneg_flag = 0;
+         data->dsh_complete = 0;
+         MEPA_EXIT(dev);
+         return MESA_RC_OK;
+     }
     RD(dev, LAN8814_BASIC_STATUS, &val);
     status->link = (val & LAN8814_F_BASIC_STATUS_LINK_STATUS) ? 1 : 0;
 
@@ -507,7 +520,7 @@ static mepa_rc lan8814_poll(mepa_device_t *dev, mepa_status_t *status)
         // establish the link then perform downshift to 100M.
         RD(dev, LAN8814_DIGITAL_AX_AN_STATUS, &val3);
         RD(dev, LAN8814_CONTROL, &val2);
-        if (data->dsh_conf.dsh_enable && !status->link && ((val2 && LAN8814_F_1000T_SPEED_STATUS) && (val3 & LAN8814_F_LINK_DET) && (data->aneg_flag)) && !data->dsh_complete) {
+        if (data->dsh_conf.dsh_enable && !status->link && ((val2 && LAN8814_F_1000T_SPEED_STATUS) && (val3 && LAN8814_F_LINK_DET) && (data->aneg_flag)) && !data->dsh_complete) {
             data->loop_cnt++;
             if (data->loop_cnt > data->dsh_conf.dsh_thr_cnt * data->rep_cnt) {
                lan8814_downshift(dev);
@@ -551,6 +564,7 @@ static mepa_rc lan8814_poll(mepa_device_t *dev, mepa_status_t *status)
                     T_I(MEPA_TRACE_GRP_GEN, "Aneg restarted on port %d", data->port_no);
                     WRM(dev, LAN8814_BASIC_CONTROL, LAN8814_F_BASIC_CTRL_RESTART_ANEG, LAN8814_F_BASIC_CTRL_RESTART_ANEG);
                     data->aneg_after_link_up = TRUE;
+                    data->loop_cnt = 0;
                     status->link = 0;
                 } else if (data->aneg_after_link_up) {// After auto-negotiation restarted, set the link status as up.
                     status->speed = MEPA_SPEED_1G;

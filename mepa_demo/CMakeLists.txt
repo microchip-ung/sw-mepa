@@ -34,6 +34,7 @@ include_directories(../mepa/vtss/include)
 include_directories(../mepa/vtss/src)
 include_directories(../mepa/microchip/lan80xx/include/microchip)
 include_directories(../mepa/microchip/lan80xx/src)
+include_directories(../mepa/microchip/lan8814/include)
 include_directories(../mepa/common/include)
 
 
