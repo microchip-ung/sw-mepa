@@ -390,8 +390,6 @@ static mepa_rc lan8814_reset(mepa_device_t *dev, const mepa_reset_param_t *rst_c
     phy_data_t *data = (phy_data_t *) dev->data;
     MEPA_ENTER(dev);
     switch(rst_conf->reset_point) {
-        case MEPA_RESET_POINT_PRE:
-            break;
         case MEPA_RESET_POINT_DEFAULT:
             if (!data->init_done) {
                 lan8814_init_conf(dev);
@@ -428,10 +426,7 @@ static mepa_rc lan8814_reset(mepa_device_t *dev, const mepa_reset_param_t *rst_c
                 data->post_mac_rst = TRUE;
             }
             break;
-        case MEPA_RESET_POINT_POST:
-            break;
         default:
-            T_E(MEPA_TRACE_GRP_GEN, "\n RESET_POINT %d does not match with any of PRE, DEFAULT and POST\n", rst_conf->reset_point);
             break;
     }
     /* Recommended to Use MEPA API "mepa_framepreempt_set" to Enable/Disable Frame Preemption */
