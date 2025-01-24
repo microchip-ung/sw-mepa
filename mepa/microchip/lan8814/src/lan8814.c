@@ -446,11 +446,45 @@ mepa_rc lan8814_rep_count_set(mepa_device_t *dev, const uint8_t rep_cnt)
 mepa_rc lan8814_downshift_conf_set(mepa_device_t *dev, const lan8814_phy_downshift_t *dsh)
 {
     phy_data_t *data = (phy_data_t *) dev->data;
+    MEPA_ENTER(dev);
     if (!dsh->dsh_enable && data->dsh_conf.dsh_enable) {
         WRM(dev, LAN8814_BASIC_CONTROL, LAN8814_F_BASIC_CTRL_RESTART_ANEG, LAN8814_F_BASIC_CTRL_RESTART_ANEG);
     }
     data->dsh_conf.dsh_enable = dsh->dsh_enable;
     data->dsh_conf.dsh_thr_cnt = dsh->dsh_thr_cnt;
+    MEPA_EXIT(dev);
+    return MEPA_RC_OK;
+}
+
+mepa_rc lan8814_qsgmii_serdes_tx_adjust(mepa_device_t *dev, const lan8814_phy_tx_qsgmii_level_t *const tx_conf)
+{
+    uint16_t value = 0;
+    phy_data_t *data = (phy_data_t *)dev->data;
+    // since QSGMII soft reset and serdes configuration registers are global this needs to be
+    // only configured via base port.
+    mepa_device_t *base_dev = (mepa_device_t*)data->base_dev;
+    phy_data_t *base_data = (phy_data_t *)base_dev->data;
+    MEPA_ASSERT(base_dev == NULL);
+    if (base_dev != dev) {
+        T_E(MEPA_TRACE_GRP_GEN,"Base port:%d needs to be passed", base_data->port_no);
+        return MEPA_RC_ERROR;
+    }
+    MEPA_ENTER(base_dev);
+    if (tx_conf->tx_boost > 127) {
+        T_E(MEPA_TRACE_GRP_GEN,"tx_boost:%d exceeds MaxValue:127 set value <= 127",tx_conf->tx_boost);
+        MEPA_EXIT(base_dev);
+        return MEPA_RC_ERROR;
+    }
+    if (tx_conf->tx_level > 127) {
+        T_E(MEPA_TRACE_GRP_GEN,"tx_level:%d exceeds MaxValue:127 set value <= 127", tx_conf->tx_level);
+        MEPA_EXIT(base_dev);
+        return MEPA_RC_ERROR;
+    }
+    value = ((LAN8814_QSGMII_SERDES_TX_LEVEL(tx_conf->tx_level)) | LAN8814_QSGMII_SERDES_TX_BOOST(tx_conf->tx_boost));
+    T_I(MEPA_TRACE_GRP_GEN,"tx_level:%x and tx_boost:%x value:%x", tx_conf->tx_level, tx_conf->tx_boost, value);
+    EP_WRM(base_dev, LAN8814_QSGMII_SERDES_TX_CTRL, value, 0x3fff);
+    EP_WRM(base_dev, LAN8814_QSGMII_SOFT_RESET, LAN8814_QSGMII_SOFT_RESET_BIT, LAN8814_QSGMII_SOFT_RESET_BIT);
+    MEPA_EXIT(base_dev);
     return MEPA_RC_OK;
 }
 
