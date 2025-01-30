@@ -884,8 +884,16 @@ static mscc_appl_opt_t main_opt_reset = {
     "SPI device used for FPGA access",
     reset_opt
 };
+
+/* Managment Bus for EDSx is SPI */
+#ifdef MEPA_DEMO_EDSx
+static int SPI_REG_IO_SLOT1 = 1;
+static int SPI_REG_IO_SLOT2 = 1;
+#else
 static int SPI_REG_IO_SLOT1 = 0;
-static int SPI_REG_IO_SLOT2= 0;
+static int SPI_REG_IO_SLOT2 = 0;
+#endif
+
 static int  SPI_REG_IO = 0;
 static char SPI_DEVICE[512];
 static int  SPI_PAD = 0;
