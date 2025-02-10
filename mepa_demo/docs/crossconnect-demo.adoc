@@ -1,0 +1,144 @@
+// Copyright (c) 2004-2020 Microchip Technology Inc. and its subsidiaries.
+// SPDX-License-Identifier: MIT
+
+= Cross connect demo Application
+
+== Cross connect Description
+A "cross connect" refers to mapping of line ports to the host ports, where the transmit (TX) data lines on 
+Line ports are directly connected to the receive (RX) data lines on the other Host ports, and vice versa.
+
+Besides manually switching through the management interface, cross-connect enables automatic switching based 
+on various events. When cross connect is used, all ports should be sourced from the same local reference clock.
+
+== Directory
+* `./mepa_demo/mepa_apps/phy_xconnect.c` - Source Code for Cross connect  Demo Sample Application.
+* `./mepa_demo/mepa_scripts/xconnect_config.json` - JSON file for Crossconnect config, Application will take configuration from this File
+
+== Prerequisites
+To Test Cross connect Demo Application user have to use `arm64_vsc7558TSN.ext4` image to EDSx Platform.
+
+== Procedure to run Cross connect Demo Application
+
+To Run Cross connect Demo Application the 'mepa-demo' application needs to be running.
+Refer Section link:#mepa_demo/docs/getting-started[Getting-Started] to
+know about the procedure to run 'mepa-demo' Application.
+
+Once 'mepa-demo' application is started then we can run the Cross connect Demo Application
+with help of following Command.
+
+    mepa-cmd Xconnect_failover <port_no> -f <file_name>
+
+The configuration is transmitted to the designated port from the JSON file specified by filename.
+This file contains the structure `vtss_phy_10g_auto_failover_conf_t` in JSON format.
+The JSON string must begin with the JSON object "phy_m10g" for VSC8258 PHY.
+
+To List the all available arguments in the Cross connect Demo Application run the below mentioned command.
+
+----
+# mepa-cmd Xconnect_failover ?
+Description:
+------------
+Set Cross connect failover for the Particular Port.
+
+Syntax:
+-------
+Xconnect_failover <port_no> [-f] [filename]
+
+Parameters:
+-----------
+<port_no>: Port number or zero
+file             :  file option
+
+filename       :  filename)
+
+----
+
+== Example for Cross connect
+
+Below is the example of cross connect demo application running on EDSx Switch with VSC8258 PHY. 
+Mapping of Line port 0 to Hostport 1 and Vice versa. 
+
+Cross connect configuration for both Line port 0,1 in xconnect_config.json JSON file.
+
+LINEPORT 0
+----
+{"phy_m10g": {
+    "port_no": 15,
+    "evnt":"VTSS_PHY_10G_AUTO_FAILOVER_EVENT_NONE",
+    "trig_ch_id":0,
+    "is_host_side": 1,
+    "channel_id": 1,
+    "chip_no": 33368,
+    "v_gpio": 12,
+    "a_gpio": 13,
+    "enable": 1,
+    "filter": "VTSS_PHY_10G_AUTO_FAILOVER_FILTER_NONE",
+    "fltr_val": 127
+   }
+}
+----
+
+LINEPORT 1
+----
+{"phy_m10g": {
+    "port_no": 14,
+    "evnt":"VTSS_PHY_10G_AUTO_FAILOVER_EVENT_NONE",
+    "trig_ch_id":1,
+    "is_host_side": 1,
+    "channel_id": ,
+    "chip_no": 33368,
+    "v_gpio": 12,
+    "a_gpio": 13,
+    "enable": 1,
+    "filter": "VTSS_PHY_10G_AUTO_FAILOVER_FILTER_NONE",
+    "fltr_val": 127
+   }
+}
+----
+
+It can be verified by transmitting packets from Link partner to Line port 0 of the PHY and vice versa
+using packet tx command. Whether the transmitted packets got received in another host port can be verified 
+by using port statistics command.
+
+
+----
+# mepa-cmd port stati 15 clear
+#
+#
+# mepa-cmd port stati 15
+Port 21 Statistics:
+
+Rx Packets:                        100   Tx Packets:                          0
+Rx Octets:                       10000   Tx Octets:                           0
+Rx Unicast:                          0   Tx Unicast:                          0
+Rx Multicast:                        0   Tx Multicast:                        0
+Rx Broadcast:                        0   Tx Broadcast:                        0
+Rx Pause:                            0   Tx Pause:                            0
+
+Rx 64:                               0   Tx 64:                               0
+Rx 65-127:                         100   Tx 65-127:                           0
+Rx 128-255:                          0   Tx 128-255:                          0
+Rx 256-511:                          0   Tx 256-511:                          0
+Rx 512-1023:                         0   Tx 512-1023:                         0
+Rx 1024-1518:                        0   Tx 1024-1518:                        0
+Rx 1519-    :                        0   Tx 1519-    :                        0
+
+Rx Packets_0:                      100   Tx Packets_0:                        0
+Rx Packets_1:                        0   Tx Packets_1:                        0
+Rx Packets_2:                        0   Tx Packets_2:                        0
+Rx Packets_3:                        0   Tx Packets_3:                        0
+Rx Packets_4:                        0   Tx Packets_4:                        0
+Rx Packets_5:                        0   Tx Packets_5:                        0
+Rx Packets_6:                        0   Tx Packets_6:                        0
+Rx Packets_7:                        0   Tx Packets_7:                        0
+
+Rx Drops:                            0   Tx Drops:                            0
+Rx CRC/Alignment:                    0   Tx Late Collisions:                  0
+Rx Symbol:                           0   Tx Excessive Coll.:                  0
+Rx Undersize:                        0   Tx Carrier Sense:                    0
+Rx Oversize:                         0
+Rx Fragments:                        0
+Rx Jabbers:                          0
+Rx Filtered:                         0
+
+----
