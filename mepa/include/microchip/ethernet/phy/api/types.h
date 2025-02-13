@@ -267,7 +267,7 @@ typedef struct {
 typedef struct {
     phy10g_oper_mode_t oper_mode;
     phy10g_interface_mode_t interface_mode;
-    uint32_t       channel_id;
+    mepa_phy_channel_id_t channel_id;
     phy10g_media_t h_media;
     phy10g_media_t l_media;
     mepa_bool_t    channel_high_to_low; /* If Channel id decreasing order w.r.t port number increasing set this to one */
@@ -280,17 +280,6 @@ typedef struct {
     mepa_bool_t    h_clk_src_is_high_amp;  /* Host H_PLL5G Amplitude selection HIGH or LOW     */
     mepa_bool_t    l_clk_src_is_high_amp;  /* Line L_PLL5G Amplitude selection HIGH or LOW     */
 } phy10g_conf_t;
-
-#if 0
-typedef struct {
-    phy10g_oper_mode_t      oper_mode;
-    phy10g_interface_mode_t interface_mode;
-    mepa_phy_channel_id_t   channel_id;
-    phy10g_media_t          h_media;
-    phy10g_media_t          l_media;
-    mepa_bool_t             channel_high_to_low; /* If Channel id decreasing order w.r.t port number increasing set this to one */
-}phy10g_conf_t;
-#endif
 
 /** \brief Represents the configuration that is applied to PHY. */
 typedef struct {
