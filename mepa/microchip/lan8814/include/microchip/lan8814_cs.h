@@ -23,12 +23,6 @@ typedef struct {
     lan8814_downshift_conf_t dsh_thr_cnt;   /** <Downshift threshold count */
 } lan8814_phy_downshift_t;
 
-/** \brief Represents the qsgmii serdes tx configuration that is applied to PHY. */
-typedef struct {
-    uint8_t tx_level;   /**< Adjusts the amplitude of the Signal(eye hieght). maximum value is 127*/
-    uint8_t tx_boost;   /**< Boost the signal strength upon frequency loss. maximum value is 127*/
-} lan8814_phy_tx_qsgmii_level_t;
-
 /**
  * \brief
  * Get input of Repetetive count from the user
@@ -67,22 +61,5 @@ mepa_rc lan8814_rep_count_set(mepa_device_t *dev, const uint8_t rep_cnt);
  */
 
 mepa_rc lan8814_downshift_conf_set(mepa_device_t *dev, const lan8814_phy_downshift_t *dsh);
-
-/**
- * \brief
- * Configure QSGMII serdes tx params for a particular port
- *
- * \param dev      [IN]         mepa driver
- * \param tx_conf  [IN]             tx_level parameter
- *
- * \return Return code.
- *  MEPA_RC_OK  on Sucess
- *  MEPA_RC_ERROR on Fail
- **/
-
-/** This API is used to control the QSGMII serdes TX eye amplitude with TX_LEVEL[6:0] and
- * TX_BOOST[13:7] to control the pre-emphasis level of transmitter output(Used upon frequency loss).
- */
-mepa_rc lan8814_qsgmii_serdes_tx_adjust(mepa_device_t *dev, const lan8814_phy_tx_qsgmii_level_t *const tx_conf);
 
 #endif

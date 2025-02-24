@@ -635,9 +635,9 @@ typedef struct {
 
 /** \brief Represents the serdes Tx configuration that is applied to PHY. */
 typedef struct {
-    uint8_t tx_level; /**< Adjust the amplitude of the Signal(eye hieght). Maximum value is 127 */
-    uint8_t tx_boost; /**< Boost the signal strength upon frequency loss.  Maximum value is 127 */
-} mepa_serdes_tx_level_t;
+    uint8_t level; /**< Adjust the amplitude of the Signal(eye hieght). Maximum value is 127 */
+    uint8_t boost; /**< Boost the signal strength upon frequency loss.  Maximum value is 127 */
+} mepa_serdes_tx_conf_t;
 
 /** \brief Capability info */
 typedef enum {

@@ -2887,13 +2887,13 @@ mepa_rc mepa_prbs_monitor_get(struct mepa_device *dev, mepa_phy_prbs_monitor_con
     return dev->drv->mepa_driver_prbs_monitor_get(dev, value);
 }
 
-mepa_rc mepa_serdes_tx_level_set(struct mepa_device *dev, const mepa_serdes_tx_level_t *const value)
+mepa_rc mepa_serdes_tx_conf_set(struct mepa_device *dev, const mepa_serdes_tx_conf_t *const value)
 {
-    if (!dev->drv->mepa_driver_serdes_tx_level_set) {
+    if (!dev->drv->mepa_driver_serdes_tx_conf_set) {
         return MESA_RC_NOT_IMPLEMENTED;
     }
 
-    return dev->drv->mepa_driver_serdes_tx_level_set(dev, value);
+    return dev->drv->mepa_driver_serdes_tx_conf_set(dev, value);
 }
 
 uint32_t mepa_capability(struct mepa_device *dev, uint32_t capability)

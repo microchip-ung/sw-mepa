@@ -797,7 +797,7 @@ typedef mepa_rc (*mepa_driver_warmrestart_sync_t)(struct mepa_device *dev);
  *  MEPA_RC_OK  on Sucess
  *  MEPA_RC_ERROR on Fail
  **/
-typedef mepa_rc (*mepa_driver_serdes_tx_level_set_t)(struct mepa_device *dev, const mepa_serdes_tx_level_t *const tx_conf);
+typedef mepa_rc (*mepa_driver_serdes_tx_conf_set_t)(struct mepa_device *dev, const mepa_serdes_tx_conf_t *const tx_conf);
 
 /**
  * \brief To get phy capability
@@ -867,7 +867,7 @@ typedef struct mepa_driver {
     mepa_driver_warmrestart_conf_get_t mepa_driver_warmrestart_conf_get;
     mepa_driver_warmrestart_conf_end_t mepa_driver_warmrestart_conf_end;
     mepa_driver_warmrestart_conf_set_t mepa_driver_warmrestart_conf_set;
-    mepa_driver_serdes_tx_level_set_t  mepa_driver_serdes_tx_level_set;
+    mepa_driver_serdes_tx_conf_set_t   mepa_driver_serdes_tx_conf_set;
     mepa_ts_driver_t                   *mepa_ts;
     mepa_macsec_driver_t               *mepa_macsec;
     mepa_tc10_driver_t                 *mepa_tc10;

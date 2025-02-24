@@ -2620,7 +2620,7 @@ static mepa_rc lan8814_prbs_monitor_get(mepa_device_t *dev, mepa_phy_prbs_monito
 #endif
 
 #if !defined(MEPA_LAN8814_LIGHT)
-static mepa_rc lan8814_serdes_tx_level_set(mepa_device_t *dev, const mepa_serdes_tx_level_t *const tx_conf)
+static mepa_rc lan8814_serdes_tx_conf_set(mepa_device_t *dev, const mepa_serdes_tx_conf_t *const tx_conf)
 {
     uint16_t      value     = 0;
     phy_data_t    *data     = (phy_data_t *)dev->data, *base_data;
@@ -2641,18 +2641,18 @@ static mepa_rc lan8814_serdes_tx_level_set(mepa_device_t *dev, const mepa_serdes
     MEPA_ENTER(dev);
 
     rc = MEPA_RC_ERROR;
-    if (tx_conf->tx_boost > 127) {
-        T_E(MEPA_TRACE_GRP_GEN, "tx_boost: %u exceeds maximum value of 127", tx_conf->tx_boost);
+    if (tx_conf->boost > 127) {
+        T_E(MEPA_TRACE_GRP_GEN, "boost: %u exceeds maximum value of 127", tx_conf->boost);
         goto do_exit;
     }
 
-    if (tx_conf->tx_level > 127) {
-        T_E(MEPA_TRACE_GRP_GEN, "tx_level: %u exceeds maximum value of 127", tx_conf->tx_level);
+    if (tx_conf->level > 127) {
+        T_E(MEPA_TRACE_GRP_GEN, "level: %u exceeds maximum value of 127", tx_conf->level);
         goto do_exit;
     }
 
-    value = ((LAN8814_QSGMII_SERDES_TX_LEVEL(tx_conf->tx_level)) | LAN8814_QSGMII_SERDES_TX_BOOST(tx_conf->tx_boost));
-    T_I(MEPA_TRACE_GRP_GEN,"tx_level: %u = 0x%x and tx_boost: %u = 0x%x => value = 0x%x", tx_conf->tx_level, tx_conf->tx_level, tx_conf->tx_boost, tx_conf->tx_boost, value);
+    value = ((LAN8814_QSGMII_SERDES_TX_LEVEL(tx_conf->level)) | LAN8814_QSGMII_SERDES_TX_BOOST(tx_conf->boost));
+    T_I(MEPA_TRACE_GRP_GEN,"level: %u = 0x%x and boost: %u = 0x%x => value = 0x%x", tx_conf->level, tx_conf->level, tx_conf->boost, tx_conf->boost, value);
 
     EP_WRM(base_dev, LAN8814_QSGMII_SERDES_TX_CTRL, value, 0x3fff);
     EP_WRM(base_dev, LAN8814_QSGMII_SOFT_RESET, LAN8814_QSGMII_SOFT_RESET_BIT, LAN8814_QSGMII_SOFT_RESET_BIT);
@@ -2715,7 +2715,7 @@ mepa_drivers_t mepa_lan8814_driver_init()
             .mepa_driver_prbs_get = lan8814_prbs_get,
             .mepa_driver_prbs_monitor_set = lan8814_prbs_monitor_set,
             .mepa_driver_prbs_monitor_get = lan8814_prbs_monitor_get,
-            .mepa_driver_serdes_tx_level_set = lan8814_serdes_tx_level_set,
+            .mepa_driver_serdes_tx_conf_set = lan8814_serdes_tx_conf_set,
 #endif //!defined MEPA_LAN8814_LIGHT
         },
         {
@@ -2763,7 +2763,7 @@ mepa_drivers_t mepa_lan8814_driver_init()
             .mepa_driver_prbs_get = lan8814_prbs_get,
             .mepa_driver_prbs_monitor_set = lan8814_prbs_monitor_set,
             .mepa_driver_prbs_monitor_get = lan8814_prbs_monitor_get,
-            .mepa_driver_serdes_tx_level_set = lan8814_serdes_tx_level_set,
+            .mepa_driver_serdes_tx_conf_set = lan8814_serdes_tx_conf_set,
 #endif //!defined MEPA_LAN8814_LIGHT
         },
         {
@@ -2811,7 +2811,7 @@ mepa_drivers_t mepa_lan8814_driver_init()
             .mepa_driver_prbs_get = lan8814_prbs_get,
             .mepa_driver_prbs_monitor_set = lan8814_prbs_monitor_set,
             .mepa_driver_prbs_monitor_get = lan8814_prbs_monitor_get,
-            .mepa_driver_serdes_tx_level_set = lan8814_serdes_tx_level_set,
+            .mepa_driver_serdes_tx_conf_set = lan8814_serdes_tx_conf_set,
 #endif //!defined MEPA_LAN8814_LIGHT
         },
     };

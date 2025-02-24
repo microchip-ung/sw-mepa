@@ -990,7 +990,7 @@ mepa_rc mepa_prbs_monitor_get(struct mepa_device *dev, mepa_phy_prbs_monitor_con
  *  MEPA_RC_OK  on Sucess
  *  MEPA_RC_ERROR on Fail
  **/
-mepa_rc mepa_serdes_tx_level_set(struct mepa_device *dev, const mepa_serdes_tx_level_t *const tx_conf);
+mepa_rc mepa_serdes_tx_conf_set(struct mepa_device *dev, const mepa_serdes_tx_conf_t *const tx_conf);
 
 /**
  * \brief To get phy capability
