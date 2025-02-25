@@ -2620,6 +2620,11 @@ static mepa_rc lan8814_prbs_monitor_get(mepa_device_t *dev, mepa_phy_prbs_monito
 #endif
 
 #if !defined(MEPA_LAN8814_LIGHT)
+/**
+ * This function is used to control the QSGMII serdes Tx eye amplitude with
+ * TX_LEVEL[6:0] and TX_BOOST[13:7] to control the pre-emphasis level of
+ * transmitter output (used upon frequency loss).
+ */
 static mepa_rc lan8814_serdes_tx_conf_set(mepa_device_t *dev, const mepa_serdes_tx_conf_t *const tx_conf)
 {
     uint16_t      value     = 0;

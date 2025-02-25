@@ -786,12 +786,11 @@ typedef mepa_rc (*mepa_driver_warmrestart_sync_t)(struct mepa_device *dev);
 /**
  * \brief Configure serdes Tx parameters for a particular port.
  *
- * This API is used to control the QSGMII serdes Tx eye amplitude with
- * TX_LEVEL[6:0] and TX_BOOST[13:7] to control the pre-emphasis level of
- * transmitter output (used upon frequency loss).
- *
+ * This API is used to control various Serdes Tx configuration parameters,
+ * hereunder Tx eye amplitude.
+
  * \param dev      [IN] mepa driver
- * \param tx_conf  [IN] tx_level parameter
+ * \param tx_conf  [IN] Serdes Tx configuration
  *
  * \return Return code.
  *  MEPA_RC_OK  on Sucess
