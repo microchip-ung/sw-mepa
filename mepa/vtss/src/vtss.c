@@ -1042,62 +1042,19 @@ static mepa_rc phy_10g_delete(mepa_device_t *dev)
 static mepa_rc malibu_10g_reset(mepa_device_t *dev,
                                 const mepa_reset_param_t *rst_conf)
 {
-    vtss_phy_10g_mode_t oper_mode = {};
     phy_data_t *data = (phy_data_t *)(dev->data);
-    vtss_phy_10g_init_parm_t init_parm;
+
     data->temp_init_flag = false;
     switch(rst_conf->reset_point) {
     case MEPA_RESET_POINT_PRE:
-        T_D(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_PRE");
-        if(vtss_phy_10g_init(data->vtss_instance, data->port_no, &init_parm) != VTSS_RC_OK) {
+        if(vtss_phy_10g_init(data->vtss_instance, data->port_no, NULL) != VTSS_RC_OK) {
             return MEPA_RC_ERROR;
         }
-        break;
-    case MEPA_RESET_POINT_DEFAULT:
-        if (vtss_phy_10g_mode_get(data->vtss_instance, data->port_no, &oper_mode) != MEPA_RC_OK) {
-            return MEPA_RC_ERROR;
-        }
-        if (rst_conf->media_intf == MESA_PHY_MEDIA_IF_FI_10G_LAN) {
-            oper_mode.oper_mode = VTSS_PHY_LAN_MODE;
-            T_D(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_DEFAULT: 10G_LAN Media_if: 0x%x", rst_conf->media_intf);
-        } else if (rst_conf->media_intf == MESA_PHY_MEDIA_IF_FI_10G_1G_LAN) {
-            oper_mode.oper_mode = VTSS_PHY_1G_MODE;
-            T_D(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_DEFAULT: 10G_1G_LAN, Media_if: 0x%x", rst_conf->media_intf);
-            vtss_phy_10g_clause_37_control_t ctrl;
-            memset(&ctrl, 0, sizeof(vtss_phy_10g_clause_37_control_t));
-            ctrl.enable = TRUE;
-            ctrl.l_h = TRUE;
-            ctrl.advertisement.fdx = TRUE;
-            ctrl.advertisement.hdx = FALSE;
-            ctrl.advertisement.symmetric_pause = FALSE; /* Enable or Disable Flowcontrol */
-            ctrl.advertisement.asymmetric_pause = FALSE; /* Enable or Disable Flowcontrol */
-            ctrl.advertisement.remote_fault =  FALSE;
-            ctrl.advertisement.acknowledge =  FALSE;
-            ctrl.advertisement.next_page =  FALSE;
-            if (vtss_phy_10g_clause_37_control_set(data->vtss_instance, data->port_no, &ctrl) != VTSS_RC_OK) {
-                return MEPA_RC_ERROR;
-            }
-        } else if (rst_conf->media_intf == MESA_PHY_MEDIA_IF_FI_10G_WAN) {
-            oper_mode.oper_mode = VTSS_PHY_WAN_MODE;
-            T_D(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_DEFAULT: 10G_WAN Media_if: 0x%x", rst_conf->media_intf);
-        } else {
-            T_E(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_DEFAULT: INVALID Media_if: 0x%x", rst_conf->media_intf);
-            return MEPA_RC_ERROR;
-        }
-        if (vtss_phy_10g_mode_set(data->vtss_instance, data->port_no, &oper_mode) != MEPA_RC_OK) {
-            return MEPA_RC_ERROR;
-        }
-        break;
-    case MEPA_RESET_POINT_POST:
-        T_D(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_POST: Media_if: 0x%x", rst_conf->media_intf);
-        break;
     default:
-        T_E(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_UNDEFINED: INVALID Media_if: 0x%x", rst_conf->media_intf);
-        break;
+        // No other RESET POINTs needed
     }
 
     return MEPA_RC_OK;
-
 }
 
 static mepa_rc venice_10g_reset(mepa_device_t *dev,
@@ -1153,52 +1110,36 @@ static mepa_rc phy_10g_conf_set(mepa_device_t *dev, const mepa_conf_t *config)
     phy_data_t *data = (phy_data_t *)dev->data;
     vtss_phy_10g_mode_t mode = {};
 
-    if(config->conf_10g.channel_id == MEPA_CHANNELID_NONE) {
-        T_E(data, MEPA_TRACE_GRP_GEN, "Provide valid Channel ID\n");
-        return MEPA_RC_ERROR;
-    }
-
-    if (vtss_phy_10g_mode_get(data->vtss_instance, data->port_no, &mode) != MEPA_RC_OK) {
-        return MEPA_RC_ERROR;
-    }
+    mode.oper_mode = config->conf_10g.oper_mode;
+    mode.interface  = config->conf_10g.interface_mode;
+    mode.channel_id = config->conf_10g.channel_id;
+    mode.h_media = config->conf_10g.h_media;
+    mode.l_media = config->conf_10g.l_media;
+    mode.channel_high_to_low = config->conf_10g.channel_high_to_low;
+    mode.xfi_pol_invert = config->conf_10g.xfi_pol_invert;
+    mode.polarity.host_rx = config->conf_10g.polarity.host_rx;
+    mode.polarity.line_rx = config->conf_10g.polarity.line_rx;
+    mode.polarity.host_tx = config->conf_10g.polarity.host_tx;
+    mode.polarity.line_tx = config->conf_10g.polarity.line_tx;
+    mode.is_host_wan = config->conf_10g.is_host_wan;
+    mode.lref_for_host = config->conf_10g.lref_for_host;
+    mode.h_clk_src.is_high_amp = config->conf_10g.h_clk_src_is_high_amp;
+    mode.l_clk_src.is_high_amp = config->conf_10g.l_clk_src_is_high_amp;
 
     if (config->speed == MESA_SPEED_1G || config->speed == MESA_SPEED_AUTO) {
         /* Need to flip the lanes to match JR XAUI-lane-0 and 8487 XAUI-lane-0
-        * This only applies to PHY's with a XAUI MAC Interface
-               */
+         * This only applies to PHY's with a XAUI MAC Interface  */
         mode.xaui_lane_flip = true;
-        if (mode.oper_mode != VTSS_PHY_1G_MODE) {
-            mode.oper_mode = VTSS_PHY_1G_MODE;
-            if (vtss_phy_10g_mode_set(data->vtss_instance, data->port_no, &mode) != MEPA_RC_OK) {
-                return MEPA_RC_ERROR;
-            }
-        }
-        T_D(data, MEPA_TRACE_GRP_GEN, "MESA_SPEED_1G or MESA_SPEED_AUTO: 0x%x", config->speed);
 
-        mode.oper_mode = config->conf_10g.oper_mode;
-        mode.interface  = config->conf_10g.interface_mode;
-        mode.channel_id = config->conf_10g.channel_id;
-        mode.h_media = config->conf_10g.h_media;
-        mode.l_media = config->conf_10g.l_media;
-        mode.channel_high_to_low = config->conf_10g.channel_high_to_low;
-        mode.xfi_pol_invert = config->conf_10g.xfi_pol_invert;
-        mode.polarity.host_rx = config->conf_10g.polarity.host_rx;
-        mode.polarity.line_rx = config->conf_10g.polarity.line_rx;
-        mode.polarity.host_tx = config->conf_10g.polarity.host_tx;
-        mode.polarity.line_tx = config->conf_10g.polarity.line_tx;
-        mode.is_host_wan = config->conf_10g.is_host_wan;
-        mode.lref_for_host = config->conf_10g.lref_for_host;
-        mode.h_clk_src.is_high_amp = config->conf_10g.h_clk_src_is_high_amp;
-        mode.l_clk_src.is_high_amp = config->conf_10g.l_clk_src_is_high_amp;
-
+        /* Speed controls oper_mode */
+        mode.oper_mode = VTSS_PHY_1G_MODE;
         if (vtss_phy_10g_mode_set(data->vtss_instance, data->port_no, &mode) != MEPA_RC_OK) {
             return MEPA_RC_ERROR;
         }
 
-
-
+        /* Enable/disable 1G Clause 37 aneg */
         vtss_phy_10g_clause_37_control_t ctrl = {};
-        ctrl.enable = (config->speed == MESA_SPEED_AUTO)?1:0;
+        ctrl.enable = (config->speed == MESA_SPEED_AUTO) ? 1 : 0;
         ctrl.advertisement.fdx = 1;
         ctrl.advertisement.symmetric_pause = config->flow_control;
         ctrl.advertisement.asymmetric_pause = config->flow_control;
@@ -1211,24 +1152,8 @@ static mepa_rc phy_10g_conf_set(mepa_device_t *dev, const mepa_conf_t *config)
             return MEPA_RC_ERROR;
         }
         return MEPA_RC_OK;
-    } else if(config->speed == MESA_SPEED_10G) {
-        T_D(data, MEPA_TRACE_GRP_GEN, "MESA_SPEED_10G: 0x%x", config->speed);
-        mode.oper_mode = config->conf_10g.oper_mode;
-        mode.interface  = config->conf_10g.interface_mode;
-        mode.channel_id = config->conf_10g.channel_id;
-        mode.h_media = config->conf_10g.h_media;
-        mode.l_media = config->conf_10g.l_media;
-        mode.channel_high_to_low = config->conf_10g.channel_high_to_low;
-        mode.xfi_pol_invert = config->conf_10g.xfi_pol_invert;
-        mode.polarity.host_rx = config->conf_10g.polarity.host_rx;
-        mode.polarity.line_rx = config->conf_10g.polarity.line_rx;
-        mode.polarity.host_tx = config->conf_10g.polarity.host_tx;
-        mode.polarity.line_tx = config->conf_10g.polarity.line_tx;
-        mode.is_host_wan = config->conf_10g.is_host_wan;
-        mode.lref_for_host = config->conf_10g.lref_for_host;
-        mode.h_clk_src.is_high_amp = config->conf_10g.h_clk_src_is_high_amp;
-        mode.l_clk_src.is_high_amp = config->conf_10g.l_clk_src_is_high_amp;
-
+    } else if (config->speed == MESA_SPEED_10G) {
+        // mode.oper_mode is set by the application
         if (vtss_phy_10g_mode_set(data->vtss_instance, data->port_no, &mode) != MEPA_RC_OK) {
             return MEPA_RC_ERROR;
         }
