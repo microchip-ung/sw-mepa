@@ -2502,45 +2502,42 @@ static vtss_rc vtss_phy_10g_set_default_conf(vtss_state_t *vtss_state, const vts
 {
     vtss_phy_10g_mode_t *oper_mode;
     VTSS_D("Enter");
-    if (vtss_state->phy_10g_state[port_no].channel_id_lock) {
-        /* Expects PHY to be identified and appropriate channel id is assigned */
-        oper_mode = &vtss_state->phy_10g_state[port_no].mode;
-        oper_mode->oper_mode = VTSS_PHY_LAN_MODE;
-        if (vtss_state->phy_10g_state[port_no].family == VTSS_PHY_FAMILY_MALIBU) {
-            vtss_state->phy_10g_state[port_no].gpio_count = 40;
-            oper_mode->polarity.host_rx = TRUE;
-            oper_mode->polarity.line_rx = TRUE;
-            oper_mode->polarity.host_tx = FALSE;
-            oper_mode->polarity.line_tx = FALSE;
-            oper_mode->is_host_wan = FALSE;
-            oper_mode->lref_for_host = FALSE;
-            oper_mode->h_clk_src.is_high_amp = TRUE;
-            oper_mode->l_clk_src.is_high_amp = TRUE;
-            oper_mode->h_media = VTSS_MEDIA_TYPE_SR;
-            oper_mode->l_media = VTSS_MEDIA_TYPE_SR;
-            oper_mode->serdes_conf.l_offset_guard = TRUE;
-            oper_mode->serdes_conf.h_offset_guard = TRUE;
-            oper_mode->is_init = TRUE;
-        } else if(vtss_state->phy_10g_state[port_no].family == VTSS_PHY_FAMILY_VENICE){
-            vtss_state->phy_10g_state[port_no].gpio_count = 16;
-            if (!(vtss_state->phy_10g_state[port_no].revision)) {
-                oper_mode->venice_rev_a_los_detection_workaround = TRUE;
-            } else {
-                oper_mode->venice_rev_a_los_detection_workaround = FALSE;
-            }
-            oper_mode->apc_ib_regulator = VTSS_APC_IB_BACKPLANE;
-            oper_mode->l_clk_src.is_high_amp = TRUE;
-            oper_mode->sd6g_calib_done = FALSE;
-            oper_mode->is_init = TRUE;
+    /* Expects PHY to be identified and appropriate channel id is assigned */
+    oper_mode = &vtss_state->phy_10g_state[port_no].mode;
+    oper_mode->oper_mode = VTSS_PHY_LAN_MODE;
+    if (vtss_state->phy_10g_state[port_no].family == VTSS_PHY_FAMILY_MALIBU) {
+        vtss_state->phy_10g_state[port_no].gpio_count = 40;
+        oper_mode->polarity.host_rx = TRUE;
+        oper_mode->polarity.line_rx = TRUE;
+        oper_mode->polarity.host_tx = FALSE;
+        oper_mode->polarity.line_tx = FALSE;
+        oper_mode->is_host_wan = FALSE;
+        oper_mode->lref_for_host = FALSE;
+        oper_mode->h_clk_src.is_high_amp = TRUE;
+        oper_mode->l_clk_src.is_high_amp = TRUE;
+        oper_mode->h_media = VTSS_MEDIA_TYPE_SR;
+        oper_mode->l_media = VTSS_MEDIA_TYPE_SR;
+        oper_mode->serdes_conf.l_offset_guard = TRUE;
+        oper_mode->serdes_conf.h_offset_guard = TRUE;
+        oper_mode->is_init = TRUE;
+    } else if(vtss_state->phy_10g_state[port_no].family == VTSS_PHY_FAMILY_VENICE){
+        vtss_state->phy_10g_state[port_no].gpio_count = 16;
+        if (!(vtss_state->phy_10g_state[port_no].revision)) {
+            oper_mode->venice_rev_a_los_detection_workaround = TRUE;
         } else {
-            vtss_state->phy_10g_state[port_no].gpio_count = 12;
-            if (vtss_state->phy_10g_state[port_no].type == VTSS_PHY_TYPE_8484 || vtss_state->phy_10g_state[port_no].type == VTSS_PHY_TYPE_8487 || vtss_state->phy_10g_state[port_no].type == VTSS_PHY_TYPE_8488) {
-                oper_mode->xfi_pol_invert = 0;
-            } else {
-                oper_mode->xfi_pol_invert = 1;
-            }
+            oper_mode->venice_rev_a_los_detection_workaround = FALSE;
         }
-
+        oper_mode->apc_ib_regulator = VTSS_APC_IB_BACKPLANE;
+        oper_mode->l_clk_src.is_high_amp = TRUE;
+        oper_mode->sd6g_calib_done = FALSE;
+        oper_mode->is_init = TRUE;
+    } else {
+        vtss_state->phy_10g_state[port_no].gpio_count = 12;
+        if (vtss_state->phy_10g_state[port_no].type == VTSS_PHY_TYPE_8484 || vtss_state->phy_10g_state[port_no].type == VTSS_PHY_TYPE_8487 || vtss_state->phy_10g_state[port_no].type == VTSS_PHY_TYPE_8488) {
+            oper_mode->xfi_pol_invert = 0;
+        } else {
+            oper_mode->xfi_pol_invert = 1;
+        }
     }
     VTSS_D("Exit");
     return VTSS_RC_OK;
