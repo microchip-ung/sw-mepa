@@ -494,6 +494,65 @@ MMC write: dev # 0, block # 2097186, count 229552 ... 229552 blocks written: OK
 ----
 
 ===== UBOOT Command lines to update the MMC flash for EDS2
+Use the mmc block 5 for updating the emmc flash. Set "mmc_cur" as 5 and "mmc_bak"
+as 6.
+
+----
+=> setenv mmc_cur 5
+=> setenv mmc_bak 6
+----
+
+Set the environment variable "rootargs_mmc" to initialize the current root directory.
+
+----
+=> setenv rootargs_mmc 'root=/dev/ram0 rw rootwait'
+----
+
+Set the environement variable "mtdroot" to mount the rootfs in  root_next.
+
+----
+=> setenv mtdroot 'root_next=/dev/mmcblk0p5'
+----
+
+Set the environment variable 'mmc_tryboot' to load the mmc_image into the 'loadaddr'
+and make it available as '.itb' image and set the 'root_next' to '/dev/mmcblk0p5'.
+
+----
+=> setenv mmc_tryboot 'run mmc_load;run ramboot;'
+----
+
+Set the environment variable "setup" with appropriate "rootargs_mmc" and "mtdparts".
+
+----
+=> setenv setup 'setenv bootargs console=${console} ${mtdparts} ${rootargs_mmc} ${mtdroot} fis_act=${active} boot_source=${boot_source} ${bootargs_extra}'
+----
+
+Run the environment variable "setup" to update the bootargs.
+
+----
+=> run setup
+----
+
+Verify the bootargs is updated as shown below
+
+----
+=> printenv bootargs
+bootargs=console=ttyS0,115200n8 mtdparts=spi0:1536k(fip),256k(Env),256k(Env.bk) root=/dev/ram0 rw rootwait root_next=/dev/mmcblk0p5 fis_act= boot_source=nor uio_pdrv_genirq.of_id=generic-uio loglevel=1
+----
+
+Set the Environment variable 'ramboot' to run mmc_tryboot and boot the kernel
+on 'loadaddr' with Device tree 'lan9668_ung8385_0_at_lan966x'.
+
+----
+=> setenv ramboot 'bootm ${loadaddr}#lan9668_ung8385_0_at_lan966x'
+----
+
+Once the above environment variables are set make sure to save the environment
+
+----
+=> saveenv
+----
+
 Run the Following Command to extract the '.gz' type image and load it in mmcaddr.
 
 ----
@@ -506,20 +565,6 @@ To flash the extracted image to emmc flash run the command 'run mmc_boot0_upd'.
 => run mmc_boot0_upd
 
 MMC write: dev # 0, block # 532544, count 61166 ... 61166 blocks written: OK
-----
-
-Set the environment variable 'mmc_tryboot' to load the mmc_image into the 'loadaddr'
-and make it available as '.itb' image and set the 'root_next' to '/dev/mmcblk0p5'.
-
-----
-=> setenv mmc_tryboot 'run mmc_load; setenv mtdroot root_next=/dev/mmcblk0p5;'
-----
-
-Set the Environment variable 'ramboot' to run mmc_tryboot and boot the kernel
-on 'loadaddr' with Device tree 'lan9668_ung8385_0_at_lan966x'.
-
-----
-=> setenv ramboot 'run mmc_tryboot; bootm ${loadaddr}#lan9668_ung8385_0_at_lan966x'
 ----
 
 === Booting the Firware Image (itb and ext4 image)
@@ -691,9 +736,22 @@ This will run in the background as a daemon in the background, and allow the
 
 To see the list of valid commands use the `mepa-cmd` with no argument.
 
-For EDS2 platform we have environment variable 'pcb' and the variable expands
+For EDS2 platform we have a linux environment variable 'pcb' and the variable expands
 to 'pcb = pcb8385_x' where `x` determines the PHY combination Connected on
-PHY slots 1 and 2.
+PHY slots 1 and 2. The "pcb" variable can be found with 'env' command.
+----
+USER=root
+SHLVL=1
+HOME=/root
+PS1=#
+LOGNAME=root
+TERM=vt100
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+SHELL=/bin/sh
+PWD=/root
+pcb=pcb8385_0
+EDITOR=/bin/vi
+----
 
 Below is the tabulation made for the available PHY combinations
 and corresponding 'x' value:
