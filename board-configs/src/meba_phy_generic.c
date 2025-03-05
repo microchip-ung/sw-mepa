@@ -75,6 +75,14 @@ static void meba_phy_config(meba_inst_t inst, const vtss_inst_t vtss_instance, m
     phy_reset.reset_point = MEPA_RESET_POINT_PRE;
     meba_phy_reset(inst, port_no, &phy_reset);
 
+    /* PHY Info Get */
+    meba_phy_info_get(inst, port_no, &phy_info);
+
+    if(phy_info.part_number == MEBA_10GPHY_8258) {
+        phy_reset.media_intf = MESA_PHY_MEDIA_IF_FI_10G_LAN;
+        m10g_mode_conf(vtss_instance, inst, port_no, base_port_no);
+    }
+
     /* Default Reset Point */
     phy_reset.reset_point = MEPA_RESET_POINT_DEFAULT;
     meba_phy_reset(inst, port_no, &phy_reset);
@@ -83,13 +91,6 @@ static void meba_phy_config(meba_inst_t inst, const vtss_inst_t vtss_instance, m
     phy_reset.reset_point = MEPA_RESET_POINT_POST;
     meba_phy_reset(inst, port_no, &phy_reset);
 
-    /* PHY Info Get */
-    meba_phy_info_get(inst, port_no, &phy_info);
-
-    /* Port Configuration */
-    if(phy_info.part_number == MEBA_10GPHY_8258) {
-        m10g_mode_conf(vtss_instance, inst, port_no, base_port_no);
-    }
 } 
 
 uint16_t slot1_map[] = {0x1b, 0x1a, 0x19, 0x18};

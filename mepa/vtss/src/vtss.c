@@ -1090,6 +1090,7 @@ static mepa_rc malibu_10g_reset(mepa_device_t *dev,
         break;
     case MEPA_RESET_POINT_POST:
         T_D(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_POST: Media_if: 0x%x", rst_conf->media_intf);
+        break;
     default:
         T_E(data, MEPA_TRACE_GRP_GEN, "MEPA_RESET_POINT_UNDEFINED: INVALID Media_if: 0x%x", rst_conf->media_intf);
         break;
