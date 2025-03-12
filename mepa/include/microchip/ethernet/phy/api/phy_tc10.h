@@ -18,6 +18,9 @@ typedef enum mepa_tc10_pin {
 typedef enum mepa_tc10_sleep_request {
     MEPA_TC10_LPS,          /**< LPS pulse */
     MEPA_TC10_FORCE_SLEEP,  /**< Force sleep */
+    MEPA_TC10_SLEEP_ABORT,  /**< Sleep abort */
+    MEPA_TC10_SLEEP_REJECT,  /**< Sleep reject */
+    MEPA_TC10_ABORT_CLEAR,  /**< Sleep clear */
 } mepa_tc10_sleep_request_t;
 
 /** \brief  TC10 wakeup modes */
