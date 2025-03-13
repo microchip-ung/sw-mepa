@@ -152,3 +152,26 @@ PHY by asserting GPIO Pin (GPIO-33 (EDSX), GPIO-64(EDS2)) high.
 
 This command will set the direction of GPIO pin as output and disable COMA mode on the 
 PHY by asserting GPIO Pin (GPIO-33 (EDSX), GPIO-64(EDS2)) low.
+
+== Downshift Application command
+
+The Downshift allows an interface to link at a lower advertised speed when unable to
+establish a stable link at the maximum speed.
+
+The below are the list of command lines that are used to configure the Downshift.
+
+NOTE: LAN8804 and LAN8814 are the 2 SKU's that has Downshift support.
+
+=== Enabling Downshift
+
+	mepa-cmd downshift <port_list> <dsh_time> enable
+
+This command will configure the Downshift for the list of PHY ports with the given 'dsh_time'.
+
+NOTE: The 'dsh_time' can be given as input from the Range of 0 to 6 secs
+
+=== Disabling Downshift
+
+	mepa-cmd downshift <port_list> <dsh_time> disable
+
+This command will disable the Downshift for the list of PHY ports.
