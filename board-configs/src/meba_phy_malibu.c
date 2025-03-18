@@ -45,7 +45,12 @@ void m10g_mode_conf(const vtss_inst_t inst, meba_inst_t meba_inst, mepa_port_no_
     mesa_rc rc = MESA_RC_OK;
     vtss_gpio_10g_gpio_mode_t gpio_conf;
     const edsx_phy_config_map_t *gmap = &vsc825x_gpio_map[iport - slot_port]; /*have to be changed to respective slot */
-    mepa_conf_t conf;
+    mepa_conf_t conf = {0};
+
+    if ((rc = mepa_conf_get(meba_inst->phy_devices[iport], &conf)) != MESA_RC_OK) {
+        printf("mepa_conf_get failed on port %u", iport);
+        return;
+    }
     conf.speed = MESA_SPEED_10G;
     conf.conf_10g.oper_mode = MEPA_PHY_LAN_MODE;
     conf.conf_10g.interface_mode = MEPA_PHY_SFI_XFI;
@@ -56,6 +61,12 @@ void m10g_mode_conf(const vtss_inst_t inst, meba_inst_t meba_inst, mepa_port_no_
     if(conf.conf_10g.channel_high_to_low == false ) {
         conf.conf_10g.channel_id = VTSS_CHANNEL_AUTO;
     }
+    conf.conf_10g.polarity.host_rx = false;
+    conf.conf_10g.polarity.line_rx = false;
+    conf.conf_10g.polarity.host_tx = false;
+    conf.conf_10g.polarity.line_tx = false;
+    conf.conf_10g.h_clk_src_is_high_amp = true;
+    conf.conf_10g.l_clk_src_is_high_amp = true;
     if ((rc = mepa_conf_set(meba_inst->phy_devices[iport], &conf)) != MESA_RC_OK) {
         printf("mepa_conf_set failed on port %u", iport);
 	return;

@@ -1050,8 +1050,10 @@ static mepa_rc malibu_10g_reset(mepa_device_t *dev,
         if(vtss_phy_10g_init(data->vtss_instance, data->port_no, NULL) != VTSS_RC_OK) {
             return MEPA_RC_ERROR;
         }
+        break;
     default:
         // No other RESET POINTs needed
+        break;
     }
 
     return MEPA_RC_OK;
@@ -1108,8 +1110,10 @@ static mepa_rc phy_10g_poll(mepa_device_t *dev,
 static mepa_rc phy_10g_conf_set(mepa_device_t *dev, const mepa_conf_t *config)
 {
     phy_data_t *data = (phy_data_t *)dev->data;
-    vtss_phy_10g_mode_t mode = {};
-
+    vtss_phy_10g_mode_t mode = {0};
+    if(vtss_phy_10g_init(data->vtss_instance, data->port_no, NULL) != VTSS_RC_OK) {
+        return MEPA_RC_ERROR;
+    }
     mode.oper_mode = config->conf_10g.oper_mode;
     mode.interface  = config->conf_10g.interface_mode;
     mode.channel_id = config->conf_10g.channel_id;
@@ -1125,7 +1129,6 @@ static mepa_rc phy_10g_conf_set(mepa_device_t *dev, const mepa_conf_t *config)
     mode.lref_for_host = config->conf_10g.lref_for_host;
     mode.h_clk_src.is_high_amp = config->conf_10g.h_clk_src_is_high_amp;
     mode.l_clk_src.is_high_amp = config->conf_10g.l_clk_src_is_high_amp;
-
     if (config->speed == MESA_SPEED_1G || config->speed == MESA_SPEED_AUTO) {
         /* Need to flip the lanes to match JR XAUI-lane-0 and 8487 XAUI-lane-0
          * This only applies to PHY's with a XAUI MAC Interface  */

@@ -40,8 +40,8 @@
 			"hl_clk_synth": 0,
 			"is_host_wan" : 0,
 			"lref_for_host" : 0,
-			"h_clk_src_is_high_amp" : 0,
-			"l_clk_src_is_high_amp" : 0
+			"h_clk_src_is_high_amp" : 1,
+			"l_clk_src_is_high_amp" : 1
 		}
 	}
 }
