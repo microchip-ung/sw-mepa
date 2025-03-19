@@ -3091,6 +3091,20 @@ mepa_rc mepa_tc10_send_wake_request(struct mepa_device *dev)
     return dev->drv->mepa_tc10->mepa_tc10_send_wake_request(dev);
 }
 
+mepa_rc mepa_tc10_get_indication(struct mepa_device      *dev,
+        uint16_t                *const indication)
+{
+    if (!dev->drv->mepa_tc10) {
+        return MESA_RC_NOT_IMPLEMENTED;
+    }
+
+    if (!dev->drv->mepa_tc10->mepa_tc10_get_indication) {
+        return MESA_RC_NOT_IMPLEMENTED;
+    }
+
+    return dev->drv->mepa_tc10->mepa_tc10_get_indication(dev, indication);
+}
+
 mepa_rc mepa_warmstart_conf_end(struct mepa_device *dev)
 {
     if (!dev->drv->mepa_driver_warmrestart_conf_end) {
