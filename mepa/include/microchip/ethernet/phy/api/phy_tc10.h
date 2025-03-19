@@ -215,6 +215,8 @@ mepa_rc mepa_tc10_send_sleep_request(struct mepa_device                     *dev
 mepa_rc mepa_tc10_get_state(struct mepa_device      *dev,
                             mepa_tc10_state_t       *const state);
 
+mepa_rc mepa_tc10_get_indication(struct mepa_device      *dev,
+                                 uint16_t       *const indication);
 /**
  * \brief sends TC10 wakeup request.
  *
