@@ -321,7 +321,6 @@ static mepa_rc lan887x_phy_tc10_send_sleep_request(struct mepa_device           
 
     if (data->tc10_cfg.sleep_enable == PHY_TRUE &&
             data->conf.admin.enable == PHY_TRUE) {
-        rc = MEPA_RC_ERR_PARM;
         if (req == MEPA_TC10_LPS ) {
             MEPA_RC_GOTO(rc, phy_mmd_reg_rd(dev, MDIO_MMD_VEND1,
                                             LAN887X_DEV30_COMMON_TC10_REG_REG16, &reg_data));
@@ -347,6 +346,8 @@ static mepa_rc lan887x_phy_tc10_send_sleep_request(struct mepa_device           
                           LAN887X_DEV30_COMMON_TC10_SLEEP_ABRT_SLEEP_ABORT);
             MEPA_RC_GOTO(rc, phy_mmd_reg_wr(dev, MDIO_MMD_VEND1,
                                             LAN887X_DEV30_COMMON_TC10_SLEEP_ABRT, reg_data));
+        } else {
+            return MEPA_RC_ERR_PARM;
         }
     }
 
