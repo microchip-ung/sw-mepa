@@ -84,10 +84,18 @@ MEPA_LIB(LIB_NAME mepa_lan966x ADVANCED
          DEFS     -DMEPA_HAS_VTSS  -DMEPA_HAS_KSZ9031  -D MEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x
          DRVS     mepa_drv_vtss    mepa_drv_ksz9031    mepa_drv_lan8814   mepa_drv_lan884x)
 
+MEPA_LIB(LIB_NAME mepa_eds2 ADVANCED
+         DEFS     -DMEPA_HAS_VTSS  -DMEPA_HAS_KSZ9031  -D MEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x
+         DRVS     mepa_drv_vtss    mepa_drv_ksz9031    mepa_drv_lan8814   mepa_drv_lan884x)
+
 MEPA_LIB(LIB_NAME mepa_velocitysp_lan966x ADVANCED
          DEFS     -DMEPA_HAS_LAN8814
          DRVS     mepa_drv_lan8814)
 
 MEPA_LIB(LIB_NAME mepa_velocitysp_lan969x ADVANCED
-         DEFS     -DMEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x -DMEPA_HAS_LAN887X
-         DRVS     mepa_drv_lan8814_light mepa_drv_lan884x mepa_drv_lan887x)
+         DEFS     -DMEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x
+         DRVS     mepa_drv_lan8814_light mepa_drv_lan884x)
+
+MEPA_LIB(LIB_NAME mepa_velocitysp_lan969x_auto ADVANCED
+         DEFS     -DMEPA_HAS_LAN887X -DMEPA_HAS_LAN884x
+         DRVS     mepa_drv_lan887x mepa_drv_lan884x)

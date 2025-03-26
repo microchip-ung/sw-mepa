@@ -9062,6 +9062,9 @@ static vtss_rc vtss_phy_conf_set_private(vtss_state_t *vtss_state,
                 /* If clearing bit is desired, Clear the bit in the Register either before or after this Write */
                 if (!vtss_state->sync_calling_private) {
                     VTSS_RC(VTSS_PHY_WARM_WR_MASKED(vtss_state, port_no, VTSS_PHY_MAC_SERDES_PCS_CONTROL, 0xFFFF, new_reg_value));
+
+                    /* MEPA:984: Handling this to clear the ANEG Control bit (Bit 7) in register 16E3 */
+                    VTSS_RC(VTSS_PHY_WARM_WR_MASKED(vtss_state, port_no, VTSS_PHY_MAC_SERDES_PCS_CONTROL, new_reg_value, 0x0080));
                 }
                 // Setup Reg23E3
                 new_reg_value = 0;

@@ -12,9 +12,9 @@ include_directories(./src)
 include_directories(./src/drivers)
 include_directories(../mepa/vtss/include)
 include_directories(../me/include)
-
-option(BUILD_MEBA_ALL "Build all MEBA layers" OFF)
-mark_as_advanced(BUILD_MEBA_ALL)
+include_directories(../mepa_demo)
+option(BUILD_BOARD_CFG_ALL "Build all Board Config layers" OFF)
+mark_as_advanced(BUILD_BOARD_CFG_ALL)
 
 macro(merge_static_libs)
     set(oneValueArgs   TARGET FILENAME)
@@ -79,7 +79,7 @@ macro(MEBA_LIB)
     merge_static_libs(TARGET meba_${A_LIB_NAME}_static FILENAME libmeba_${A_LIB_NAME}.a
                       LIBRARIES meba_only_${A_LIB_NAME} ${A_STATIC_DEPENDENCIES})
 
-    if (${BUILD_ALL} OR ${BUILD_MEBA_ALL})
+    if (${BUILD_ALL} OR ${BUILD_BOARD_CFG_ALL})
         set(BUILD_MEBA_${A_LIB_NAME} ON CACHE BOOL "" FORCE)
         set(BUILD_MEBA_STATIC_${A_LIB_NAME} ON CACHE BOOL "" FORCE)
     endif()
@@ -112,6 +112,7 @@ MEBA_LIB(LIB_NAME sparx5_macsec MEBA_SRC_FOLDER sparx5
 MEBA_LIB(LIB_NAME sparx5_bringup MEBA_SRC_FOLDER sparx5
          STATIC_DEPENDENCIES    mepa_sparx5_bringup)
 
-MEBA_LIB(LIB_NAME lan966x MEBA_SRC_FOLDER lan966x
-         STATIC_DEPENDENCIES    mepa_lan966x)
+MEBA_LIB(LIB_NAME eds2 MEBA_SRC_FOLDER eds2
+         STATIC_DEPENDENCIES    mepa_eds2
+	 MEBA_DEFINES -DMEPA_DEMO_EDS2)
 

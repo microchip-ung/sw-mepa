@@ -148,7 +148,7 @@ static void printf_trace_head(const char *mname,
     m = (tv.tv_sec / 60 % 60);
     s = (tv.tv_sec % 60);
     printf("%u:%02u:%02u:%05lu %s/%s/%s %s(%u) %s%s",
-           h, m, s, tv.tv_usec,
+           h, m, s, (long unsigned int)tv.tv_usec,
            mname,
            gname,
            level == MESA_TRACE_LEVEL_ERROR ? "error" :

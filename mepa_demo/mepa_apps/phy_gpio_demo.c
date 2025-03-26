@@ -55,7 +55,7 @@ static void cli_cmd_gpio_conf(cli_req_t *req)
     int gpio_mode = 0, alt_mode = 0, led_number = 0, alt_fun = 0;
     uint8_t gpio_num = 0, max_alter_fun = 0;
     int vsc_phy_connected = 0;
-    gpio_table_t gpio_table;
+    gpio_table_t gpio_table = {0};
 
     if ((rc = mepa_dev_create_check(meba_gpio_lp_instance, req->port_no)) != MEPA_RC_OK) {
         cli_printf(" Dev is Not Created for the port : %d\n", req->port_no);

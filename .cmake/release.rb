@@ -132,15 +132,18 @@ global = OptionParser.new do |opts|
     end
 end.order!
 
-
+# is_mesa flag is used to download the sw-mesa package only once for both arm and arm64 targets
+is_mesa = "false"
 $presets.each do |preset, c|
-    # build only arm64 target
-    next if preset!='arm64'
+    # build only arm64 and arm based targets
+    next if ((preset!='arm')&&(preset!='arm64'))
     next if not c[:release_artifact]
+    next if (is_mesa == "true")
     dw_file = "mesa-#{c[:mesa]}-#{c[:mesa_id]}@#{c[:mesa_branch]}"
     bcmd = "sudo /usr/local/bin/mscc-install-pkg -t mesa/#{c[:mesa]}-#{c[:mesa_id]}@#{c[:mesa_branch]} #{dw_file}"
     run bcmd
     run "mkdir -p sw-mesa && cp -r /opt/mscc/#{dw_file}/* sw-mesa"
+    is_mesa = "true"
 end
 git_sha = %x(git rev-parse --short HEAD).chop
 git_sha_long = %x(git rev-parse HEAD).chop
@@ -312,8 +315,8 @@ FileUtils.mkdir_p($ws)
 $workers = []
 
 $presets.each do |preset, c|
-    # build only arm64 target
-    next if preset!='arm64' 
+    # build only arm64 and arm based targets
+    next if (preset!='arm')&&(preset!='arm64')
     next if not c[:release_artifact]
     arch = c[:arch]
     dw_file = "mscc-brsdk-#{arch}-#{c[:brsdk]}"
@@ -460,7 +463,7 @@ puts "combined status: #{$res.status}"
 
 # Make MFI and FIT images easier to access for SQA
 $presets.each do |arch, c|
-    next if arch != "arm64"
+    next if (arch != "arm")&&(arch != "arm64")
     next if not c[:release_artifact]
     run("mkdir -p images")
     Dir["#{$ws}/bin/#{arch}/mepa_demo/*"].each do |e|

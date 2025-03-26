@@ -20,17 +20,41 @@ static mepa_rc dummy_1g_poll(mepa_device_t *dev,
 {
     priv_data_t *priv;
     priv = dev->data;
-    
+
     status->link = 1;
     status->speed = (priv->cap & MEBA_PORT_CAP_2_5G_FDX) ?  MESA_SPEED_2500M
         : (priv->cap & MEBA_PORT_CAP_1G_FDX) ? MESA_SPEED_1G
         : (priv->cap & MEBA_PORT_CAP_100M_FDX) ? MESA_SPEED_100M : MESA_SPEED_10M;
     status->fdx = 1;
-    
+
     return MEPA_RC_OK;
 }
 
 static mepa_rc dummy_conf_set(mepa_device_t *dev, const mepa_conf_t *config)
+{
+    return MEPA_RC_OK;
+}
+
+static mepa_rc dummy_info_get(mepa_device_t *dev, mepa_phy_info_t *const phy_info)
+{
+    phy_info->cap = 0;
+    phy_info->part_number = 1234;
+    phy_info->revision = 5678;
+    phy_info->cap |= MEPA_CAP_SPEED_MASK_10G;
+    return MEPA_RC_OK;
+}
+
+static mepa_rc dummy_conf_get(mepa_device_t *dev, mepa_conf_t *const config)
+{
+    return MEPA_RC_OK;
+}
+
+static mepa_rc dummy_reset(mepa_device_t *dev, const mepa_reset_param_t *rst_conf)
+{
+    return MEPA_RC_OK;
+}
+
+static mepa_rc dummy_if_set(mepa_device_t *dev, mepa_port_interface_t mac_if)
 {
     return MEPA_RC_OK;
 }
@@ -64,6 +88,10 @@ mepa_drivers_t mepa_dummy_driver_init()
     dummy[0].mepa_driver_poll = dummy_1g_poll;
     dummy[0].mepa_driver_conf_set = dummy_conf_set;
     dummy[0].mepa_driver_probe = dummy_probe;
+    dummy[0].mepa_driver_phy_info_get = dummy_info_get,
+    dummy[0].mepa_driver_conf_get = dummy_conf_get;
+    dummy[0].mepa_driver_reset = dummy_reset,
+    dummy[0].mepa_driver_if_set = dummy_if_set,
     res.phy_drv = dummy;
     res.count = 1;
 

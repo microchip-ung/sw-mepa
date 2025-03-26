@@ -24,13 +24,16 @@ pages:
         - src: "mepa_demo/docs/gpio-demo.adoc"
         - src: "mepa_demo/docs/loopback-demo.adoc"
         - src: "mepa_demo/docs/diagnostics-demo.adoc"
+        - src: "mepa_demo/docs/crossconnect-demo.adoc"
 
     - name: "MEPA App Reference"
       pages:
         - src: "mepa_demo/mepa_apps/phy_port_config.c"
         - src: "mepa_demo/mepa_apps/phy_loopback.c"
+        - src: "mepa_demo/mepa_apps/phy_xconnect_demo.c"
         - src: "mepa_demo/mepa_scripts/port_config_json.json"
         - src: "mepa_demo/mepa_scripts/loopback_config.json"
+        - src: "mepa_demo/mepa_scripts/xconnect_config.json"
     - name: "MEPA .h reference"
       pages:
         - src:  "me/include/microchip/ethernet/common.h"

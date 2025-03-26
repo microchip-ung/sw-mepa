@@ -47,7 +47,7 @@ Steps involved in the port-config aplication are:
 
 	1. Creating the Dev `mepa_drv_create` 
 	2. Attaching the Dev `cli_cmd_dev_attach`
-	3. Configuring the Dev `cli_cmd_phy_conf`
+	3. Configuring the Dev `cli_cmd_phy_conf` or `cli_parm_speed_select`
 	4. Deleting the Dev    `mepa_drv_del`
 
 
@@ -123,6 +123,12 @@ The configuration is passed to the respective port from the file_name, the file 
 mepa_conf_t structure in the json format. the json string should start with the json object
 "port_config"
 
+        mepa-cmd phy speed <port_list> [10hdx|10fdx|100hdx|100fdx|1000fdx|10g|25g]
+
+User can either use `dev conf` command or `phy speed` command to configure the Dev of the Port,
+This `phy speed` command will configure the Fixed Speed to the port by hardcoding few parameters of
+the structure `mepa_conf_t`
+
  
 == Deleting the Dev
 
@@ -146,3 +152,26 @@ PHY by asserting GPIO Pin (GPIO-33 (EDSX), GPIO-64(EDS2)) high.
 
 This command will set the direction of GPIO pin as output and disable COMA mode on the 
 PHY by asserting GPIO Pin (GPIO-33 (EDSX), GPIO-64(EDS2)) low.
+
+== Downshift Application command
+
+The Downshift allows an interface to link at a lower advertised speed when unable to
+establish a stable link at the maximum speed.
+
+The below are the list of command lines that are used to configure the Downshift.
+
+NOTE: LAN8804 and LAN8814 are the 2 SKU's that has Downshift support.
+
+=== Enabling Downshift
+
+	mepa-cmd downshift <port_list> <dsh_time> enable
+
+This command will configure the Downshift for the list of PHY ports with the given 'dsh_time'.
+
+NOTE: The 'dsh_time' can be given as input from the Range of 0 to 6 secs
+
+=== Disabling Downshift
+
+	mepa-cmd downshift <port_list> <dsh_time> disable
+
+This command will disable the Downshift for the list of PHY ports.

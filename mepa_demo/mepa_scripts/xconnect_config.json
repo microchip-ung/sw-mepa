@@ -1,0 +1,14 @@
+{"phy_m10g": {
+    "port_no": 15,
+    "evnt":"VTSS_PHY_10G_AUTO_FAILOVER_EVENT_NONE",
+    "trig_ch_id": 0,
+    "is_host_side": 1,
+    "channel_id": 1,
+    "chip_no": 33368,
+    "v_gpio": 12,
+    "a_gpio": 13,
+    "enable": 1,
+    "filter": "VTSS_PHY_10G_AUTO_FAILOVER_FILTER_NONE",
+    "fltr_val": 127
+   }
+}

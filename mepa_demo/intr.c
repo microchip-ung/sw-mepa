@@ -173,7 +173,7 @@ static void intr_callback(int fd, void *ref)
     int  seq_no, enable, irq_id, i;
     char line[128], irq_name[32];
     irq_map_t *map;
-    
+
     T_D("callback, fd: %d", fd);
     if (read(fd, &seq_no, sizeof(seq_no)) != sizeof(seq_no)) {
         T_E("read error");

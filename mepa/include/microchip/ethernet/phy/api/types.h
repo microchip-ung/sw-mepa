@@ -256,14 +256,30 @@ typedef enum {
     MEPA_CHANNELID_3,		/**<Channel 3 */
 } mepa_phy_channel_id_t;
 
+/** \brief 10G Phy Polarity inversion */
 typedef struct {
-    phy10g_oper_mode_t      oper_mode;
+    mepa_bool_t line_rx; /**< Line side Receive path*/
+    mepa_bool_t line_tx; /**< Line side Transmit path*/
+    mepa_bool_t host_rx; /**< Host side Receive path*/
+    mepa_bool_t host_tx; /**< Host side Transmit path*/
+} phy_10g_polarity_inv_t;
+
+typedef struct {
+    phy10g_oper_mode_t oper_mode;
     phy10g_interface_mode_t interface_mode;
-    mepa_phy_channel_id_t   channel_id;
-    phy10g_media_t          h_media;
-    phy10g_media_t          l_media;
-    mepa_bool_t             channel_high_to_low; /* If Channel id decreasing order w.r.t port number increasing set this to one */
-}phy10g_conf_t;
+    mepa_phy_channel_id_t channel_id;
+    phy10g_media_t h_media;
+    phy10g_media_t l_media;
+    mepa_bool_t    channel_high_to_low; /* If Channel id decreasing order w.r.t port number increasing set this to one */
+    mepa_bool_t    xfi_pol_invert;      /* Selects polarity to the TX XFI data. 1:Invert 0:Normal */
+    mepa_bool_t    xaui_lane_flip;      /* Swaps XAUI Lane 0 <--> 3 and 1 <--> 2 for both RX/TX for Venice PHY family */
+    phy_10g_polarity_inv_t polarity;    /* polarity inversion configuration */
+    mepa_bool_t    hl_clk_synth;        /* 0: Free running clock  1: Hitless clock   */
+    mepa_bool_t    is_host_wan;         /* HOST WAN/LAN Selection for SerDes config */
+    mepa_bool_t    lref_for_host;          /* Clock source selection HREF or LREF on HOST side*/
+    mepa_bool_t    h_clk_src_is_high_amp;  /* Host H_PLL5G Amplitude selection HIGH or LOW     */
+    mepa_bool_t    l_clk_src_is_high_amp;  /* Line L_PLL5G Amplitude selection HIGH or LOW     */
+} phy10g_conf_t;
 
 /** \brief Represents the configuration that is applied to PHY. */
 typedef struct {
@@ -617,13 +633,18 @@ typedef struct {
     mepa_restart_version_t  version_prev;    /* Previous version */
 } mepa_restart_info_t;
 
+/** \brief Represents the serdes Tx configuration that is applied to PHY. */
+typedef struct {
+    uint8_t level; /**< Adjust the amplitude of the Signal(eye hieght). Maximum value is 127 */
+    uint8_t boost; /**< Boost the signal strength upon frequency loss.  Maximum value is 127 */
+} mepa_serdes_tx_conf_t;
+
 /** \brief Capability info */
 typedef enum {
     MEPA_CAP_MACSEC_SECY_CNT = 100000000, /* MACSec Secy count */
     MEPA_CAP_MACSEC_MAX_SA,               /* MACSec Max SA */
     MEPA_CAP_MACSEC_MAX_SC                /* MACSec Max SC */
 } mepa_cap_t;
-
 
 #include <microchip/ethernet/hdr_end.h>  /**< ALL INCLUDE ABOVE THIS LINE */
 #endif /**< _MICROCHIP_ETHERNET_PHY_API_TYPES_H_ */
