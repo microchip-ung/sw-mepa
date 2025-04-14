@@ -175,6 +175,23 @@ endif()
 include_directories(sw-mesa/include)
 
 ################################################################################
+# Find all .c and .h files recursively in the repo
+file(GLOB_RECURSE ALL_SOURCE_FILES
+    "${CMAKE_SOURCE_DIR}/mepa/microchip/*.c"
+    "${CMAKE_SOURCE_DIR}/mepa/microchip/*.h"
+    "${CMAKE_SOURCE_DIR}/mepa_demo/mepa_apps/*.c"
+    "${CMAKE_SOURCE_DIR}/mepa_demo/mepa_apps/*.h"
+    "${CMAKE_SOURCE_DIR}/board-configs/*.c"
+    "${CMAKE_SOURCE_DIR}/board-configs/*.h"
+)
+
+# Add a format target using your custom AStyle config
+add_custom_target(format
+    COMMAND astyle --options=${CMAKE_SOURCE_DIR}/.cmake/astyle ${ALL_SOURCE_FILES}
+    COMMENT "Formatting all .c and .h files using AStyle with .astylerc"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 
 set(LIST_OF_API_TARGETS)
 
