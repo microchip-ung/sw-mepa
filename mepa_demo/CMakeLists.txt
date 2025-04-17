@@ -255,9 +255,9 @@ macro(IMG_TARGET)
     endif()
 endmacro()
 
-APP_TARGET(NAME app_vsc7558TSN         MESA vsc7558TSN         MEBA meba_sparx5 DEFS -DMEPA_DEMO_EDSx)
-APP_TARGET(NAME app_vsc7558MSEC        MESA vsc7558MSEC        MEBA meba_sparx5_macsec -DMEPA_DEMO_EDSx)
-APP_TARGET(NAME app_lan966x            MESA lan966x            MEBA meba_eds2 APP_TARGET_DEFINES -DMEPA_DEMO_EDS2)
+APP_TARGET(NAME app_vsc7558TSN         MESA vsc7558TSN         MEBA meba_sparx5          APP_TARGET_DEFINES -DMEPA_DEMO_EDSx)
+APP_TARGET(NAME app_vsc7558MSEC        MESA vsc7558MSEC        MEBA meba_sparx5_macsec   APP_TARGET_DEFINES -DMEPA_DEMO_EDSx)
+APP_TARGET(NAME app_lan966x            MESA lan966x            MEBA meba_eds2            APP_TARGET_DEFINES -DMEPA_DEMO_EDS2)
 
 #if (CMAKE_SYSTEM_PROCESSOR STREQUAL "mipsel")
 #    IMG_TARGET(NAME mipsel_vsc7428         TYPE mfi  APP app_vsc7428  MACHINE luton_pcb091   )

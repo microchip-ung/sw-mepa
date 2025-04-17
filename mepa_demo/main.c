@@ -32,11 +32,15 @@
 #define EDSX_SLOT1_START_PORT_CNT_9 0
 #define EDSX_SLOT2_START_PORT_CNT_9 4
 
+char *MEPA_RELEASE_VERSION = "v2025.06.02";
+
 // Local data
 static int LOOP_PORT = -1;
 static int REF_BOARD_PCB = -1;
 static int REF_BOARD_PORT_COUNT = -1;
-mesa_bool_t phy_attach = 1;
+static int MDIO_BUS_ACCESS = -1;
+
+static mesa_bool_t phy_attach = 1;
 static mscc_appl_trace_module_t trace_module = {
     .name = "main"
 };
@@ -505,14 +509,6 @@ static mesa_rc board_conf_get(const char *tag, char *buf, size_t bufsize, size_t
 
     case MESA_CHIP_FAMILY_SPARX5:   // SparX-5/SparX-5i Family
         // Read the uboot env variables to find out PCB nr. and port count
-#if 0
-        if (REF_BOARD_PCB == -1) {
-            if (!get_env("pcb", &REF_BOARD_PCB)) {
-                printf("uboot 'pcb' env variable does not exist, use fw_setenv to set (defaulting to pcb125).\n");
-                REF_BOARD_PCB = 125;
-            }
-        }
-#endif
         REF_BOARD_PCB = 134;
         if (REF_BOARD_PORT_COUNT == -1) {
             if (!get_env("pcb_var", &REF_BOARD_PORT_COUNT)) {
@@ -900,7 +896,6 @@ static mscc_appl_opt_t main_opt_reset = {
     "SPI device used for FPGA access",
     reset_opt
 };
-
 /* Managment Bus for EDSx is SPI */
 #ifdef MEPA_DEMO_EDSx
 static int SPI_REG_IO_SLOT1 = 1;
@@ -1214,6 +1209,25 @@ int main(int argc, char **argv)
         sleep_us = 200;
     }
 
+    /* Before starting MEPA-DEMO Application, if we set variable "mdio_bus = 1", then PHY will be
+     * accessed through MDIO, if "mdio_bus = 0", then PHY will be aacessed through SPI.
+     * By-default EDSx will use SPI when "mdio_bus" variable is not available
+     */
+    switch (mesa_capability(NULL, MESA_CAP_MISC_CHIP_FAMILY)) {
+    case MESA_CHIP_FAMILY_SPARX5:
+        if (!get_env("mdio_bus", &MDIO_BUS_ACCESS)) {
+            MDIO_BUS_ACCESS = -1;
+            T_D("Using default SPI Bus\n");
+        }
+        if (MDIO_BUS_ACCESS > 0) {
+            SPI_REG_IO_SLOT1 = 0;
+            SPI_REG_IO_SLOT2 = 0;
+        }
+        break;
+    default:
+        break;
+    }
+
     // Register trace
     init->cmd = MSCC_INIT_CMD_REG;
     init_modules(init);
@@ -1232,7 +1246,6 @@ int main(int argc, char **argv)
     }
 
     memset(&board_info, 0, sizeof(board_info));
-    
     if (SPI_REG_IO_SLOT1) {
         rc = spi_io_init(SPI_USER_REG, "/dev/spidev0.1",SPI_FREQ, SPI_PAD);
         board_info.mepa_spi_slot1_reg_read = mepa_phy_spi_read;
@@ -1289,7 +1302,6 @@ int main(int argc, char **argv)
         return 1;
     }
     T_D("API Instantiated");
-
     if (SPI_REG_IO_SLOT1) {
         init->board_inst->iface.mepa_spi_slot1_reg_read = mepa_phy_spi_read;
         init->board_inst->iface.mepa_spi_slot1_reg_write = mepa_phy_spi_write;

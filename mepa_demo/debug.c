@@ -11,7 +11,11 @@
 #include "cli.h"
 #include "symreg.h"
 
-extern meba_inst_t meba_global_inst;
+static meba_inst_t meba_global_inst;
+
+extern uint16_t slot1_map[];
+extern uint16_t slot2_map[];
+extern char *MEPA_RELEASE_VERSION;
 
 static mscc_appl_trace_module_t trace_module = {
     .name = "debug"
@@ -360,6 +364,28 @@ static void cli_cmd_debug_serdes(cli_req_t *req)
     }
 }
 
+static void cli_cmd_image_info(cli_req_t *req)
+{
+    char *bus;
+    if ((meba_global_inst->mepa_callout.spi_read != NULL) && (meba_global_inst->mepa_callout.spi_write != NULL)) {
+        bus = "SPI";
+    } else {
+        bus = "MDIO";
+    }
+    cli_printf("\n Image Version             : %s", MEPA_RELEASE_VERSION);
+    cli_printf("\n Management Bus            : %s", bus);
+    switch (mesa_capability(NULL, MESA_CAP_MISC_CHIP_FAMILY)) {
+    case MESA_CHIP_FAMILY_SPARX5:
+        cli_printf("\n MDIO PHY Addr, 25G Slot 1 : %d, %d, %d, %d", slot1_map[0], slot1_map[1], slot1_map[2], slot1_map[3]);
+        cli_printf("\n MDIO PHY Addr, 25G Slot 2 : %d, %d, %d, %d", slot2_map[0], slot2_map[1], slot2_map[2], slot2_map[3]);
+        break;
+    default:
+        break;
+    }
+    cli_printf("\n");
+    return;
+}
+
 static void cli_cmd_debug_chip_id(cli_req_t *req)
 {
     mesa_chip_id_t id;
@@ -474,7 +500,11 @@ static cli_cmd_t cli_cmd_table[] = {
         cli_cmd_debug_phy_clause45_write,
         CLI_CMD_FLAG_ALL_PORTS
     },
-
+    {
+        "Debug image info",
+        "Displays Information about Binary Image",
+        cli_cmd_image_info,
+    },
 };
 
 static int cli_parm_api_layer(cli_req_t *req)
@@ -804,6 +834,7 @@ static void debug_cli_init(void)
 
 void mscc_appl_debug_init(mscc_appl_init_t *init)
 {
+    meba_global_inst = init->board_inst;
     switch (init->cmd) {
     case MSCC_INIT_CMD_REG:
         mscc_appl_trace_register(&trace_module, trace_groups, TRACE_GROUP_CNT);

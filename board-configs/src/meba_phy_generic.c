@@ -92,6 +92,7 @@ static void meba_phy_config(meba_inst_t inst, const vtss_inst_t vtss_instance, m
 
 } 
 
+/* MDIO PHY Address of each ports */
 uint16_t slot1_map[] = {0x1b, 0x1a, 0x19, 0x18};
 uint16_t slot1_map_viper[] = {0x0, 0x1, 0x2, 0x3};
 uint16_t slot2_map[] = {0x1f, 0x1e, 0x1d, 0x1c};
