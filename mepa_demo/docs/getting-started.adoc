@@ -724,15 +724,28 @@ Welcome to SMBStaX
 vcoreiii login: root
 ----
 
-We now have a normal Linux command line interface. Where we can start the MESA
+We now have a normal Linux command line interface. Where we can start the MEPA
 demo application using the command `mepa-demo-edsx`:
 
 ----
 $ mepa-demo-edsx
 ----
-
 This will run in the background as a daemon in the background, and allow the
 `mepa-cmd` to issue commands.
+
+By default EDSx board will use SPI as management bus to access registers of PHY,
+EDS2 board will use MDIO bus as management bus to access registers of PHY.
+
+NOTE: In EDSx boards we provide a support to switch to MDIO bus, by using the environmental variable
+`mdio_bus` before starting the MEPA-DEMO application, If the variable is set to 1 before starting Application, then
+PHY will be accessed through MDIO, else PHY will be accesed through SPI. This variable is supported only for EDSx boards.
+EDS2 boards will always access PHY through MDIO.
+
+To switch from SPI to MDIO bus, use the below command:
+
+----
+$ mdio_bus=1 mepa-demo-edsx
+----
 
 To see the list of valid commands use the `mepa-cmd` with no argument.
 
