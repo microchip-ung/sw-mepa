@@ -312,6 +312,10 @@ static void cli_cmd_secy_create(cli_req_t *req)
         return;
     }
     mepa_macsec_secy_conf_t secy_conf;
+    if (mreq->port_id == 0xFFFF) {
+        T_E("\n SecY ID not Supported on Port : %d \n", req->port_no);
+        return;
+    }
 
     cli_printf("\n SECTAG PARAMETERS CONFIGURATION ........................ \n");
     cli_printf("\n\n Protect Frames [1 : true, 0 : false] : ");
@@ -2111,37 +2115,33 @@ static int cli_cmd_parse_u16_param(cli_req_t *req)
 {
     uint16_t value;
     macsec_configuration *mreq = req->module_req;
+    int error = 0;
 
     if (keyword.etype_parsed == 1) {
-        cli_parm_u16(req, &value, 0, MASK_16BIT);
+        error = cli_parm_u16(req, &value, 0, MASK_16BIT);
         mreq->pattern_ethtype = value;
         keyword.etype_parsed = 0;
-    }
-    else if(keyword.vlan_id_parsed == 1) {
-        cli_parm_u16(req, &value, 0, MASK_16BIT);
+    } else if (keyword.vlan_id_parsed == 1) {
+        error = cli_parm_u16(req, &value, 0, MASK_16BIT);
         mreq->vid = value;
         keyword.vlan_id_parsed = 0;
-    }
-    else if(keyword.vlan_inner_id_parsed == 1) {
-        cli_parm_u16(req, &value, 0, MASK_16BIT);
+    } else if (keyword.vlan_inner_id_parsed == 1) {
+        error = cli_parm_u16(req, &value, 0, MASK_16BIT);
         mreq->vid_inner = value;
         keyword.vlan_inner_id_parsed = 0;
-    }
-    else if(keyword.rx_sc_id_parsed == 1) {
-        cli_parm_u16(req, &value, 0, MASK_16BIT);
+    } else if (keyword.rx_sc_id_parsed == 1) {
+        error = cli_parm_u16(req, &value, 0, MASK_16BIT);
         mreq->rx_sc_id = value;
         keyword.rx_sc_id_parsed = 0;
-    }
-    else if(keyword.an_parsed == 1) {
-        cli_parm_u16(req, &value, 0, MASK_16BIT);
+    } else if (keyword.an_parsed == 1) {
+        error = cli_parm_u16(req, &value, 0, MASK_16BIT);
         mreq->an_no = value;
         keyword.an_parsed = 0;
+    } else {
+        error = cli_parm_u16(req, &value, 0, MASK_16BIT);
+        mreq->port_id = value;
     }
-    else {
-        cli_parm_u16(req, &value, 0, MASK_16BIT);
-	mreq->port_id = value;
-    }
-    return 0;
+    return error;
 }
 
 static int cli_cmd_parse_boolean(cli_req_t *req)
@@ -2268,23 +2268,23 @@ static int cli_cmd_parse_u64_param(cli_req_t *req)
 {
     uint64_t value;
     macsec_configuration *mreq = req->module_req;
+    int error = 0;
     if (keyword.next_pn_parsed == 1) {
-        cli_parm_u64(req, &value, 0, MASK_64BIT);
+        error = cli_parm_u64(req, &value, 0, MASK_64BIT);
         mreq->next_pn = value;
         keyword.next_pn_parsed = 0;
     }
 
     else if (keyword.lowest_pn_parsed == 1) {
-        cli_parm_u64(req, &value, 0, MASK_64BIT);
+        error = cli_parm_u64(req, &value, 0, MASK_64BIT);
         mreq->lowest_pn = value;
         keyword.lowest_pn_parsed = 0;
-    }
-    else {
-        cli_parm_u64(req, &value, 0, MASK_64BIT);
+    } else {
+        error = cli_parm_u64(req, &value, 0, MASK_64BIT);
         mreq->seq_threshold_value = value;
     }
 
-    return 0;
+    return error;
 }
 
 static int cli_cmd_stats_get_clear(cli_req_t *req)
