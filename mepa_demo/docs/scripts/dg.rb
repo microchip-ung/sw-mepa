@@ -207,7 +207,7 @@ def process_adoc dir, base, ext, content
         :attributes => {
             "backend" => "xhtml5",
             "sectnums" => true,
-            "sectnumlevels" => "5",
+            "sectnumlevels" => "6",
             "sectanchors" => true,
             "sectlinks" => true,
             "outfilesuffix" => "/",

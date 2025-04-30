@@ -5,28 +5,25 @@
 
 == Getting started for EDSx and EDS2 Board
 
-MESA as such is a C library, but the MESA packet includes a mepa-demo application,
+MEPA as such is a C library, but the MEPA packet includes a mepa-demo application,
 and scripts to build a complete bootable firmware image including a
 Linux root file system, mepa-demo application ,MESA library and MEPA library.
 
-The MESA packet includes both sources and binaries. Binaries make it easy to
+The MEPA packet includes both sources and binaries. Binaries make it easy to
 load the pre-build code on a reference system and explore the mepa-demo application.
-But most users of the MESA library will eventually need to build their own
-application, or integrate MESA into an existing application. Doing this requires
+But most users of the MEPA library will eventually need to build their own
+application, or integrate MEPA into an existing application. Doing this requires
 compiling the sources.
 
 This document will cover how to prepare a development system, build the sources,
 load the binaries, and start the MEPA demo application.
 
-Users that are in a hurry, and already has a reference system can skip the steps
-to compile the sources, and instead using one of the binary images.
-
 == Pre-requests and preparations
 
-In order to follow this getting started guide, a version of the MESA packet and a
+In order to follow this getting started guide, a version of the MEPA packet and a
 reference board is needed.
 
-Further more, to build and load the MESA library and mepa-demo application a Linux
+Further more, to build and load the MEPA library and mepa-demo application a Linux
 development machine with root access is needed. This guide is using a Ubuntu
 Server version 18.04 with 8G of memory. Other distributions does also work, but
 they are expected to need other dependencies not documented here.
@@ -35,8 +32,11 @@ When loading the firmware, this guide assumes that the Linux development machine
 is located at the same network as the reference board.
 
 NOTE: If you aldready have the build image for EDSx `arm64_vsc7558XXX.itb` or 
-`arm64_vsc7558XXX.ext4`, then you can direclty jump to Section 7 to know how to
-load this binary images to EDSx Board. 
+`arm64_vsc7558XXX.ext4`, then you can direclty jump to Section 6 to know how to
+load this binary images to EDSx Board. `XXX` referrs to `TSN` or `MSEC`.
+
+`TSN` binary images doesnot have MEPA MACsec support, it has PTP API support along with all other features supported in PHY,
+whereas `MSEC` binary images has both PTP and MACsec MEPA API support along with all other features supported in PHY.
 
 NOTE: If you Already have the Build image for EDS2 `armv7_lan966x.itb` or
 `armv7_lan966x.ext4.gz`, then you can directly Skip to Section 7 to know how to
@@ -67,7 +67,11 @@ not, then it can be installed using the instructions below:
 
 ----
 sudo apt-get install tftpd-hpa
+sudo mkdir /var/lib/tftpboot
 sudo chmod 777 /var/lib/tftpboot/
+
+sudo ufw allow 69/udp   -- Open Port 69 in Firewall(If Enabled)
+sudo systemctl restart tftpd-hpa
 ----
 
 == Extracting the sources
@@ -75,30 +79,14 @@ sudo chmod 777 /var/lib/tftpboot/
 The first step is to extract the MESA packet:
 
 ----
-$ tar xf mesa-<version>.tar.gz
-$ cd mesa-<version>
+$ tar xf mepa-<version>.tar.gz
+$ cd mepa-<version>
 ----
-
-== Copy a binary image to the tftp folder
-
-To confirm that the boards are working and compatible with a given firmware
-image, it is a good idea to start loading one of the binary images as a first
-step.
-
-To do this copy one of the image files from `./bin/<arch>/mepa_demo/` to the
-tftp server. Example:
-
-----
-$ cp bin/build-arm64/mepa_demo/arm64_vsc7558TSN.itb /var/lib/tftpboot/
-----
-
-To try out the binary image, skip the instructions to build, and go directly to
-the section on firmware loading.
 
 == Create a CMake project (and download BSP and toolchain)
 
 To build the sources a CMake project is needed. The easiest way to create a
-CMake project is to use the `./.cmake/create_cmake_project.rb` script:
+CMake project is to run  `./.cmake/create_cmake_project.rb` script:
 
 ----
 $ ./.cmake/create_cmake_project.rb
@@ -121,8 +109,11 @@ Lets prepare a project for arm64 based targets:
 $ ./.cmake/create_cmake_project.rb arm64
 ----
 
-Once the script is run the appropriate released package will be extracted in /opt/mscc/ folder.
-The BSP source package will be also be installed automatically if not availbale in /opt/mscc/.
+Once the script is run the appropriate released package will be extracted in /opt/mscc/ folder. The BSP source package will be also be
+installed automatically if not availbale in `/opt/mscc/`. +
+
+This Script will automatically pull the last released MESA Package and copy a package of MESA inside MEPA repository. +
+
 Following is the expected result to be displayed while creating CMake Project.
 ----
 $ ./.cmake/create_cmake_project.rb arm64
@@ -168,7 +159,7 @@ ln -s /opt/mscc/mscc-brsdk-arm64-2023.02.8-1052/arm64-armv8_a-linux-gnu/xstax/re
 
 NOTE: EDSx board is based on ARM64 platform whereas EDS2 board is based on ARM platform.
 The above script is executed with 'arm64' as input, for EDS2 board the input should be
-given as 'arm' while executing the Cmake script.
+given as 'arm' while executing the CMake script.
 
 
 == Selecting the Target and Building the SW
@@ -178,7 +169,7 @@ The CMake project allows you to select what targets to build. By default, BUILD_
 The steps to build the MEPA Static Libraries is available in 
 link:mepa-doc.html#mepa/docs/getting-started[Getting Started] section.
 
-=== Select the image(s) to build
+=== Select the image(s) to build for EDSx Boards
 
 We now have CMake project configured to use the BSP and cross-tool chain to
 build binaries for the ARM target, but no targets has been enabled.
@@ -186,7 +177,7 @@ build binaries for the ARM target, but no targets has been enabled.
 Make sure to `cd` to the newly created build folder.
 
 The CMake will allow you to select what targets to build and image targets.
-By default nothing is selected. The various projects includes many targets, and 
+By default no image generation is enabled. The various projects includes many targets, and 
 some naming conventions are used to make it easier to navigate.
 
 Generally the `vscXXXX` number is included in all targets to indicate what
@@ -204,22 +195,23 @@ found:
 . Bootable demo images. These targets will generate a complete firmware image
   including kernel, root file system, and the MEPA Demo application. These are
   the images used in this getting started article.
-.. `IMG_arm64_vscXXXX` This is the image which is used on the ARM64 based targets.
-.. `IMG_armv7_lan966x` This is the image which is used on the ARM based targets.
+.. `IMG_arm64_vscXXXX` This is the image which is used on the ARM64 based targets for EDSx Boards.
+.. `IMG_armv7_lan966x` This is the image which is used on the ARM based targets for EDS2 Boards
 
 
 As we are interested in a bootable firmware we need either a `fit`/`itb` or `ext4`
 image.
-For EDSx board we want the `IMG_arm64_vsc7558TSN` target. To enable this use
-the following command.
+
+For EDSx board we want the `IMG_arm64_vsc7558TSN_ext4` and `IMG_arm64_vsc7558MSEC_ext4` target to be enabled.
+To enable this use the following command.
 ----
-cd build-arm64
+$cd build-arm64
 ----
 
 Run ccmake:
 
 ----
-ccmake ..
+$ccmake ..
 ----
 This ccmake.. command will open a GUI listing the available static Libraries 
 and available image options as below:
@@ -234,15 +226,24 @@ MEPA_aqr                         OFF
 MEPA_dummy_phy                   OFF
 --------
 
-To enable the image generation for target `arm64_vsc7558` enable `IMG_arm64_vsc7558TSN_ext4`
+To enable the image generation for target `arm64_vsc7558` enable `IMG_arm64_vsc7558TSN_ext4` and  `IMG_arm64_vsc7558MSEC_ext4`
 
 
-Press [enter] to edit option Press [d] to delete an entry CMake Version 3.16.3
-Press [c] to configure
-Press [h] for help Press [q] to quit without generating
-Press [t] to toggle advanced mode (Currently Off)
+Press [enter] to edit option Enable or Disable respective target +
+Press [d] to delete an entry CMake Version 3.16.3 +
 
-Note:: To list of all targets available, use option 't' in the GUI:
+
+Once the Necessary Tragets are selected follow below steps to generate Makefile +
+
+* Press [c] to configure +
+* Press [g] to generate Makefile +
+
+
+
+Press [h] for help Press [q] to quit without generating +
+Press [t] to toggle advanced mode (Currently Off) +
+
+=== Select the image(s) to build for EDS2 Boards
 
 For EDS2 board  we want the `IMG_armv7_lan966x_ext4` target. To enable this use
 the following command.
@@ -270,20 +271,24 @@ MEPA_aqr                         OFF
 
 To enable the image generation for target `armv7_lan966x` enable `IMG_armv7_lan966x_ext4`.
 
-Press [enter] to edit option Press [d] to delete an entry CMake Version 3.16.3
-Press [c] to configure
-Press [h] for help Press [q] to quit without generating
-Press [t] to toggle advanced mode (Currently Off)
+Press [enter] to edit option Enable or Disable respective target
+Press [d] to delete an entry CMake Version 3.16.3
 
-After enabling the necessary targets Press [c] to configure the targets.
-After configuration is complete Press [g] to generate Makefile with enabled targets.
+Once the Necessary Tragets are selected follow below steps to generate Makefile
+
+Press [c] to configure
+Press [g] to generate Makefile
+
+
+Press [h] for help Press [q] to quit without generating
+Press [t] to toggle advanced mode (Currently Off)fter configuration is complete Press [g] to generate Makefile with enabled targets.
 
 === Building the SW
 
 Now that the project is configured, we just need to build it. This is the only
-step which needs to be repeated when the sources are changed.
+step which needs to be repeated when the sources are changed, no need to select image targets again.
 
-Use the normal make command to build (the `-jN` options specify how many cores
+Use the normal `make` command to build (the `-jN` options specify how many cores
 to use).
 
 The below example is for EDSx platform:
@@ -300,13 +305,18 @@ mkimage -q -f arm64_vsc7558TSN.its arm64_vsc7558TSN.itb
 [100%] Built target arm64_vsc7558TSN_ext4
 ----
 
-After a while, the build will be done, and the resulting image can be found in
-`.build-arm64/mepa_demo`. Lets copy this to the tftp server folder.
+After a while, the build will be done, and the resulting binary images will be available in `.build-arm64/mepa_demo`.
+
+Lets copy the binary images to the tftp server folder.
 
 ----
 $ cp mepa_demo/arm64_vsc7558TSN.itb /var/lib/tftpboot/.
                         or 
 $ cp mepa_demo/arm64_vsc7558TSN.ext4.gz /var/lib/tftpboot/.
+                        or
+$ cp mepa_demo/arm64_vsc7558MSEC.itb /var/lib/tftpboot/.
+                        or
+$ cp mepa_demo/arm64_vsc7558MSEC.ext4.gz /var/lib/tftpboot/.
 ----
 
 NOTE: For EDS2 platform `armv7_lan966x_ext4` 'fit' and 'ext4' Images will be generated
@@ -315,19 +325,22 @@ and can be found at `.build-arm/mepa-demo`. This needs to be Copied to tftp serv
 
 == Loading firmware image over network from UBoot
 
-UBoot is being used to load the SW over the network via TFTP and into memory.
-There are two type of images 'fit/itb' or 'ext4' where 
+UBoot Bootloader is being used to load the SW over the network via TFTP and into memory. +
+
+There are two type of images 'fit/itb' or 'ext4' where +
+
 * 'itb' - is a standard U-Boot image format, which is used for NOR only or network boot.
-         It can be used on all boards running U-Boot.
+         It can be used on all boards running U-Boot. +
+
 * 'ext4' - This image type is using eMMC for storage. It is a standard Linux filesystem
-         image format, suitable for this storage type.
+         image format, suitable for this storage type. +
 
    
 The system can then boot from memory.
 
 Connect a terminal to the reference board, open your serial terminal client
-(minicom, picocom, teraterm, putty), power up the board, and break the boot process in
-the UBoot console. 
+(minicom, picocom, teraterm, putty) with UART Baud-rate as 115200, power up the board, and break the boot process in
+the UBoot console.
 
 This is an example of booting an EDSx board, and breaking it into UBoot.
 
@@ -348,6 +361,141 @@ Net:   eth0: switch@0
 Hit any key to stop autoboot:  0
 =>
 ----
+
+=== Mandatory U-Boot Variables
+
+When preparing a board for flashing, make sure that:
+
+1. You have the latest U-Boot installed. (And have booted it!).
+2. If User wants to reset the U-Boot environment. Do so by the following steps:
+   * `env default -a`
+   * `env save`
+
+U-boot typically contain pre-coded command sequences in the
+environment, which is why it is crucial to reset this to default
+_after_ upgrading.
+
+Follwing are the Necessary U-boot variables to boot the binary, make sure the U-boot variables are as required.
+Configuration of U-boot variables are necessary only one time for the board, it will not be changed unless it changed by user manually.
+
+==== U-boot variables for EDSx Boards
+For EDSx boards, check the U-boot variable `pcb` by giving `printenv` command in U-boot and make sure
+the `pcb = edsx_emmc`, if not set this U-boot Variable by command `setenv pcb edsx_emmc` and then `saveenv`.
+
+----
+setenv `pcb edsx_emmc`
+saveenv
+----
+
+Following are the Necessary U-boot variables for EDSx boards.
+
+----
+=> printenv
+baudrate=115200
+bootargs_extra=loglevel=4
+bootcmd=run mmc_boot
+bootdelay=3
+console=ttyS0,115200n8
+ethact=switch@0
+ethaddr=2e:48:f9:c6:7f:eb
+fdtcontroladdr=77fb38fa0
+ipaddr=10.99.10.1
+loadaddr=740000000
+mmc_bak=2
+mmc_boot=run mmc_tryboot; env set mmc_cur ${mmc_bak}; run mmc_tryboot
+mmc_cur=1
+mmc_dev=mmc 0
+mmc_dlup=dhcp ${mmc_image}; unzip ${fileaddr} ${mmcaddr}; run mmc_update
+mmc_format=gpt guid ${mmc_dev} mmc_guid; gpt write ${mmc_dev} ${mmc_part}; env save
+mmc_image=new.ext4.gz
+mmc_part=uuid_disk=${mmc_guid};name=Boot0,size=1024MiB,type=linux;name=Boot1,size=1024MiB,type=linux;name=Data,size=1536MiB,type=linux
+mmc_set_blkcnt=setexpr mmc_blkcnt ${filesize} + 0x1ff; setexpr mmc_blkcnt ${mmc_blkcnt} / 0x200
+mmc_swap=env set mmc_cur ${mmc_bak}; env save
+mmc_tryboot=run mmcload; setenv mtdroot root_next=/dev/mmcblk0p${mmc_cur}; run ramboot
+mmc_update=run mmcgetoffset; run mmc_set_blkcnt; mmc write ${mmcaddr} ${mmc_start} ${mmc_blkcnt}
+mmcaddr=760000000
+mmcgetoffset=part start ${mmc_dev} ${mmc_cur} mmc_start
+mmcload=ext4load ${mmc_dev}:${mmc_cur} ${loadaddr} Image.itb
+mtdids=nor0=spi0.0
+mtdparts=mtdparts=spi0.0:1m(UBoot),256k(Env),256k(Env.bk),20m(linux),20m(linux.bk)
+nor_boot=sf probe; env set active linux; run nor_tryboot; env set active linux.bk; run nor_tryboot
+nor_dlup=dhcp ${nor_image}; run nor_update
+nor_image=new.itb
+nor_only=env set mtdparts mtdparts=${nor_parts}; env set bootcmd run nor_boot; env save
+nor_parts=spi0.0:1m(UBoot),256k(Env),256k(Env.bk),20m(linux),20m(linux.bk),32m(rootfs_data)
+nor_tryboot=mtd read ${active} ${loadaddr}; run ramboot
+nor_update=sf probe; sf update ${fileaddr} linux ${filesize}
+pcb=edsx_emmc
+ramboot=run setup; bootm ${loadaddr}#${pcb}
+rootargs=root=/dev/ram0 rw rootfstype=squashfs
+setup=setenv bootargs console=${console} ${mtdparts} ${rootargs} ${mtdroot} fis_act=${active} ${bootargs_extra}
+stderr=serial@600100000
+stdin=serial@600100000
+stdout=serial@600100000
+ubupdate=sf probe; sf update ${fileaddr} 0 ${filesize}
+ver=U-Boot 2023.04 (Apr 15 2024 - 11:18:03 +0530)sparx5
+----
+
+==== U-boot variables for EDS2 Boards
+Use the mmc block 5 for updating the emmc flash. Set "mmc_cur" as 5 and "mmc_bak"
+as 6.
+
+----
+=> setenv mmc_cur 5
+=> setenv mmc_bak 6
+----
+
+Set the environment variable "rootargs_mmc" to initialize the current root directory.
+
+----
+=> setenv rootargs_mmc 'root=/dev/ram0 rw rootwait'
+----
+
+Set the environement variable "mtdroot" to mount the rootfs in  root_next.
+
+----
+=> setenv mtdroot 'root_next=/dev/mmcblk0p5'
+----
+
+Set the environment variable 'mmc_tryboot' to load the mmc_image into the 'loadaddr'
+and make it available as '.itb' image and set the 'root_next' to '/dev/mmcblk0p5'.
+
+----
+=> setenv mmc_tryboot 'run mmc_load;run ramboot;'
+----
+
+Set the environment variable "setup" with appropriate "rootargs_mmc" and "mtdparts".
+
+----
+=> setenv setup 'setenv bootargs console=${console} ${mtdparts} ${rootargs_mmc} ${mtdroot} fis_act=${active} boot_source=${boot_source} ${bootargs_extra}'
+----
+
+Run the environment variable "setup" to update the bootargs.
+
+----
+=> run setup
+----
+
+Verify the bootargs is updated as shown below
+
+----
+=> printenv bootargs
+bootargs=console=ttyS0,115200n8 mtdparts=spi0:1536k(fip),256k(Env),256k(Env.bk) root=/dev/ram0 rw rootwait root_next=/dev/mmcblk0p5 fis_act= boot_source=nor uio_pdrv_genirq.of_id=generic-uio loglevel=1
+----
+
+Set the Environment variable 'ramboot' to run mmc_tryboot and boot the kernel
+on 'loadaddr' with Device tree 'lan9668_ung8385_0_at_lan966x'.
+
+----
+=> setenv ramboot 'bootm ${loadaddr}#lan9668_ung8385_0_at_lan966x'
+----
+
+Once the above environment variables are set make sure to save the environment
+
+----
+=> saveenv
+----
+
 
 === Configure network
 
@@ -379,12 +527,11 @@ NOTE: To make the environment settings persistent, use the `saveenv` command.
 Final step is to load the SW into memory. To do this the `tftp` command is used.
 Remember to copy the firmware image into the tftp folder, and use the correct IP
 address of the tftp server and firmware filename (this example uses `10.99.10.1`
-as tftp server, and `firmware.ext` firmware file, replace with IP of your TFTP
+as tftp server, and `arm64_vsc7558TSN.itb` firmware file, replace with IP of your TFTP
 server, and actual file name of the firmware).
 
 ==== Steps to Load ITB image to Memory
 Load the itb binary from the tftp server using the following tftpboot command
-
 
 ----
 tftpboot ${loadaddr} 10.99.10.1:arm64_vsc7558TSN.itb
@@ -477,7 +624,7 @@ NOTE: Above mentioned steps for ext4 type image loading into memory is shown
 with 'arm64_vsc7558TSN.ext4.gz' for EDSx board. The same steps can be used to load
 'armv7_lan966x.ext4.gz' image for EDS2 board as well.
 
-===== UBOOT command lines to update MMC flash for EDSx
+===== UBOOT command lines to update MMC flash for EDSx Boards
 
 Run the Following Command to extract the '.gz' type image and load it in mmcaddr.
 
@@ -493,65 +640,7 @@ To flash the extracted image to emmc flash run the command 'run mmc_update'
 MMC write: dev # 0, block # 2097186, count 229552 ... 229552 blocks written: OK
 ----
 
-===== UBOOT Command lines to update the MMC flash for EDS2
-Use the mmc block 5 for updating the emmc flash. Set "mmc_cur" as 5 and "mmc_bak"
-as 6.
-
-----
-=> setenv mmc_cur 5
-=> setenv mmc_bak 6
-----
-
-Set the environment variable "rootargs_mmc" to initialize the current root directory.
-
-----
-=> setenv rootargs_mmc 'root=/dev/ram0 rw rootwait'
-----
-
-Set the environement variable "mtdroot" to mount the rootfs in  root_next.
-
-----
-=> setenv mtdroot 'root_next=/dev/mmcblk0p5'
-----
-
-Set the environment variable 'mmc_tryboot' to load the mmc_image into the 'loadaddr'
-and make it available as '.itb' image and set the 'root_next' to '/dev/mmcblk0p5'.
-
-----
-=> setenv mmc_tryboot 'run mmc_load;run ramboot;'
-----
-
-Set the environment variable "setup" with appropriate "rootargs_mmc" and "mtdparts".
-
-----
-=> setenv setup 'setenv bootargs console=${console} ${mtdparts} ${rootargs_mmc} ${mtdroot} fis_act=${active} boot_source=${boot_source} ${bootargs_extra}'
-----
-
-Run the environment variable "setup" to update the bootargs.
-
-----
-=> run setup
-----
-
-Verify the bootargs is updated as shown below
-
-----
-=> printenv bootargs
-bootargs=console=ttyS0,115200n8 mtdparts=spi0:1536k(fip),256k(Env),256k(Env.bk) root=/dev/ram0 rw rootwait root_next=/dev/mmcblk0p5 fis_act= boot_source=nor uio_pdrv_genirq.of_id=generic-uio loglevel=1
-----
-
-Set the Environment variable 'ramboot' to run mmc_tryboot and boot the kernel
-on 'loadaddr' with Device tree 'lan9668_ung8385_0_at_lan966x'.
-
-----
-=> setenv ramboot 'bootm ${loadaddr}#lan9668_ung8385_0_at_lan966x'
-----
-
-Once the above environment variables are set make sure to save the environment
-
-----
-=> saveenv
-----
+===== UBOOT Command lines to update the MMC flash for EDS2 Boards
 
 Run the Following Command to extract the '.gz' type image and load it in mmcaddr.
 
@@ -570,8 +659,6 @@ MMC write: dev # 0, block # 532544, count 61166 ... 61166 blocks written: OK
 === Booting the Firware Image (itb and ext4 image)
 Depending on image type and board, the steps to actually boot the image are
 slightly different.
-
-NOTE: MIPS targets can do both, but the default is still mfi
 
 ==== Booting fit/itb images
 
@@ -741,7 +828,7 @@ NOTE: In EDSx boards we provide a support to switch to MDIO bus, by using the en
 PHY will be accessed through MDIO, else PHY will be accesed through SPI. This variable is supported only for EDSx boards.
 EDS2 boards will always access PHY through MDIO.
 
-To switch from SPI to MDIO bus, use the below command:
+To switch from SPI to MDIO bus, use the below command in EDSx Boards:
 
 ----
 $ mdio_bus=1 mepa-demo-edsx
@@ -790,126 +877,11 @@ will be configured.
 NOTE: The Available PHY Support for EDS2 can be viewed in
 link:mepa-app-doc.html#mepa-demo/docs/supported_hw[EDS2 supported PHY's]
 
-== Persisting firmware image in flash from UBoot
-
-Depending on the board, there might be several storage options,
-depending on image size and performance requirements.
-
-* `NOR` flash
-* `eMMC` flash
-
-`NOR` flash is available on all platforms. Depending on board type,
-the size may be more or less restricted. On some boards it is as low
-as 16 Mb, which requires additional software storage on `NAND`. The
-`NOR` flash also holds the boot-loader.
-
-`eMMC` is available on SparX5(i) boards. It is currently the default for
-PCB135 boards, but can be enabled for other boards (PCB134) as
-well. `eMMC` provides superior performance compared to `NAND`, and
-also has higher capacity.
-
-Depending on the `NOR` capacity and the image size, it may be possible
-to configure a board to solely use `NOR`. This option is referred to
-as _NOR only_.
-
-Depending on how you want to boot the firmware, you will need to use
-one of several image types:
-
-* `MFI`: This is a proprietary image format, which is used for `NOR`
-  in conjunction with `NAND`. It is typically used on the MIPS-based boards.
-
-* `FIT`: This is a standard U-Boot image format, which is used for
-  _NOR only_ or network boot. It can be used on all boards running
-  U-Boot. (It uses the `.itb` suffix, which is why it sometimes also
-  is called `ITB`).
-
-* `ubifs`: This image type is used for SparX5(i)-based boards using
-  `NAND` for storage. It is a standard Linux filesystem image format,
-  suitable for this storage type.
-
-* `ext4.gz`: This image type is used for SparX5(i)-based boards using
-  `eMMC` for storage. It is a standard Linux filesystem image format,
-  suitable for this storage type.
-
-=== Flashing boards using U-Boot
-
-When preparing a board for flashing, make sure that:
-
-1. You have the latest U-Boot installed. (And have booted it!).
-2. You have reset the U-Boot environment. Do so by the following steps:
-   * `env default -a`
-   * `env save`
-
-U-boot typically contain pre-coded command sequences in the
-environment, which is why it is crucial to reset this to default
-_after_ upgrading.
-
-==== Flashing EDSx for `NOR` boot
-
-Before flashing the board, the `NOR` flash must first be partitioned.
-
-Do so by executing `run nor_only` at the U-Boot prompt.
-
-------------------------------
-=> run nor_only
-Saving Environment to SPI Flash... Erasing SPI flash...Writing to SPI flash...done
-Valid environment: 1
-OK
-=> mtd list
-List of MTD devices:
-* nor0
- - type: NOR flash
- - block size: 0x1000 bytes
- - min I/O: 0x1 bytes
- - 0x000000000000-0x000008000000 : "nor0"
-         - 0x000000000000-0x000000100000 : "UBoot"
-         - 0x000000100000-0x000000140000 : "Env"
-         - 0x000000140000-0x000000180000 : "Env.bk"
-         - 0x000000180000-0x000001580000 : "linux"
-         - 0x000001580000-0x000002980000 : "linux.bk"
-         - 0x000002980000-0x000004980000 : "rootfs_data"
-...
-------------------------------
-
-The `nor_parts` environment variable is used to subdivide the `NOR`
-flash. If you have other capacity requirements, you can edit/change
-the `nor_parts` variable _before_ running `nor_only`.
-
-Once you have partitioned the `NOR`, download the `FIT` image for your
-build and use the following commands to flash the device:
-
-* `env set nor_image somepath/image.itb`
-* `run nor_dlup`
-
-For example:
-
--------------------------------
-=> env set nor_image somepath/image.itb
-=> run nor_dlup
-...
-Using switch@0 device
-TFTP from server 10.10.137.100; our IP address is 10.10.137.12
-Filename 'somepath/image.itb'.
-Load address: 0x740000000
-Loading: #################################################################
-         #################################################################
-         ...
-         #################################################################
-         #################################################################
-         #################################################################
-         #########################################################
-         1.5 MiB/s
-done
-Bytes transferred = 15786816 (f0e340 hex)
-SF: Detected mx66l1g45g with page size 256 Bytes, erase size 4 KiB, total 128 MiB
-device 0 offset 0x180000, size 0xf0e340
-11989824 bytes written, 3796992 bytes skipped in 142.438s, speed 113574 B/s
--------------------------------
-
-After this, the default `bootcmd` being `run nor_boot` should start
-the firmware installed.
-
 == MEPA-DEMO Appl Command Examples
+
+MEPA-DEMO Application commands to configure or access PHYs are available here link:mepa-app-doc.html[PHY Appl Commands]
+
+Following are few application commands to configure or access the HOST ports[EDSx/EDS2].
 
 Get help on the port state command.
 
@@ -946,6 +918,10 @@ Port  State     Mode    Flow Control  Rx Pause  Tx Pause  MaxFrame  Link
 9     Enabled   Auto    Enabled       Enabled   Enabled   1518      1Gfdx
 #
 ----
+
+NOTE: Disabling the NPI port is recommended to prevent traffic from leaking to the RJ45 NPI ports, ports can be Enabled/Disable
+using the command `mepa-cmd port state <port_no> [enable | disable]`
+
 
 Get help on the port statistics command:
 
@@ -1097,6 +1073,7 @@ Enable debug trace for port API at AIL and show the trace level:
 ----
 
 Read chip ID in different ways using symbolic register access:
+Command `sym read` and `sym write` are used to Read/Write EDSx/EDS2 Registers.
 
 ----
 # mepa-cmd debug sym read help
