@@ -217,7 +217,7 @@ This ccmake.. command will open a GUI listing the available static Libraries
 and available image options as below:
 
 --------
-BUILD_SHARED_LIBS                ON
+BUILD_SHARED_LIBS                OFF
 BUILD_STATIC_LIBS                ON
 BUILD_mepa                       ON
 IMG_arm64_vsc7558MSEC_ext4       OFF
@@ -282,6 +282,9 @@ Press [g] to generate Makefile
 
 Press [h] for help Press [q] to quit without generating
 Press [t] to toggle advanced mode (Currently Off)fter configuration is complete Press [g] to generate Makefile with enabled targets.
+
+NOTE: The Binary images `IMG_armv7_lan966x_ext4`, `IMG_arm64_vsc7558TSN_ext4` and `IMG_arm64_vsc7558MSEC_ext4` binary packages contains
+static MEPA libraries linked, it doesn't uses shared MEPA libraries.
 
 === Building the SW
 
