@@ -32,7 +32,7 @@
 #define EDSX_SLOT1_START_PORT_CNT_9 0
 #define EDSX_SLOT2_START_PORT_CNT_9 4
 
-char *MEPA_RELEASE_VERSION = "v2025.06.03";
+char *MEPA_RELEASE_VERSION = "v2025.06.04";
 
 // Local data
 static int LOOP_PORT = -1;
