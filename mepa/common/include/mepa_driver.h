@@ -8,6 +8,7 @@
 #include <mepa_ts_driver.h>
 #include <mepa_macsec_driver.h>
 #include <mepa_tc10_driver.h>
+#include <mepa_t1s_driver.h>
 #include <microchip/ethernet/phy/api.h>
 #include <microchip/ethernet/hdr_start.h>  /**< ALL INCLUDE ABOVE THIS LINE */
 
@@ -881,6 +882,7 @@ typedef struct mepa_driver {
     mepa_ts_driver_t                   *mepa_ts;
     mepa_macsec_driver_t               *mepa_macsec;
     mepa_tc10_driver_t                 *mepa_tc10;
+    mepa_t1s_driver_t                  *mepa_t1s;
     uint32_t id;                  /**< Id of the driver */
     uint32_t mask;                /**< Mask of the driver */
     struct mepa_driver *next; /**< Pointer to the next driver */
@@ -957,6 +959,9 @@ mepa_drivers_t mepa_lan884x_driver_init();
 
 /** \brief Returns drivers for lan887x PHY */
 mepa_drivers_t mepa_lan887x_driver_init(void);
+
+/** \brief Returns drivers for lan867x PHY */
+mepa_drivers_t mepa_lan867x_driver_init(void);
 
 /** \brief Dummy SW driver */
 mepa_drivers_t mepa_dummy_driver_init();

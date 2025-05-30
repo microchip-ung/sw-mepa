@@ -231,12 +231,15 @@ struct mepa_device *mepa_create(const mepa_callout_t    MEPA_SHARED_PTR *callout
 #if defined(MEPA_HAS_LAN887X)
         MEPA_phy_lib[9] = mepa_lan887x_driver_init();
 #endif
+#if defined(MEPA_HAS_LAN867X)
+        MEPA_phy_lib[10] = mepa_lan867x_driver_init();
+#endif
 #if defined(MEPA_HAS_DUMMY_PHY)
-        MEPA_phy_lib[10] = mepa_dummy_driver_init();
+        MEPA_phy_lib[11] = mepa_dummy_driver_init();
 #endif
         // Shall be last
 #if defined(MEPA_HAS_VTSS)
-        MEPA_phy_lib[11] = mepa_default_phy_driver_init();
+        MEPA_phy_lib[12] = mepa_default_phy_driver_init();
 #endif
     }
     if (conf->dummy_phy_cap > 0) {
@@ -3144,3 +3147,32 @@ mepa_rc mepa_phy_qsgmii_sync(struct mepa_device *dev)
     return dev->drv->mepa_driver_phy_qsgmii_sync(dev);
 
 }
+
+mepa_rc mepa_t1s_set_plca_config (struct mepa_device *dev,
+                                                 const mepa_t1s_plca_cfg_t cfg)
+{
+    if (!def->drv->mepa_t1s) {
+        return MESA_RC_NOT_IMPLEMENTED;
+    }
+
+    if (!dev->drv->mepa_t1s->mepa_t1s_set_plca_config) {
+        return MESA_RC_NOT_IMPLEMENTED;
+    }
+
+    return dev->drv->mepa_t1s->mepa_t1s_set_plca_config(dev, cfg);
+}
+
+mepa_rc mepa_t1s_get_plca_config (struct mepa_device *dev,
+                                                 mepa_t1s_plca_cfg_t *const cfg)
+{
+    if (!def->drv->mepa_t1s) {
+        return MESA_RC_NOT_IMPLEMENTED;
+    }
+
+    if (!dev->drv->mepa_t1s->mepa_t1s_get_plca_config) {
+        return MESA_RC_NOT_IMPLEMENTED;
+    }
+
+    return dev->drv->mepa_t1s->mepa_t1s_get_plca_config(dev, cfg);
+}
+

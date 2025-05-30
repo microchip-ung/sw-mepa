@@ -11,6 +11,7 @@ struct mepa_callout_ctx;
 
 struct mepa_ts_driver;
 struct mepa_tc10_driver;
+struct mepa_t1s_driver;
 
 /** \brief Contains methods that are specific to each phy. */
 struct mepa_driver;
