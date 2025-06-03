@@ -8,13 +8,14 @@
 #include <microchip/ethernet/hdr_start.h>  /**< ALL INCLUDE ABOVE THIS LINE */
 
 /** \brief  T1S PLCA Config */
+/*  IEEE-802.3-2022 30.16.1.1 */
 typedef struct mepa_t1s_plca_config {
-    mepa_bool_t plca_enable;
-    uint8_t plca_cnt;
-    uint8_t node_id;
-    uint8_t node_count;
-    uint8_t max_burst_cnt;
-    uint8_t burst_timer;
+    uint8_t node_count;         /* aPLCANodeCount */
+    uint8_t node_id;            /* aPLCALocalNodeID */
+    mepa_bool_t plca_enable;    /* acPLCAAdminControl/aPLCAAdminState/ */
+    uint8_t tx_oppr_timer;      /* aPLCATransmitOpportunityTimer */
+    uint8_t max_burst_cnt;      /* aPLCAMaxBurstCount */
+    uint8_t burst_timer;        /* aPLCABurstTimer */
 } mepa_t1s_plca_cfg_t;
 
 

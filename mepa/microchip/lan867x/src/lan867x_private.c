@@ -183,7 +183,7 @@ mepa_rc lan867x_init_conf(mepa_device_t *const dev, const mepa_t1s_plca_cfg_t cf
     temp2 = (((uint16_t)cfg.max_burst_cnt << 8U) | (uint16_t)cfg.burst_timer);
     MEPA_RC(rc, lan867x_mmd_reg_wr(dev, MMD_MISC, PLCA_BURST, temp2));
     MEPA_RC(rc, lan867x_mmd_reg_wr(dev, MMD_MISC, PLCA_CTRL_0, cfg.plca_enable ? PLCA_ENABLE : 0U));
-    MEPA_RC(rc, lan867x_mmd_reg_wr(dev, MMD_MISC, PLCA_TO_TIMER, cfg.plca_cnt));
+    MEPA_RC(rc, lan867x_mmd_reg_wr(dev, MMD_MISC, PLCA_TO_TIMER, cfg.tx_oppr_timer));
 
     MEPA_RC(rc, lan867x_mmd_reg_wr(dev, MMD_MISC, MISC_RX_MATCH_MASK_L, 0x0003));
     MEPA_RC(rc, lan867x_mmd_reg_wr(dev, MMD_MISC, MISC_RX_MATCH_CTRL, RX_MATCH_ENABLE));

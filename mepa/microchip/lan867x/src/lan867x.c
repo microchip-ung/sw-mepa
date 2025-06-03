@@ -140,7 +140,7 @@ update:
     pdata->conf.mac_if_aneg_ena = false;
     pdata->t1s_cfg.plca_cfg.node_count = 8;
     pdata->t1s_cfg.plca_cfg.plca_enable = true;
-    pdata->t1s_cfg.plca_cfg.plca_cnt = 32;
+    pdata->t1s_cfg.plca_cfg.tx_oppr_timer = 32;
     pdata->t1s_cfg.plca_cfg.max_burst_cnt = 0;
     pdata->t1s_cfg.plca_cfg.burst_timer = 128;
 

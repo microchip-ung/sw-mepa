@@ -3151,7 +3151,7 @@ mepa_rc mepa_phy_qsgmii_sync(struct mepa_device *dev)
 mepa_rc mepa_t1s_set_plca_config (struct mepa_device *dev,
                                                  const mepa_t1s_plca_cfg_t cfg)
 {
-    if (!def->drv->mepa_t1s) {
+    if (!dev->drv->mepa_t1s) {
         return MESA_RC_NOT_IMPLEMENTED;
     }
 
@@ -3165,7 +3165,7 @@ mepa_rc mepa_t1s_set_plca_config (struct mepa_device *dev,
 mepa_rc mepa_t1s_get_plca_config (struct mepa_device *dev,
                                                  mepa_t1s_plca_cfg_t *const cfg)
 {
-    if (!def->drv->mepa_t1s) {
+    if (!dev->drv->mepa_t1s) {
         return MESA_RC_NOT_IMPLEMENTED;
     }
 
