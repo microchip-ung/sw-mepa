@@ -1043,5 +1043,16 @@ mepa_rc mepa_warmstart_conf_get(struct mepa_device *dev, mepa_restart_t *const r
 
 mepa_rc mepa_warmstart_conf_set(struct mepa_device *dev, const mepa_restart_t restart);
 
+/**
+ * \brief To Set QSGMII Interface Synchronization
+ *
+ * \param dev        [IN]  Driver instance.
+ *
+ * \return
+ *   MEPA_RC_OK on success.
+ **/
+
+mepa_rc mepa_phy_qsgmii_sync(struct mepa_device *dev);
+
 #include <microchip/ethernet/hdr_end.h>
 #endif

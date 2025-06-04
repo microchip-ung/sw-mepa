@@ -3134,3 +3134,13 @@ mepa_rc mepa_warmstart_conf_set(struct mepa_device *dev, const mepa_restart_t re
     return dev->drv->mepa_driver_warmrestart_conf_set(dev, restart);
 
 }
+
+mepa_rc mepa_phy_qsgmii_sync(struct mepa_device *dev)
+{
+    if (!dev->drv->mepa_driver_phy_qsgmii_sync) {
+        return MESA_RC_NOT_IMPLEMENTED;
+    }
+
+    return dev->drv->mepa_driver_phy_qsgmii_sync(dev);
+
+}

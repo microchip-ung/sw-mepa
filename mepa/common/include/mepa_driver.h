@@ -809,6 +809,16 @@ typedef mepa_rc (*mepa_driver_serdes_tx_conf_set_t)(struct mepa_device *dev, con
  **/
 typedef uint32_t (*mepa_capability_t)(struct mepa_device *dev, uint32_t capability);
 
+/**
+ * \brief To sync QSGMII configuration
+ *
+ * \param dev      [IN]  Driver instance.
+ *
+ * \return Return code.
+ *   MEPA_RC_OK on Success
+ **/
+typedef mepa_rc (*mepa_driver_phy_qsgmii_sync_t)(struct mepa_device *dev);
+
 typedef struct mepa_driver {
     mepa_driver_delete_t               mepa_driver_delete;
     mepa_driver_reset_t                mepa_driver_reset;
@@ -867,6 +877,7 @@ typedef struct mepa_driver {
     mepa_driver_warmrestart_conf_end_t mepa_driver_warmrestart_conf_end;
     mepa_driver_warmrestart_conf_set_t mepa_driver_warmrestart_conf_set;
     mepa_driver_serdes_tx_conf_set_t   mepa_driver_serdes_tx_conf_set;
+    mepa_driver_phy_qsgmii_sync_t      mepa_driver_phy_qsgmii_sync;
     mepa_ts_driver_t                   *mepa_ts;
     mepa_macsec_driver_t               *mepa_macsec;
     mepa_tc10_driver_t                 *mepa_tc10;

@@ -1483,6 +1483,14 @@ mepa_rc phy_debug_info_dump(struct mepa_device *dev,
     return vtss_phy_debug_info_print(data->vtss_instance, pr, &phy_info);
 }
 
+// API for QSGMII synchronization
+mepa_rc phy_1g_qsgmii_sync(struct mepa_device *dev)
+{
+    phy_data_t *data = (phy_data_t *)(dev->data);
+
+    return vtss_phy_1g_qsgmii_sync(data->vtss_instance, data->port_no);
+}
+
 /*
 Address is in this format
 [15:0] -> Register address
@@ -1790,6 +1798,7 @@ mepa_drivers_t mepa_mscc_driver_init()
             .mepa_driver_eee_mode_conf_get = phy_eee_mode_conf_get,
             .mepa_driver_eee_status_get = phy_eee_status_get,
             .mepa_debug_info_dump = phy_debug_info_dump,
+            .mepa_driver_phy_qsgmii_sync = phy_1g_qsgmii_sync,
             .mepa_ts = &vtss_ts_drivers,
         },
         {
@@ -1873,6 +1882,7 @@ mepa_drivers_t mepa_mscc_driver_init()
             .mepa_driver_phy_info_get = phy_1g_info_get,
             .mepa_driver_isolate_mode_conf = phy_isolate_mode_conf,
             .mepa_debug_info_dump = phy_debug_info_dump,
+	    .mepa_driver_phy_qsgmii_sync = phy_1g_qsgmii_sync,
         },
         {
             // Cicada (all models)

@@ -7879,6 +7879,41 @@ static vtss_rc vtss_phy_detect_base_ports_private(vtss_state_t *vtss_state)
     return VTSS_RC_OK;
 }
 
+//Function added for QSGMII Sync in Tesla PHY.
+// In - port_no - Phy port number.
+
+static vtss_rc vtss_phy_1g_qsgmii_sync_private(vtss_state_t *vtss_state,
+                                               const vtss_port_no_t port_no)
+{
+    u16 reg_val;
+
+    /* Get the current MAC Interface mode */
+    VTSS_RC(vtss_phy_page_gpio(vtss_state, port_no));
+    VTSS_RC(PHY_RD_PAGE(vtss_state, port_no, VTSS_PHY_MAC_MODE_AND_FAST_LINK, &reg_val));
+    reg_val = (reg_val >> 14) & 0x3;
+
+    /* Checks if the MAC Interface is QSGMII */
+    if(reg_val == VTSS_MAC_CONFIGURATION_QSGMII)
+    {
+        /* SGMII mode configs */
+        VTSS_I("port_no %u, Configuring SerDes for VTSS_PORT_INTERFACE_SGMII - 0x80F0 - force_reset = TRUE", port_no);
+        VTSS_RC(vtss_phy_page_gpio(vtss_state, port_no));
+        VTSS_RC(VTSS_PHY_WARM_WR_MASKED_CHK_MASK(vtss_state, port_no, VTSS_PHY_MICRO_PAGE, 0x80F0, 0xFFFF, 0));
+        /* Check to ensure that 0x80E0 or 0x80F0 Microcommand has been applied */
+        VTSS_RC(vtss_phy_wait_for_micro_complete(vtss_state, port_no));
+
+        /* QSGMII mode configs */
+        VTSS_I("port_no %u, Configuring SerDes for VTSS_PORT_INTERFACE_QSGMII - 0x80E0 - force_reset = TRUE", port_no);
+        VTSS_RC(vtss_phy_page_gpio(vtss_state, port_no));
+        VTSS_RC(VTSS_PHY_WARM_WR_MASKED_CHK_MASK(vtss_state, port_no, VTSS_PHY_MICRO_PAGE, 0x80E0, 0xFFFF, 0));
+        /* Check to ensure that 0x80E0 or 0x80F0 Microcommand has been applied */
+        VTSS_RC(vtss_phy_wait_for_micro_complete(vtss_state, port_no));
+    }
+
+    VTSS_RC(vtss_phy_page_std(vtss_state, port_no));   // Go back to standard page.
+
+    return VTSS_RC_OK;
+}
 
 // Function that is called at boot, after port reset.
 // The function is calling the post initialization script (setting coma).
@@ -12248,6 +12283,20 @@ vtss_rc vtss_phy_firmware_update(const vtss_inst_t    inst,
                                  u32 *const len)
 {
     vtss_rc      rc = VTSS_RC_ERROR;
+    return rc;
+}
+
+vtss_rc vtss_phy_1g_qsgmii_sync(const vtss_inst_t     inst,
+                                const vtss_port_no_t  port_no)
+{
+    vtss_state_t *vtss_state;
+    vtss_rc      rc;
+
+    VTSS_ENTER();
+    if ((rc = vtss_inst_port_no_check(inst, &vtss_state, port_no)) == VTSS_RC_OK) {
+        rc = VTSS_RC_COLD(vtss_phy_1g_qsgmii_sync_private(vtss_state, port_no));
+    }
+    VTSS_EXIT();
     return rc;
 }
 
