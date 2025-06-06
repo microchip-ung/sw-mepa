@@ -34,7 +34,7 @@
  * @param is32 - is register 32 bit
  * @param off  - subtarget offset
  */
-#define LAN80XX_IOREG(mmd, is32, off)      _lan80xx_ioreg(&data->io_var, (mmd), (is32), (off))
+#define LAN80XX_IOREG(mmd, is32, off)      _lan80xx_ioreg(&data->io_var, (mmd), (mepa_bool_t)(is32), (off))
 
 
 /******************** DEVICE ID(MMD ID) ****************************/
