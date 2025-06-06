@@ -9613,6 +9613,11 @@ vtss_rc vtss_phy_macsec_csr_wr_private(vtss_state_t         *vtss_state,
     u32 target_tmp = 0;
     //    u16 val;
 
+    if (port_no >= VTSS_PORT_ARRAY_SIZE) {
+        VTSS_N("port_no:%d out of range, higher that port_state arrary range", port_no);
+        return VTSS_RC_ERROR;
+    }
+
     // The only ones not accessible in non-MACsec devices are the MACsec ingress and egress blocks at 0x38 and 0x3C (for each port).
     // Everything else is accessible using the so-called macsec_csr_wr/rd functions using registers 17-20 in extended page 4 (as described in PS1046).
     if (!vtss_phy_can(vtss_state, port_no, VTSS_CAP_MACSEC) && (target == 0x38 || target == 0x3C)) {
@@ -9665,6 +9670,11 @@ vtss_rc vtss_phy_macsec_csr_rd_private(vtss_state_t         *vtss_state,
     u16 reg_value_lower;
     u16 reg_value_upper;
     u32 target_tmp = 0;
+
+    if (port_no >= VTSS_PORT_ARRAY_SIZE) {
+        VTSS_N("port_no:%d out of range, higher that port_state arrary range", port_no);
+        return VTSS_RC_ERROR;
+    }
 
     if (!vtss_phy_can(vtss_state, port_no, VTSS_CAP_MACSEC) && (target == 0x38 || target == 0x3C)) {
         VTSS_E("Port:%d, MACSEC to phy without MACSEC support, target:0x%X", port_no, target);
@@ -9721,6 +9731,12 @@ vtss_rc vtss_phy_macsec_csr_rd_64_private(vtss_state_t         *vtss_state,
     u64 value_64 = 0;
 
     *value = 0;
+
+    if (port_no >= VTSS_PORT_ARRAY_SIZE) {
+        VTSS_N("port_no:%d out of range, higher that port_state arrary range", port_no);
+        return VTSS_RC_ERROR;
+    }
+    
     if (!vtss_phy_can(vtss_state, port_no, VTSS_CAP_MACSEC) && (target == 0x38 || target == 0x3C)) {
         VTSS_E("Port:%d, MACSEC to phy without MACSEC support, target:0x%X", port_no, target);
         return VTSS_RC_ERR_MACSEC_PHY_NOT_MACSEC_CAPABLE;
