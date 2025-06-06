@@ -3207,7 +3207,9 @@ static AQ_Retcode AQ_API_EraseBySectors
     #endif
       printf("Flash data save failed on address 0x%08X\n", sectorEraseStart);
   #endif
-      free(preData);
+      if (preData != NULL) {
+        free(preData);
+      }
       return retcode;
     }
   }
@@ -3229,9 +3231,12 @@ static AQ_Retcode AQ_API_EraseBySectors
     #endif
       printf("Flash data save failed on address 0x%08X\n", sectorEraseEnd - postDataSize);
   #endif
-      if (preDataSize)
+      if (preData != NULL) {
         free(preData);
-      free(postData);
+      }
+      if (postData != NULL) {
+        free(postData);
+      }
       return retcode;
     }
   }
@@ -3250,10 +3255,14 @@ static AQ_Retcode AQ_API_EraseBySectors
     #endif
       printf("Flash sector erase failed on address 0x%08X\n", sectorEraseAddress);
   #endif
-      if (preDataSize)
+      if (preData != NULL) {
         free(preData);
-      if (postDataSize)
+        preData = NULL;
+      }
+      if (postData != NULL) {
         free(postData);
+        postData = NULL;
+      }
       return retcode;
     }
   }
@@ -3274,6 +3283,7 @@ static AQ_Retcode AQ_API_EraseBySectors
   #endif
     }
     free(preData);
+	preData = NULL;
   }
   if (postDataSize)
   {
@@ -3290,8 +3300,15 @@ static AQ_Retcode AQ_API_EraseBySectors
       retcode = retcode2;
     }
     free(postData);
+	postData = NULL;
   }
 
+  if (preData != NULL) {
+    free(preData);
+  }
+  if (postData != NULL) {
+    free(postData);
+  }
   return retcode;
 }
 

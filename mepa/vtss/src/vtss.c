@@ -1397,15 +1397,15 @@ static mepa_rc phy_eee_mode_conf_get(mepa_device_t *dev, mepa_phy_eee_conf_t *co
     phy_data_t *data = (phy_data_t *)(dev->data);
     mepa_rc rc = MEPA_RC_OK;
     mepa_bool_t capable = FALSE;
-    vtss_phy_eee_conf_t *eee_conf = (vtss_phy_eee_conf_t*)malloc(sizeof(vtss_phy_eee_conf_t));
+    vtss_phy_eee_conf_t eee_conf = {0};
     if ((rc = vtss_phy_port_eee_capable(data->vtss_instance, data->port_no, &capable)) != MEPA_RC_OK) {
         return rc;
     }
-    if ((rc = vtss_phy_eee_conf_get(data->vtss_instance, data->port_no, eee_conf)) != MEPA_RC_OK) {
+    if ((rc = vtss_phy_eee_conf_get(data->vtss_instance, data->port_no, &eee_conf)) != MEPA_RC_OK) {
         return rc;
     }
-    conf->eee_mode = (eee_conf->eee_mode == VTSS_EEE_DISABLE ? MEPA_EEE_DISABLE : eee_conf->eee_mode == VTSS_EEE_ENABLE ? MEPA_EEE_ENABLE : MEPA_EEE_REG_UPDATE);
-    conf->eee_ena_phy = eee_conf->eee_ena_phy;
+    conf->eee_mode = (eee_conf.eee_mode == VTSS_EEE_DISABLE ? MEPA_EEE_DISABLE : eee_conf.eee_mode == VTSS_EEE_ENABLE ? MEPA_EEE_ENABLE : MEPA_EEE_REG_UPDATE);
+    conf->eee_ena_phy = eee_conf.eee_ena_phy;
     return MEPA_RC_OK;
 }
 
