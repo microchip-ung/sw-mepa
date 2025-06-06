@@ -1506,7 +1506,7 @@ static mepa_rc phy_10g_clause45_read(struct mepa_device *dev,
     uint16_t page_add = (address >> 16) & 0xffff;
     uint16_t mmd = (page_add & 0x1f);
     uint16_t addr = address & 0xffff;
-    uint32_t data_val;
+    uint32_t data_val = 0;
 
     if (mmd) {
         rc = vtss_phy_10g_csr_read(data->vtss_instance, data->port_no, mmd, addr, &data_val);

@@ -814,7 +814,7 @@ static mepa_rc lan8814_led_mode_set(mepa_device_t *dev, mepa_gpio_mode_t led_mod
 }
 static mepa_rc lan8814_gpio_mode_private(mepa_device_t *dev, const mepa_gpio_conf_t *data)
 {
-    uint16_t gpio_en = 0, dir, val = 0, gpio_no = data->gpio_no;
+    uint16_t gpio_en = 0, dir = 0, val = 0, gpio_no = data->gpio_no;
     mepa_gpio_mode_t mode = data->mode;
 
     if (mode == MEPA_GPIO_MODE_OUT || mode == MEPA_GPIO_MODE_IN) {
@@ -2217,6 +2217,7 @@ static mepa_rc lan8814_recovered_clk_set(mepa_device_t *dev, const mepa_synce_cl
     MEPA_ENTER(dev);
     // Enable recovered clock outputs in gpio
     gpio_conf.mode = (conf->dst == MEPA_SYNCE_CLOCK_DST_1) ? MEPA_GPIO_MODE_RCVRD_CLK_OUT1 : MEPA_GPIO_MODE_RCVRD_CLK_OUT2;
+    gpio_conf.gpio_no = (conf->dst == MEPA_SYNCE_CLOCK_DST_1) ? 9 : 10;
     rc = lan8814_gpio_mode_private(dev, &gpio_conf);
 
     switch (conf->freq) {

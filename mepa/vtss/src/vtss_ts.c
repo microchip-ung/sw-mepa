@@ -641,7 +641,7 @@ static mepa_rc vtss_ts_init_conf_set(struct mepa_device *dev, const mepa_ts_init
         init_conf.xaui_sel_8487 = VTSS_PHY_TS_8487_XAUI_SEL_0; /**< 8487 XAUI lane selection*/
     }
     if (data->cap == PHY_CAP_10G) {
-        vtss_phy_10g_id_t phy_id;
+        vtss_phy_10g_id_t phy_id = {0};
         vtss_phy_10g_id_get(data->vtss_instance, data->port_no, &phy_id);
         if (phy_id.part_number == 0x8489 || phy_id.part_number == 0x8490 || phy_id.part_number == 0x8491 ||
             phy_id.family == VTSS_PHY_FAMILY_MALIBU) {
