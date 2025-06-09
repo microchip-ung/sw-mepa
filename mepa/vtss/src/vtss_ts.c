@@ -619,7 +619,7 @@ static mepa_rc vtss_ts_init_conf_set(struct mepa_device *dev, const mepa_ts_init
 {
     phy_data_t *data = (phy_data_t *)dev->data;
     vtss_phy_ts_init_conf_t init_conf = {};
-
+    
     data->ts.dly_req_recv_10byte_ts = ts_init_conf->dly_req_recv_10byte_ts;
     data->ts.tx_fifo_spi_conf = ts_init_conf->tx_fifo_spi_conf;
     init_conf.clk_freq = ts_init_conf->clk_freq;
@@ -642,7 +642,7 @@ static mepa_rc vtss_ts_init_conf_set(struct mepa_device *dev, const mepa_ts_init
     }
     if (data->cap == PHY_CAP_10G) {
         vtss_phy_10g_id_t phy_id = {0};
-        vtss_phy_10g_id_get(data->vtss_instance, data->port_no, &phy_id);
+        MEPA_RC(vtss_phy_10g_id_get(data->vtss_instance, data->port_no, &phy_id));
         if (phy_id.part_number == 0x8489 || phy_id.part_number == 0x8490 || phy_id.part_number == 0x8491 ||
             phy_id.family == VTSS_PHY_FAMILY_MALIBU) {
             init_conf.auto_clear_ls = ts_init_conf->auto_clear_ls;
@@ -651,7 +651,7 @@ static mepa_rc vtss_ts_init_conf_set(struct mepa_device *dev, const mepa_ts_init
         }
     } else {
         vtss_phy_type_t phy_id;
-        vtss_phy_id_get(data->vtss_instance, data->port_no, &phy_id);
+        MEPA_RC(vtss_phy_id_get(data->vtss_instance, data->port_no, &phy_id));
         if (phy_id.part_number == VTSS_PHY_TYPE_8582 || phy_id.part_number == VTSS_PHY_TYPE_8584 ||
             phy_id.part_number == VTSS_PHY_TYPE_8575) {
             init_conf.auto_clear_ls = ts_init_conf->auto_clear_ls;
