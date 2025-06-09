@@ -3197,6 +3197,9 @@ static AQ_Retcode AQ_API_EraseBySectors
   {
     sectorEraseStart = sectorEraseStart - preDataSize;
     preData = (uint8_t*)malloc(preDataSize);
+    if (preData == NULL) {
+        return AQ_RET_ERROR;
+    }
     retcode = AQ_API_ReadFlashImageOfKnownFLASH(port, flashParams->flashType,
       sectorEraseStart, preDataSize, preData, &actualSize, False);
     if (retcode != AQ_RET_OK)
@@ -3221,6 +3224,12 @@ static AQ_Retcode AQ_API_EraseBySectors
     postDataSize = sectorSize - postDataSize;
     sectorEraseEnd = sectorEraseEnd + postDataSize;
     postData = (uint8_t*)malloc(postDataSize);
+    if (postData == NULL) {
+        if (preData != NULL) {
+            free(preData);
+        }
+        return AQ_RET_ERROR;
+    }
     retcode = AQ_API_ReadFlashImageOfKnownFLASH(port, flashParams->flashType,
       sectorEraseEnd - postDataSize, postDataSize, postData, &actualSize, False);
     if (retcode != AQ_RET_OK)
