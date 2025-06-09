@@ -9911,10 +9911,13 @@ vtss_rc vtss_phy_status_get_private(vtss_state_t *vtss_state,
         vtss_phy_decode_status_reg(port_no, reg, status);
 
         if((ps->family == VTSS_PHY_FAMILY_VIPER) || (ps->family == VTSS_PHY_FAMILY_TESLA)) {
+        /*Check for the Mac IF QSGMII/SGMII and update Status->link_down*/
             if((conf->mac_if == VTSS_PORT_INTERFACE_QSGMII) || (conf->mac_if == VTSS_PORT_INTERFACE_SGMII)) {
-        /* Set Link Down Indication based on latched in link_status in Reg01, Reg17 and Reg24*/
-                status->link_down = (((reg & (1 << 2)) | (reg24 & (1 << 2))) & (reg17 & (1 << 2)) ? 0 : 1);
-	    }
+            /* Set Link Down Indication based on latched in link_status in Reg01, Reg17 and Reg24*/
+                status->link_down = (((reg & (1 << 2)) || (reg24 & (1 << 2))) && (reg17 & (1 << 2)) ? 0 : 1);
+            }
+        } else {
+            status->link_down = ((reg & (1 << 2)) ? 0 : 1);
         }
 
         VTSS_RC(vtss_phy_page_std(vtss_state, port_no));
@@ -9934,11 +9937,12 @@ vtss_rc vtss_phy_status_get_private(vtss_state_t *vtss_state,
                 case VTSS_PHY_FAMILY_VIPER:
                 case VTSS_PHY_FAMILY_TESLA:
                     if((conf->mac_if == VTSS_PORT_INTERFACE_QSGMII) || (conf->mac_if == VTSS_PORT_INTERFACE_SGMII)) {
-                        status->link = (((reg & (1 << 2)) | (reg24 & (1<<2))) & (reg17 & (1<<2)) ? 1 : 0);
+                        status->link = (((reg & (1 << 2)) || (reg24 & (1<<2))) && (reg17 & (1<<2)) ? 1 : 0);
                     }
                     break;
                 default:
                     status->link = ((reg & (1 << 2)) ? 1 : 0);
+                    break;
             }
             VTSS_N("status->link = %d, port = %d, reg = 0x%X", status->link, port_no, reg);
 
