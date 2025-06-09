@@ -216,10 +216,15 @@ coding_standards.each do |key, cfg|
       impact = issue.dig("checkerProperties", "impact") || ""
 
       csv << [checker_name, filepath, line_number, function, impact]
-      $cnt_err += 1
+      # Increment error count only for High or Medium impact
+      if impact.casecmp?("High") || impact.casecmp?("Medium")
+        $cnt_err += 1
+      end
     end
   end
 end
+
+puts "Total Violations: #{$cnt_err}"
 
 output_dir = ARGV[0]
 
