@@ -1183,10 +1183,8 @@ static int __gpy211_setup_forced(struct gpy211_device *phy)
 			return ret;
 		}
 	} else {
-		// Mesa-913
-		LOG_WARN("WARN: Speed forced not supported\n");
-		return -EINVAL;
-
+        // Mesa-913
+        LOG_WARN("WARN: Speed forced not supported\n");
 		/* Full duplex only */
 		ctrl1 &= STD_CTRL_SSM_MASK | STD_CTRL_SSL_MASK
 			 | STD_CTRL_LB_MASK | STD_CTRL_ISOL_MASK
@@ -1248,6 +1246,9 @@ static int __gpy211_setup_forced(struct gpy211_device *phy)
 			LOG_CRIT("ERROR: PMA_CTRL2 write fails\n");
 			return ret;
 		}
+        // Mesa-913
+        LOG_WARN("WARN: Speed forced not supported\n");
+        return -EINVAL;
 	}
 
 	ret = PHY_READ(phy, STD_STD_GCTRL);
@@ -5114,9 +5115,9 @@ int gpy2xx_gmacx_pm_pdi_get(struct gpy211_device *phy,
 
 	pm_pdi_cfg = _data;
 
-	pm_cfg->bypass_gmac = FIELD_GET(pm_pdi_cfg, PM_PDI_CFG_GMAC_BYP);
+    //pm_cfg->bypass_gmac = FIELD_GET(pm_pdi_cfg, PM_PDI_CFG_GMAC_BYP);
 	pm_cfg->bypass_gmac = FIELD_GET(pm_pdi_cfg, PM_PDI_CFG_GMACL_BYP);
-	pm_cfg->bypass_macsec = FIELD_GET(pm_pdi_cfg, PM_PDI_CFG_MACSECE_BYP);
+	//pm_cfg->bypass_macsec = FIELD_GET(pm_pdi_cfg, PM_PDI_CFG_MACSECE_BYP);
 	pm_cfg->bypass_macsec = FIELD_GET(pm_pdi_cfg, PM_PDI_CFG_MACSECI_BYP);
 	pm_cfg->drop_on_crc_err = FIELD_GET(pm_pdi_cfg, PM_PDI_CFG_CRC_ERR);
 	pm_cfg->drop_on_pkt_err = FIELD_GET(pm_pdi_cfg, PM_PDI_CFG_PKT_ERR);
