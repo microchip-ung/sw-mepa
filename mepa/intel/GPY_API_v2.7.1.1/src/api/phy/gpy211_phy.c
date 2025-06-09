@@ -5929,8 +5929,7 @@ int gpy2xx_usxgmii_reach_cfg(struct gpy211_device *phy,
 	/* 	return -EINVAL; */
 	/* } */
 
-	if (reach_cfg->trace_len < CONST_VSPEC1_SGMII_CTRL_USXGMII_REACH_SHORT ||
-	    reach_cfg->trace_len > CONST_VSPEC1_SGMII_CTRL_USXGMII_REACH_CUSTOM) {
+	if (reach_cfg->trace_len > CONST_VSPEC1_SGMII_CTRL_USXGMII_REACH_CUSTOM) {
 		LOG_WARN("WARN: Invalid trace_len.\n");
 		return -EINVAL;
 	}

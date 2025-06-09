@@ -415,7 +415,7 @@ static uint8_t get_vs_mac_type(mepa_ts_mac_match_select_t mac_type)
 }
 void get_eng_flow_info(uint16_t in_flow, vtss_phy_ts_engine_t *eng_id, uint16_t *eng_flow, uint8_t *flow_st, uint8_t *flow_end)
 {
-    if (in_flow >= 0 && in_flow < TS_FLOWS_PER_ENG * (VTSS_PHY_TS_PTP_ENGINE_ID_0 + 1)) {
+    if (in_flow < TS_FLOWS_PER_ENG * (VTSS_PHY_TS_PTP_ENGINE_ID_0 + 1)) {
         *eng_id = VTSS_PHY_TS_PTP_ENGINE_ID_0;
     } else if (in_flow >= (TS_FLOWS_PER_ENG * VTSS_PHY_TS_PTP_ENGINE_ID_1) &&
                in_flow <  (TS_FLOWS_PER_ENG * VTSS_PHY_TS_OAM_ENGINE_ID_2A)) {
