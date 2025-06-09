@@ -4561,15 +4561,13 @@ static vtss_rc patch_array_set_value(vtss_state_t *vtss_state, vtss_port_no_t po
     if (lsb > 0) {
         arr_bit_lsb = lsb;
         arr_idx_lsb = arr_bit_lsb >> 3;
-        arr_bit_msb = msb;
-        arr_idx_msb = arr_bit_msb >> 3;
     } else {
         arr_bit_lsb = msb;
         arr_idx_lsb = arr_bit_lsb >> 3;
-        arr_bit_msb = msb;
-        arr_idx_msb = arr_bit_msb >> 3;
     }
 
+    arr_bit_msb = msb;
+    arr_idx_msb = arr_bit_msb >> 3;
     sz = (arr_bit_msb - arr_bit_lsb) + 1;
     if (sz > 8) {
         return (-101);

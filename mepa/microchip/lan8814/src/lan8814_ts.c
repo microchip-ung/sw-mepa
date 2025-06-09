@@ -958,7 +958,7 @@ static mepa_rc lan8814_ts_clock_ingress_latency_set(mepa_device_t *dev, const me
         if (*latency >= 0) {
             val = (uint16_t)((base_phy->ts_state.default_latencies.rx10mbps >> 16) & 0xFFFF) + val;
         } else {
-            if ((base_phy->ts_state.default_latencies.rx100mbps >> 16) <= val) {
+            if ((base_phy->ts_state.default_latencies.rx10mbps >> 16) <= val) {
                 T_I(MEPA_TRACE_GRP_TS, "Port No : %d   Bad Ingress Latency Values :: %lld \n", data->port_no, *latency);
                 break;
             }
