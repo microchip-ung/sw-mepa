@@ -235,24 +235,24 @@ static mepa_rc lan8814_ts_port_init(mepa_device_t *dev, const mepa_ts_init_conf_
     // Ingress latencies
     val = lan8814_ing_latencies[ts_init_conf->clk_freq][2];
     EP_WRM(dev, LAN8814_PTP_RX_LATENCY_10, val, LAN8814_DEF_MASK);
-    data->ts_state.default_latencies.rx10mbps = val << 16;
+    data->ts_state.default_latencies.rx10mbps = ((int64_t)val) << 16;
     val = lan8814_ing_latencies[ts_init_conf->clk_freq][1];
     EP_WRM(dev, LAN8814_PTP_RX_LATENCY_100, val, LAN8814_DEF_MASK);
-    data->ts_state.default_latencies.rx100mbps =  val << 16;
+    data->ts_state.default_latencies.rx100mbps =  ((int64_t)val) << 16;
     val = lan8814_ing_latencies[ts_init_conf->clk_freq][0];
     EP_WRM(dev, LAN8814_PTP_RX_LATENCY_1000, val, LAN8814_DEF_MASK);
-    data->ts_state.default_latencies.rx1000mbps =  val << 16;
+    data->ts_state.default_latencies.rx1000mbps =  ((int64_t)val) << 16;
 
     // Egress latencies
     val = lan8814_egr_latencies[ts_init_conf->clk_freq][2];
     EP_WRM(dev, LAN8814_PTP_TX_LATENCY_10, val, LAN8814_DEF_MASK);
-    data->ts_state.default_latencies.tx10mbps =  val << 16;
+    data->ts_state.default_latencies.tx10mbps =  ((int64_t)val) << 16;
     val = lan8814_egr_latencies[ts_init_conf->clk_freq][1];
     EP_WRM(dev, LAN8814_PTP_TX_LATENCY_100, val, LAN8814_DEF_MASK);
-    data->ts_state.default_latencies.tx100mbps =  val << 16;
+    data->ts_state.default_latencies.tx100mbps =  ((int64_t)val) << 16;
     val = lan8814_egr_latencies[ts_init_conf->clk_freq][0];
     EP_WRM(dev, LAN8814_PTP_TX_LATENCY_1000, val, LAN8814_DEF_MASK);
-    data->ts_state.default_latencies.tx1000mbps =  val << 16;
+    data->ts_state.default_latencies.tx1000mbps = ((int64_t)val) << 16;
 
 #else
 
@@ -801,7 +801,7 @@ static mepa_rc lan8814_ts_clock_egress_latency_set_priv(mepa_device_t *dev, cons
     case MEPA_SPEED_10M:
         latency = base_data->ts_state.default_latencies.tx10mbps;
         if (two_step) {
-            latency -= lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_10M] << 16; //two_step adjustment
+            latency -= ((int64_t)lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_10M]) << 16; //two_step adjustment
         }
         latency += *input_latency;
         if (latency >= 0) {
@@ -817,7 +817,7 @@ static mepa_rc lan8814_ts_clock_egress_latency_set_priv(mepa_device_t *dev, cons
     case MEPA_SPEED_100M:
         latency = base_data->ts_state.default_latencies.tx100mbps;
         if (two_step) {
-            latency -= lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_100M] << 16; //two_step adjustment
+            latency -= ((int64_t)lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_100M]) << 16; //two_step adjustment
         }
         latency += *input_latency;
         if (latency >= 0) {
@@ -834,7 +834,7 @@ static mepa_rc lan8814_ts_clock_egress_latency_set_priv(mepa_device_t *dev, cons
     case MEPA_SPEED_AUTO:
         latency = base_data->ts_state.default_latencies.tx1000mbps;
         if (two_step) {
-            latency -= lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_1G] << 16; //two_step adjustment
+            latency -= ((int64_t)lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_1G]) << 16; //two_step adjustment
         }
         latency += *input_latency;
         if (latency >= 0) {
@@ -889,7 +889,7 @@ mepa_rc lan8814_ts_reload_egress_latency(mepa_device_t *dev, mepa_bool_t two_ste
     // 10m speed
     latency = base_data->ts_state.default_latencies.tx10mbps;
     if (two_step) {
-        latency -= lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_10M] << 16; //two_step adjustment
+        latency -= ((int64_t)lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_10M]) << 16; //two_step adjustment
     }
     latency += data->ts_state.ts_port_conf.port_latencies.tx10mbps; // user configured latency.
     val = (uint16_t)(latency > 0 ? latency >> 16 : 0); // latencies cannot be -ve.
@@ -898,7 +898,7 @@ mepa_rc lan8814_ts_reload_egress_latency(mepa_device_t *dev, mepa_bool_t two_ste
     // 100m speed
     latency = base_data->ts_state.default_latencies.tx100mbps;
     if (two_step) {
-        latency -= lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_100M] << 16; //two_step adjustment
+        latency -= ((int64_t)lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_100M]) << 16; //two_step adjustment
     }
     latency += data->ts_state.ts_port_conf.port_latencies.tx100mbps; // user configured latency.
     val = (uint16_t)(latency > 0 ? latency >> 16 : 0); // latencies cannot be -ve.
@@ -907,7 +907,7 @@ mepa_rc lan8814_ts_reload_egress_latency(mepa_device_t *dev, mepa_bool_t two_ste
     // 1000m speed
     latency = base_data->ts_state.default_latencies.tx1000mbps;
     if (two_step) {
-        latency -= lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_1G] << 16; //two_step adjustment
+        latency -= ((int64_t)lan8814_twostep_egr_lat_adj[base_data->ts_state.clk_freq][MEPA_SPEED_1G]) << 16; //two_step adjustment
     }
     latency += data->ts_state.ts_port_conf.port_latencies.tx1000mbps; // user configured latency.
     val = (uint16_t)(latency > 0 ? latency >> 16 : 0); // latencies cannot be -ve.
