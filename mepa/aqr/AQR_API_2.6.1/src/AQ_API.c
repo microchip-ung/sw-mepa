@@ -2269,7 +2269,7 @@ AQ_Retcode AQ_API_HardReset
   }
 
   /* Avoid set-but-not-used variable warnings (intentionally does nothing) */
-  if (junk);
+  (void)junk;
 
   return AQ_RET_OK;
 }
@@ -2295,7 +2295,7 @@ AQ_Retcode AQ_API_SoftReset
   AQ_API_Set(port->PHY_ID, AQ_GlobalStandardControl_1, softReset, 0x1);
 
   /* Avoid set-but-not-used variable warnings (intentionally does nothing) */
-  if (junk);
+  (void)junk;
 
   return AQ_RET_OK;
 }
