@@ -3025,6 +3025,11 @@ mepa_rc lan80xx_prbs_generator_conf_set(mepa_device_t *dev, mepa_bool_t enable, 
                              LAN80XX_HOST_LINE_REG(LAN80XX_M, is_line, PMA_8BIT_LANE_33_LN_R_BIST_EN));
 
         if (enable == 0) {
+            if (is_line) {
+                data->line_prbs_conf = *prbs_conf;
+            } else {
+                data->host_prbs_conf = *prbs_conf;
+            }
             return MEPA_RC_OK;
         }
 
