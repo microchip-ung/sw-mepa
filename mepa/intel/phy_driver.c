@@ -71,7 +71,7 @@ static int (mdiobus_read)(void *mdiobus_data, uint16_t addr, uint32_t regnum)
     bool mmd_access = false;
     uint8_t devtype, regaddr;
 
-    if (regnum | MII_ADDR_C45) {
+    if (regnum & MII_ADDR_C45) {
         mmd_access = true;
         devtype = regnum >> 16 & 0x1f;
         regaddr = regnum & 0xffff;
@@ -96,7 +96,7 @@ static int (mdiobus_write)(void *mdiobus_data, uint16_t addr, uint32_t regnum, u
     bool mmd_access = false;
     uint8_t devtype, regaddr;
 
-    if (regnum | MII_ADDR_C45) {
+    if (regnum & MII_ADDR_C45) {
         mmd_access = true;
         devtype = regnum >> 16 & 0x1f;
         regaddr = regnum & 0xffff;

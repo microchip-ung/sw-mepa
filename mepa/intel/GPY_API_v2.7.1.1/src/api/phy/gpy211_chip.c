@@ -1463,11 +1463,16 @@ int gpy2xx_ptp_enable(struct gpy211_device *phy,
 	/* Is 1-step TS enabled */
 	if (ptp_cfg->ts_ostc_en) {
 		/* Validate PTP Transport Protocol ID range */
-		if (!(ptp_cfg->tx_ptp_tpt >= PTP_TRANSPORT_OVER_ETH &&
-		      ptp_cfg->tx_ptp_tpt <= PTP_TRANSPORT_OVER_IPv6)) {
-			LOG_WARN("WARN: Invalid input (ptpTxProtocol) - Transport Protocol ID\n");
-			return -EINVAL;
-		}
+        switch (ptp_cfg->tx_ptp_tpt) {
+        case PTP_TRANSPORT_OVER_ETH:
+        case PTP_TRANSPORT_OVER_IPv4:
+        case PTP_TRANSPORT_OVER_IPv6:
+            // valid case
+            break;
+        default:
+            LOG_WARN("WARN: Invalid input (ptpTxProtocol) - Transport Protocol ID\n");
+            return -EINVAL;
+        }
 	}
 
 	/* Acquire lock */
