@@ -79,6 +79,9 @@ mesa_rc json_rpc_add_name_mepa_phy_cap_t(json_rpc_req_t *req, json_object *obj, 
     if (*parm & MEPA_CAP_SPEED_MASK_10G) {
         json_rpc_add_json_string(req, obj_value, "MEPA_CAP_SPEED_MASK_10G");
     }
+    if (*parm & MEPA_CAP_SPEED_MASK_25G) {
+        json_rpc_add_json_string(req, obj_value, "MEPA_CAP_SPEED_MASK_25G");
+    }
     if (*parm & MEPA_CAP_TS_MASK_GEN_1) {
         json_rpc_add_json_string(req, obj_value, "MEPA_CAP_TS_MASK_GEN_1");
     }
@@ -1261,6 +1264,47 @@ mesa_rc json_rpc_add2_mesa_qos_egress_map_t(json_rpc_req_t *req, json_object *ob
     return MESA_RC_OK;
 }
 
+/* Warm start application - Malibu 25G - Start ------------------------------------------- */
+mesa_rc json_rpc_get2_phy25g_ts_engine_flow_conf_t(json_rpc_req_t *req, json_object *obj, phy25g_ts_engine_flow_conf_t *parm)
+{
+    json_object *obj_value;
+
+    MESA_RC(json_rpc_get_name_json_object(req, obj, "flow_conf", &obj_value));
+    MESA_RC(json_rpc_get_name_phy25g_ts_ptp_engine_flow_conf_t(req, obj_value, "ptp", &parm->flow_conf.ptp));
+    return MESA_RC_OK;
+}
+
+mesa_rc json_rpc_add2_phy25g_ts_engine_flow_conf_t(json_rpc_req_t *req, json_object *obj,  phy25g_ts_engine_flow_conf_t *parm)
+{
+    json_object *obj_value;
+
+    MESA_RC(json_rpc_new(req, &obj_value));
+    MESA_RC(json_rpc_add_name_json_object(req, obj, "flow_conf", obj_value));
+    MESA_RC(json_rpc_add_name_phy25g_ts_ptp_engine_flow_conf_t(req, obj_value, "ptp", &parm->flow_conf.ptp));
+    return MESA_RC_OK;
+}
+
+mesa_rc json_rpc_get2_phy25g_ts_engine_action_t(json_rpc_req_t *req, json_object *obj, phy25g_ts_engine_action_t *parm)
+{
+    json_object *obj_value;
+
+    MESA_RC(json_rpc_get_name_json_object(req, obj, "action", &obj_value));
+    MESA_RC(json_rpc_get_name_phy25g_ts_ptp_engine_action_t(req, obj_value, "ptp_conf", &parm->action.ptp_conf));
+    return MESA_RC_OK;
+}
+
+mesa_rc json_rpc_add2_phy25g_ts_engine_action_t(json_rpc_req_t *req, json_object *obj,  phy25g_ts_engine_action_t *parm)
+{
+    json_object *obj_value;
+
+    MESA_RC(json_rpc_new(req, &obj_value));
+    MESA_RC(json_rpc_add_name_json_object(req, obj, "action", obj_value));
+    MESA_RC(json_rpc_add_name_phy25g_ts_ptp_engine_action_t(req, obj_value, "ptp_conf", &parm->action.ptp_conf));
+    return MESA_RC_OK;
+}
+
+/* Warm start application - Malibu 25G - End -------------------------------------------- */
+
 /* - Static method table ------------------------------------------- */
 
 // Maximum 64 DSCPs and 4 DPLs
@@ -1904,3 +1948,4 @@ void mscc_appl_json_rpc_init(mscc_appl_init_t *init)
         break;
     }
 }
+

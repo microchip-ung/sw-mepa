@@ -334,10 +334,9 @@ typedef struct {
 } meba_poe_indv_mask_prebt_t;
 
 
-typedef struct 
-{
-     meba_poe_indv_mask_prebt_t im_prebt;
-     meba_poe_indv_mask_bt_t    im_BT;
+typedef struct {
+    meba_poe_indv_mask_prebt_t im_prebt;
+    meba_poe_indv_mask_bt_t    im_BT;
 } poe_individual_mask_info_t;
 
 
@@ -373,13 +372,13 @@ typedef enum {
     MEBA_POE_PORT_PD_POWER_PRIORITY_HIGH,
     MEBA_POE_PORT_PD_POWER_PRIORITY_LOW,
 } meba_poe_pd_power_priority_t;
- 
+
 
 typedef enum {
     MEBA_POE_PD692X0_CONTROLLER_TYPE_AUTO_DETECTION = 0,
-    MEBA_POE_PD69200_CONTROLLER_TYPE ,
-    MEBA_POE_PD69210_CONTROLLER_TYPE , 
-    MEBA_POE_PD69220_CONTROLLER_TYPE ,
+    MEBA_POE_PD69200_CONTROLLER_TYPE,
+    MEBA_POE_PD69210_CONTROLLER_TYPE,
+    MEBA_POE_PD69220_CONTROLLER_TYPE,
     MEBA_POE_PD69200M_CONTROLLER_TYPE
 } meba_poe_controller_type_t;
 
@@ -397,11 +396,10 @@ typedef enum {
 } meba_poe_software_power_type_t;
 
 
-typedef enum 
-{
+typedef enum {
     MEBA_POE_PS_INTERNAL = 0,
     MEBA_POE_PS_EXTERNAL
-}meba_power_supply_int_ext_t;
+} meba_power_supply_int_ext_t;
 
 
 /**
@@ -421,8 +419,7 @@ typedef enum {
 } meba_poe_port_mode_t;
 
 
-typedef struct 
-{
+typedef struct {
     uint8_t  NumOfCh_HC08_Sprt ;
     uint8_t  SubContractor     ; //
     uint8_t  Year              ; // Manufacuring year
@@ -522,7 +519,7 @@ typedef struct {
 
     // detected poe firmware type - ports mode BT or PREBT
     meba_poe_firmware_type_t     eDetected_poe_firmware_type;
-    
+
     // max number of poe ports using by poe driver
     uint8_t                      max_number_of_poe_ports;
 
@@ -570,7 +567,7 @@ typedef struct {
     // PoE port allocated power.
     mesa_poe_milliwatt_t        pse_allocated_power_mw;
 
-}meba_poe_pd_data_t;
+} meba_poe_pd_data_t;
 
 
 
@@ -580,17 +577,15 @@ typedef struct {
 
 #define MAX_PORD_NAME_STR_LEN              100   // max string size of product name
 
-typedef enum 
-{
+typedef enum {
     MEBA_POE_PORT_MAX_POWER_15W = 15,
     MEBA_POE_PORT_MAX_POWER_30W = 30,
     MEBA_POE_PORT_MAX_POWER_60W = 60,
-    MEBA_POE_PORT_MAX_POWER_90W = 90 
-}meba_poe_port_max_power_t;
+    MEBA_POE_PORT_MAX_POWER_90W = 90
+} meba_poe_port_max_power_t;
 
 
-typedef struct   // parameters taken from DB according to PN read from PoEMCU serial number
-{
+typedef struct { // parameters taken from DB according to PN read from PoEMCU serial number
     mesa_bool_t                 use_poe_static_parameters              ;
     uint8_t                     max_poe_ports                          ; // Max number of POE channels ( 6/12/24/48) based on product det (serial number)
     meba_power_supply_int_ext_t ePower_supply_internal_external        ;
@@ -598,10 +593,10 @@ typedef struct   // parameters taken from DB according to PN read from PoEMCU se
     uint16_t                    power_supply_max_power_w               ; // Midspan maximum Power Supply power (Watt)
     uint16_t                    power_supply_internal_pwr_usage        ;
 
-    char                        product_name_string[MAX_PORD_NAME_STR_LEN+1]  ; // Product name - retrieved from DB according to product being detected
+    char                        product_name_string[MAX_PORD_NAME_STR_LEN + 1]  ; // Product name - retrieved from DB according to product being detected
     meba_poe_software_power_type_t eMeba_poe_software_power_type       ; // AF-15W ,AT-30W ,BT-60W/90W
     meba_poe_firmware_type_t    eMeba_poe_firmware_type                ; // AF/AT ,BT
-}meba_poe_init_params_t;
+} meba_poe_init_params_t;
 
 
 
@@ -620,26 +615,26 @@ typedef struct {
 
 // PoE port pse data.
 typedef struct {
-    
+
     // IEEE Std 802.3bt Section 30.9.1.1.2 aPSEPowerPairsControlAbility
     mesa_bool_t                 power_pairs_control_ability;
-	
+
     // PoE port PSE
     mesa_poe_milliwatt_t        pse_max_avail_power_mw;
 
     // PoE port power status. Holds the value to go into PoE lldp element: Power
     // Status
     mesa_poe_power_status_t     power_status;
-	
+
     // PoE port PD class.
-    mesa_poe_milliwatt_t        pse_alloc_power_alt_a_mw;	
-	
+    mesa_poe_milliwatt_t        pse_alloc_power_alt_a_mw;
+
     // PoE port PD class, second pair (used for poe-bt)
     mesa_poe_milliwatt_t        pse_alloc_power_alt_b_mw;
-	
+
     // PoE port PD class.
     mesa_poe_milliwatt_t        requested_power_mode_a_mw;
-	
+
     // PoE port PD class, second pair (used for poe-bt)
     mesa_poe_milliwatt_t        requested_power_mode_b_mw;
 
@@ -659,7 +654,7 @@ typedef struct {
     meba_poe_port_pse_power_pair_t pse_power_pair;
 
     meba_poe_port_pse_prebt_port_type_t port_type_prebt_af_at_poh;
-    
+
     // PoE port cable length in meters.
     mesa_poe_meters_t           cable_len;
 
@@ -763,18 +758,18 @@ typedef struct {
     meba_poe_port_state_t       meba_poe_port_state;
 
     // 0 - not valid , 1 - sspd , 2 - dspd.
-    uint8_t                     pd_type_sspd_dspd;        
+    uint8_t                     pd_type_sspd_dspd;
 
     uint8_t                     poe_internal_port_status;
 
     // read configured port operation mode from 'get bt port parameters' // bt std = 0,1,2,3 legacy 0x10,0x11,0x12,0x13
-    uint8_t                     bt_port_operation_mode;   
-    
+    uint8_t                     bt_port_operation_mode;
+
     // pse type as set in port configuration
-    meba_poe_port_type_t        bt_pse_port_type ;        
+    meba_poe_port_type_t        bt_pse_port_type ;
 
     // read configured bt_port_pm_mode from 'get bt port parameters'
-    meba_poe_bt_port_pm_mode_t  bt_port_pm_mode;          
+    meba_poe_bt_port_pm_mode_t  bt_port_pm_mode;
 
     char                        poe_port_status_description[100];
 
@@ -842,9 +837,9 @@ typedef struct {
 // max_size [IN]  The maximum size of firmware version.
 // version  [OUT] The firmware version.
 typedef mesa_rc (*meba_poe_ctrl_version_get_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        uint32_t                        max_size,
-        char                           *version);
+    const meba_poe_ctrl_inst_t     *const inst,
+    uint32_t                        max_size,
+    char                           *version);
 
 // Firmware upgrade.
 //
@@ -867,10 +862,10 @@ typedef mesa_rc (*meba_poe_ctrl_version_get_t)(
 // size  [IN]  Size of date in bytes.
 // firmware [IN] Firmware to load.
 typedef mesa_rc (*meba_poe_ctrl_firmware_upgrade_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        mesa_bool_t                     reset,
-        uint32_t                        size,
-        const char                     *firmware);
+    const meba_poe_ctrl_inst_t     *const inst,
+    mesa_bool_t                     reset,
+    uint32_t                        size,
+    const char                     *firmware);
 
 // Preparation of Firmware upgrade.
 //
@@ -883,51 +878,51 @@ typedef mesa_rc (*meba_poe_ctrl_firmware_upgrade_t)(
 // size          [IN]  Size of date in bytes.
 // firmware      [IN]  Firmware to load.
 typedef mesa_rc (*meba_poe_ctrl_prepare_firmware_upgrade_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        mesa_bool_t                     version_check,
-        uint32_t                        size,
-        const char                     *firmware);
+    const meba_poe_ctrl_inst_t     *const inst,
+    mesa_bool_t                     version_check,
+    uint32_t                        size,
+    const char                     *firmware);
 
 // Get PoE port status.
 typedef mesa_rc (*meba_poe_ctrl_port_status_get_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        meba_poe_port_handle_t          handle,
-        meba_poe_port_status_t         *const status);
+    const meba_poe_ctrl_inst_t     *const inst,
+    meba_poe_port_handle_t          handle,
+    meba_poe_port_status_t         *const status);
 
 // Set a PoE port configuration.
 typedef mesa_rc (*meba_poe_ctrl_port_cfg_set_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        meba_poe_port_handle_t          handle,
-        meba_poe_port_cfg_t            *cfg);
+    const meba_poe_ctrl_inst_t     *const inst,
+    meba_poe_port_handle_t          handle,
+    meba_poe_port_cfg_t            *cfg);
 
 // Set a PoE controller configuration.
 typedef mesa_rc (*meba_poe_ctrl_cfg_set_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        meba_poe_global_cfg_t          *cfg);
+    const meba_poe_ctrl_inst_t     *const inst,
+    meba_poe_global_cfg_t          *cfg);
 
 // Get PoE controller status.
 typedef mesa_rc (*meba_poe_ctrl_status_get_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        meba_poe_status_t              *status);
+    const meba_poe_ctrl_inst_t     *const inst,
+    meba_poe_status_t              *status);
 
 
 // Get PoE controller capabilities.
 // status [OUT] Controller capabilities.
 typedef mesa_rc (*meba_poe_ctrl_capabilities_get_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        meba_poe_ctrl_cap_t            *capabilities);
+    const meba_poe_ctrl_inst_t     *const inst,
+    meba_poe_ctrl_cap_t            *capabilities);
 
 // Send a reset command to Poe controller.
 typedef mesa_rc (*meba_poe_ctrl_reset_command_t)(
-        const meba_poe_ctrl_inst_t     *const inst);
+    const meba_poe_ctrl_inst_t     *const inst);
 
 // Save PoE controller parameters
 typedef mesa_rc (*meba_poe_ctrl_save_command_t)(
-        const meba_poe_ctrl_inst_t     *const inst);
+    const meba_poe_ctrl_inst_t     *const inst);
 
 // Perform chip detection.
 typedef mesa_rc (*meba_poe_ctrl_do_detection_t)(
-        const meba_poe_ctrl_inst_t     *const inst);
+    const meba_poe_ctrl_inst_t     *const inst);
 
 // This function perform initialization of the controller chip
 // and setting the operatinal mode to default.
@@ -946,22 +941,22 @@ typedef mesa_rc (*meba_poe_ctrl_sync_t)(
 // handle     [IN]  Port handle
 // chip_state [OUT] Chipset detection state.
 typedef mesa_rc (*meba_poe_ctrl_chipset_get_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        meba_poe_port_handle_t          handle,
-        meba_poe_chip_state_t          *chip_state);
+    const meba_poe_ctrl_inst_t     *const inst,
+    meba_poe_port_handle_t          handle,
+    meba_poe_chip_state_t          *chip_state);
 
 // Enable debug traces.
 // trace_buf [OUT] Buffer to receive debug traces
 // buf_size  [IN]  Size of buffer.
 typedef mesa_rc (*meba_poe_ctrl_debug_t)(
-        const meba_poe_ctrl_inst_t     *const inst,
-        char                            *var,
-        uint32_t                        str_len,
-        char                            *title ,
-        char                            *tx_str ,
-        char                            *rx_str ,
-        char                            *msg,
-        int                             max_msg_len);
+    const meba_poe_ctrl_inst_t     *const inst,
+    char                            *var,
+    uint32_t                        str_len,
+    char                            *title,
+    char                            *tx_str,
+    char                            *rx_str,
+    char                            *msg,
+    int                             max_msg_len);
 
 // Get PoE port capabilities
 // handle        [IN]  Port handle

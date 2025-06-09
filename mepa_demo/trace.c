@@ -210,6 +210,7 @@ void mscc_phy_vtrace_printf(mepa_trace_group_t group,
                             mepa_trace_level_t level,
                             const char *location,
                             uint32_t line,
+                            const char *file,
                             const char *format,
                             va_list args)
 {
@@ -225,7 +226,7 @@ void mscc_phy_vtrace_printf(mepa_trace_group_t group,
            level > MEPA_TRACE_LVL_NOISE ? MESA_TRACE_LEVEL_DEBUG :
            MESA_TRACE_LEVEL_NOISE);
     if (trace_groups_cil[grp].level >= lvl) {
-        mesa_callout_trace_printf(layer, grp, lvl, "x.c", line, location, format, args);
+        mesa_callout_trace_printf(layer, grp, lvl, (file != NULL) ? file : "x.c", line, location, format, args);
     }
 }
 
@@ -233,20 +234,21 @@ void mscc_phy_trace_printf(mepa_trace_group_t group,
                            mepa_trace_level_t level,
                            const char *location,
                            uint32_t line,
+                           const char *file,
                            const char *format,
                            ...)
 {
     va_list args;
 
     va_start(args, format);
-    mscc_phy_vtrace_printf(group, level, location, line, format, args);
+    mscc_phy_vtrace_printf(group, level, location, line, file, format, args);
     va_end(args);
 }
 
 void mscc_mepa_trace_printf(const mepa_trace_data_t *data,
                             va_list                  args)
 {
-    mscc_phy_vtrace_printf(data->group, data->level, data->location, data->line,
+    mscc_phy_vtrace_printf(data->group, data->level, data->location, data->line, data->file,
                            data->format, args);
 }
 

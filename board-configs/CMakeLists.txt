@@ -6,13 +6,14 @@ project(meba)
 cmake_minimum_required(VERSION 3.5)
 
 include_directories(include)
-include_directories(../mesa/include)
-include_directories(../include)
 include_directories(./src)
 include_directories(./src/drivers)
 include_directories(../mepa/vtss/include)
+include_directories(../mepa/common/include)
 include_directories(../me/include)
 include_directories(../mepa_demo)
+include_directories(../mepa/microchip/lan80xx/include/microchip)
+
 option(BUILD_BOARD_CFG_ALL "Build all Board Config layers" OFF)
 mark_as_advanced(BUILD_BOARD_CFG_ALL)
 
@@ -104,10 +105,12 @@ macro(MEBA_LIB)
 endmacro()
 
 MEBA_LIB(LIB_NAME sparx5 MEBA_SRC_FOLDER sparx5
-         STATIC_DEPENDENCIES    mepa_sparx5)
+         STATIC_DEPENDENCIES    mepa_sparx5
+	 MEBA_DEFINES           -DMEPA_DEMO_EDSx)
 
 MEBA_LIB(LIB_NAME sparx5_macsec MEBA_SRC_FOLDER sparx5
-         STATIC_DEPENDENCIES    mepa_sparx5_macsec)
+         STATIC_DEPENDENCIES    mepa_sparx5_macsec
+	 MEBA_DEFINES           -DMEPA_DEMO_EDSx)
 
 MEBA_LIB(LIB_NAME sparx5_bringup MEBA_SRC_FOLDER sparx5
          STATIC_DEPENDENCIES    mepa_sparx5_bringup)

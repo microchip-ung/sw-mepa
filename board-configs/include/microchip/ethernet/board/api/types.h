@@ -91,6 +91,9 @@ typedef mesa_port_admin_state_t meba_port_admin_state_t;
 // is between 4 x QSGMII <--> 1 x SFI
 #define MEBA_PORT_CAP_DYNAMIC           0x400000000
 
+/* 25G Capable PHY */
+#define MEBA_PORT_CAP_25G_PHY           0x800000000
+
 #define MEBA_PORT_CAP_HDX        \
         (MEBA_PORT_CAP_10M_HDX | \
          MEBA_PORT_CAP_100M_HDX)
@@ -488,9 +491,9 @@ typedef mesa_rc (*meba_clock_event_enable_t)(struct meba_inst *inst,
 // chip_irq        [IN] Chip interrupt which triggered
 // signal_notifier [IN] Function to deliver decoded interrupts to
 typedef mesa_rc (*meba_clock_irq_handler_t)(
-        struct meba_inst *inst,
-        mesa_irq_t chip_irq,
-        meba_event_signal_t signal_notifier);
+    struct meba_inst *inst,
+    mesa_irq_t chip_irq,
+    meba_event_signal_t signal_notifier);
 
 
 typedef mesa_rc (*mepa_spi_32bit_read_write_t)(void *chip_id,
@@ -519,7 +522,7 @@ typedef struct {
     mepa_trace_func_t trace;
 } meba_board_interface_t;
 
- // INTERIM board enum - will be deleted eventually
+// INTERIM board enum - will be deleted eventually
 typedef enum {
     VTSS_BOARD_UNKNOWN = 0,
     // 1-3 is obsolete

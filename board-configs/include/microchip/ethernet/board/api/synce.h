@@ -296,15 +296,15 @@ typedef mesa_rc (*meba_synce_write_t)(struct meba_inst *inst,
 // buflen       [IN] Number of bytes to transfer
 // tx_data      [IN] Pointer to RX buffer
 typedef mesa_rc (*meba_synce_read_t)(struct meba_inst *inst,
-                                      uint8_t          addr,
-                                      uint32_t         buflen,
-                                      uint8_t         *rx_data);
+                                     uint8_t          addr,
+                                     uint32_t         buflen,
+                                     uint8_t         *rx_data);
 
 // Detect the type of DPLL present in the system (if any)
 // dpll_type    [IN] Pointer to variable used for returning DPLL type
 typedef mesa_rc (*meba_synce_spi_if_get_dpll_type_t)(
-        struct meba_inst *inst,
-        meba_synce_clock_hw_id_t *dpll_type);
+    struct meba_inst *inst,
+    meba_synce_clock_hw_id_t *dpll_type);
 
 // Find the SPI device file corresponding to a particular SPI attached device
 // id           [IN] Pointer to character string holding the name of the SPI

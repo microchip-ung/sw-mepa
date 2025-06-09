@@ -80,6 +80,8 @@ mepa_rc meba_phy_macsec_event_enable_get(meba_inst_t inst, const mepa_port_no_t 
 mepa_rc meba_phy_macsec_event_poll(meba_inst_t inst, const mepa_port_no_t port_no, mepa_macsec_event_t *const ev_mask);
 mepa_rc meba_phy_macsec_event_seq_threshold_set(meba_inst_t inst, const mepa_port_no_t port_no, const uint32_t threshold);
 mepa_rc meba_phy_macsec_event_seq_threshold_get(meba_inst_t inst, const mepa_port_no_t port_no, uint32_t *const threshold);
+mepa_rc meba_phy_macsec_event_xpn_seq_threshold_set(meba_inst_t inst, const mepa_port_no_t port_no, const uint64_t threshold);
+mepa_rc meba_phy_macsec_event_xpn_seq_threshold_get(meba_inst_t inst, const mepa_port_no_t port_no, uint64_t *const threshold);
 mepa_rc meba_phy_macsec_egr_intr_sa_get(meba_inst_t inst, const mepa_port_no_t port_no, mepa_macsec_port_t *const port, uint16_t *const an);
 mepa_rc meba_phy_macsec_csr_read(meba_inst_t inst, const mepa_port_no_t port_no, const uint16_t mmd, const uint32_t addr, uint32_t *const value);
 mepa_rc meba_phy_macsec_csr_write(meba_inst_t inst, const mepa_port_no_t port_no, const uint32_t mmd, const uint32_t addr, const uint32_t value);

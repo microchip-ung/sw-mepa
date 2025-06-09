@@ -185,6 +185,21 @@ file(GLOB_RECURSE ALL_SOURCE_FILES
     "${CMAKE_SOURCE_DIR}/board-configs/*.h"
 )
 
+# List of files to exclude from formatting
+list(APPEND EXCLUDED_FILES
+    "${CMAKE_SOURCE_DIR}/mepa/microchip/lan80xx/src/lan80xx_serdes_config.h"
+    "${CMAKE_SOURCE_DIR}/mepa/microchip/lan80xx/src/sha256/platform_util.h"
+    "${CMAKE_SOURCE_DIR}/mepa/microchip/lan80xx/src/sha256/sha256.c"
+    "${CMAKE_SOURCE_DIR}/mepa/microchip/lan80xx/src/sha256/sha256.h"
+    "${CMAKE_SOURCE_DIR}/mepa/microchip/lan80xx/src/sha256/sha256_config.h"
+)
+
+# Remove excluded files from ALL_SOURCE_FILES list
+foreach(EXCLUDED_FILE ${EXCLUDED_FILES})
+    message(STATUS "Excluding file: ${EXCLUDED_FILE}")  # Print the excluded file
+    list(REMOVE_ITEM ALL_SOURCE_FILES ${EXCLUDED_FILE})
+endforeach()
+
 # Add a format target using your custom AStyle config
 add_custom_target(format
     COMMAND astyle --options=${CMAKE_SOURCE_DIR}/.cmake/astyle ${ALL_SOURCE_FILES}
@@ -224,7 +239,8 @@ macro(API_TARGET)
 
   if (${BUILD_SHARED_LIBS})
       add_library(${A_LIB} SHARED ${API_UNI_SRC} ${API_MESA_SRC})
-      target_compile_options(${A_LIB} PUBLIC ${DEFS})
+      target_compile_options(${A_LIB} PUBLIC ${DEFS}
+                                      PRIVATE -Wno-logical-op)
 
       if (${A_LIB})
           message(STATUS "Adding ${A_LIB} (${A_CHIP}) MESA=${has_mesa} Defines: [${DEFS}]")
@@ -237,7 +253,7 @@ macro(API_TARGET)
   add_library(${A_LIB}_static STATIC ${API_UNI_SRC} ${API_MESA_SRC})
   set_target_properties(${A_LIB}_static PROPERTIES OUTPUT_NAME "${A_LIB}")
   target_compile_options(${A_LIB}_static PUBLIC ${DEFS}
-                                         PRIVATE -Wno-format-security -Wno-sign-compare -Wno-type-limits -Wno-implicit-fallthrough -Wno-array-parameter -Wno-enum-conversion)
+	                                 PRIVATE -Wno-format-security -Wno-sign-compare -Wno-type-limits -Wno-implicit-fallthrough -Wno-array-parameter -Wno-enum-conversion -Wno-logical-op)
 
   if (${A_LIB}_static)
       message(STATUS "Adding ${A_LIB}_static (${A_CHIP}) MESA=${has_mesa} Defines: [${DEFS}]")

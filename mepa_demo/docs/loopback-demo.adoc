@@ -31,7 +31,8 @@ with help of following Command.
 
 The configuration is transmitted to the designated port from the JSON file specified by filename.
 This file contains the structures `mepa_loopback_t` and `vtss_phy_10g_loopback_t` in JSON format.
-The JSON string must begin with the JSON object "1gconfig" for 1G PHY's and "10g_config" for VSC8258 PHY.
+The JSON string must begin with the JSON object "1gconfig" for 1G PHY's, "10g_config" for VSC8258 PHY
+and "25g_config" for 25G PHY.
 
 User must enable any one of the loopback configuration for the respective PHY.
 

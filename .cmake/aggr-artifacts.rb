@@ -81,7 +81,31 @@ else
     git_branch = %x(git symbolic-ref --short -q HEAD).chop
 end
 
-out_name = "mepa-#{git_id}@#{git_branch}"
+report_name = "static-analysis-report-#{git_id}-#{git_branch}"
+
+if File.exist? "#{report_name}"
+    run "rm -rf #{report_name}"
+end
+
+sys "mkdir #{report_name}"
+
+sys "cp -r static_analysis_reports/* #{report_name}"
+
+cmd = [".cmake/artifactory-ci-upload"]
+cmd << "-vvv"
+cmd << "--dep-file .cmake/deps-bsp.json"
+cmd << "--dep-file .cmake/deps-docker.json"
+cmd << "--dep-file .cmake/deps-toolchain.json"
+cmd << report_name
+
+sys cmd.join(" ")
+
+run "cp -r #{report_name} images/." if File.exist? "./images"
+
+run "rm -rf #{report_name}"
+
+
+out_name = "mepa-#{git_id}-#{git_branch}"
 
 raise "No ws folder" if not File.exist? "./ws"
 
@@ -95,6 +119,7 @@ run "tar -czvf #{out_name}.tar.gz #{out_name}"
 
 if File.exist? "./images"
   sys "cp #{out_name}/bin/arm64/mepa_demo/*.itb images/."
+  sys "cp #{out_name}/bin/arm64/mepa_demo/*.ext4.gz images/."
 end
 
 run "rm -rf #{out_name}"

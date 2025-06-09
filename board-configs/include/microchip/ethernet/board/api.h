@@ -21,9 +21,9 @@
 
 
 typedef struct {
-  uint8_t poe_12c0;
-  uint8_t poe_12c1;
-}meba_poe_i2c_tags_t;
+    uint8_t poe_12c0;
+    uint8_t poe_12c1;
+} meba_poe_i2c_tags_t;
 
 
 /** \brief Board instance struct */
@@ -72,8 +72,8 @@ struct meba_inst {
  * \return The board instance (or NULL)
  **/
 typedef struct meba_inst *(*meba_initialize_t)(
-        size_t callouts_size,
-        const meba_board_interface_t *callouts);
+    size_t callouts_size,
+    const meba_board_interface_t *callouts);
 
 /**
  * \brief Initialize board instance (used for static linking)

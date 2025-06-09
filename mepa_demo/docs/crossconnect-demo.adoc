@@ -24,15 +24,22 @@ Refer Section link:#mepa_demo/docs/getting-started[Getting-Started] to
 know about the procedure to run 'mepa-demo' Application.
 
 Once 'mepa-demo' application is started then we can run the Cross connect Demo Application
-with help of following Command.
+with help of following Commands
+
+    * Hostfailover
+    * Xconnectfailover_conf_get
+    * Hostfailover recovery
+    * Anylinetoanyhost
+
+=== HostFailover
 
     mepa-cmd Xconnect_failover <port_no> -f <file_name>
 
 The configuration is transmitted to the designated port from the JSON file specified by filename.
-This file contains the structure `vtss_phy_10g_auto_failover_conf_t` in JSON format.
-The JSON string must begin with the JSON object "phy_m10g" for VSC8258 PHY.
+This file contains the structure `vtss_phy_10g_auto_failover_conf_t` and `phy25g_autofailover_t` in JSON format.
+The JSON string must begin with the JSON object "phy_m10g" for VSC8258 PHY and "phy_m25g" for LAN80XX PHY.
 
-To List the all available arguments in the Cross connect Demo Application run the below mentioned command.
+To List the all available arguments in the Cross connect Failover Demo Application run the below mentioned command.
 
 ----
 # mepa-cmd Xconnect_failover ?
@@ -53,7 +60,7 @@ filename       :  filename)
 
 ----
 
-== Example for Cross connect
+==== Example for Cross connect
 
 Below is the example of cross connect demo application running on EDSx Switch with VSC8258 PHY. 
 Mapping of Line port 0 to Hostport 1 and Vice versa. 
@@ -141,4 +148,140 @@ Rx Fragments:                        0
 Rx Jabbers:                          0
 Rx Filtered:                         0
 
+----
+
+Below is the example of cross connect demo application running on EDSx Switch with LAN80XX PHY.
+Hostport0 (Port 4) as default active and Hostport1 (Port 3) as standby state in 1:1 Host protection with Non-reversion mode.
+
+Cross connect configuration for port 4 in xconnect_config.json JSON file.
+
+HOSTPORT 0
+----
+ "phy_m25g": {
+    "enable": 1,
+    "src_event": 0,
+    "mode": "LAN80XX_AUTO_FAILOVER_1_ISTO_1_PROTECTION",
+    "role": "LAN80XX_WPS_PHY_ROLE",
+    "is_mac_change": 0,
+    "reversion": 0,
+    "filter_ena": 0,
+    "assert_filter_val": 0,
+    "deassert_filter_val": 0,
+    "active_host": "LAN80XX_WPS_0_1_DEFAULT_ACTIVE_H0_H3",
+    "fc_signal_enable": 1,
+    "ack_timer": 0
+   }
+----
+
+Run below command to execute the JSON file.
+
+Note: Port no should be provided based upon the channel ID required. Please refer supported-hw.adoc for
+Port number to channel ID mapping in LAN80XX PHY.
+----
+#mepa-cmd xconnect_failover 4 -f xconnect_config.json
+----
+
+The WPSx_STATUS register will list of status of active and standby Host protection.
+
+Force Failover can be triggered by calling below mentioned command.
+----
+#mepa-cmd 4 xconnect_force_failover
+----
+
+If FC signal is enabled, Failoverin0/1 PIN must asserted to high for switching the standby to active state.
+
+
+It can be verified by transmitting packets from Link partner to Line port 0 of the PHY and vice versa
+using packet tx command. Whether the transmitted packets got received in another host port can be verified
+by using port statistics command.
+
+
+=== Hostfailover recovery
+Recover the PCP from failover and re-establish the connection using either reversion or non-reversion case.
+
+To List the all available arguments in the Hostfailover recovery command run the below mentioned command.
+----
+# mepa-cmd crossconnect_failover_recovery ?
+Description:
+------------
+Xconnect Failover recovery for connection fault detected port.
+
+Syntax:
+-------
+CrossConnect_failover_recovery  <port_no>
+
+Parameters:
+-----------
+<port_no>: Port number or zero
+#
+----
+
+Once the connection fault got cleared for the particular port number, reestablishment of PCP (i.e) standby 
+connection becomes active and active connection becomes standby state in reversion case.
+
+Read WPS STATUS0/1 register for protection state status.
+
+----
+# mepa-cmd cl45_read 4 0x1e 0xf11a
+----
+
+=== Anylinetoanyhost
+Cross-Connect enables any-to-any mapping of user defined four Line Ports to four Host Ports.
+
+To List the all available arguments in the Anylinetoanyhost command run the below mentioned command.
+
+----
+#
+# mepa-cmd crossconnect_AnyLineToAnyHost ?
+Description:
+------------
+Configure any hostports to user defined line ports.
+
+Syntax:
+-------
+CrossConnect_AnyLineToAnyHost <port_no> [enable|disable] <lineport_list>
+
+Parameters:
+-----------
+<port_no>      : Port number or zero
+enable     : Enable
+disable    : Disable
+(default: Show mode)
+<lineport_list>:
+ lineport_list   : List of Lineport numbers maps to Hostport 1,2,3,4
+----
+
+==== Example of Anyline to anyhost
+
+Below is the example of cross connect anyline to anyhost command running on EDSx Switch with LAN80XX PHY (Quad PHY).
+Mapping of Host port 2 to Line port 1 and vice versa.
+
+----
+mepa-cmd CrossConnect_AnyLineToAnyHost 4 enable 2,1,3,4
+----
+
+It can be verified by transmitting packets from Link partner to Line port 1 of the PHY and vice versa
+using packet tx command. Whether the transmitted packets got received in host port 2 can be verified
+by using port statistics command.
+
+=== Xconnectfailover_conf_get
+
+Xconnectfailover_conf_get command is used to list all the configured values of crossconnect failover at
+particular port number.
+
+To List the all available arguments in the xconnectfailover_conf_get command run the below mentioned command.
+----
+# mepa-cmd xconnectfailover_conf_get ?
+Description:
+------------
+Get Xconnect failover for particular port.
+
+Syntax:
+-------
+Xconnectfailover_conf_get  <port_no>
+
+Parameters:
+-----------
+<port_no>: Port number or zero
+#
 ----

@@ -44,29 +44,29 @@ typedef struct {
 
     // prebt - En/Dis support of legacy detection.
     uint8_t indv_mask_prebt_supports_legact_detection_default;
-             
+
     // prebt - en/Dis MESSAGE_READY pin notification.
     uint8_t indv_mask_prebt_message_ready_notify_default;
 
     // prebt - En/Dis Layer 2 PD commands.
     uint8_t indv_mask_prebt_layer2_lldp_enable_default;
 
-    // prebt - accept/ignored Port Priority recived from the PD                               
+    // prebt - accept/ignored Port Priority recived from the PD
     uint8_t indv_mask_prebt_layer2_priority_by_PD_default;
 
-    // prebt - use 4-pair matrix commands.                               
+    // prebt - use 4-pair matrix commands.
     uint8_t indv_mask_prebt_matrix_support_4P_default;
 
     // bt - power higher priority port.
     uint8_t indv_mask_BT_ignore_higher_priority_default;
 
     // bt - expand Resistor detection range up to range to 55 K.
-    uint8_t indv_mask_BT_support_high_res_detection_default;                                             
-                                            
-    // bt - Initialization of the I2C module system after 10 seconds of inactivity.                              
+    uint8_t indv_mask_BT_support_high_res_detection_default;
+
+    // bt - Initialization of the I2C module system after 10 seconds of inactivity.
     uint8_t indv_mask_BT_i2c_restart_enable_default;
 
-    // bt - led stream type       
+    // bt - led stream type
     uint8_t indv_mask_BT_led_stream_type_default;
 
     // bt - HOCPP - high_over Current Pulse Protection
@@ -86,14 +86,14 @@ typedef struct {
 
 
     // -----------  PREBT Power Management mode of operation  ----------------------//
-                                                                              
+
     // Selects the method of calculating total power consumption.
     uint8_t prebt_pm1_default;
 
-    // Selects the power limit at the port (maximum or according to class or predefined). 
+    // Selects the power limit at the port (maximum or according to class or predefined).
     uint8_t prebt_pm2_default;
 
-    // Selects the start condition. (Not recommended for new designs, keep 0x00).                 
+    // Selects the start condition. (Not recommended for new designs, keep 0x00).
     uint8_t prebt_pm3_default;
 } meba_poe_parameters_t;
 
@@ -126,9 +126,9 @@ int meba_pd69200_i2c_adapter_open(const char *filename, uint8_t i2c_addr);
 */
 void meba_pd69200_driver_init(
     meba_poe_ctrl_inst_t       *inst,
-    char const                 *driver_name, 
-    int                         adapter_fd, 
-    meba_poe_ctrl_cap_t         capabilities, 
+    char const                 *driver_name,
+    int                         adapter_fd,
+    meba_poe_ctrl_cap_t         capabilities,
     meba_poe_port_properties_t *port_map,
     uint32_t                    port_map_length,
     meba_poe_psu_input_prob_t   *psu_map,
@@ -155,7 +155,7 @@ void meba_pd69200_driver_init(
 void meba_pd69200bt_driver_init(
     meba_poe_ctrl_inst_t       *inst,
     char const                 *driver_name,
-    int                         adapter_fd, 
+    int                         adapter_fd,
     meba_poe_ctrl_cap_t         capabilities,
     meba_poe_port_properties_t *port_map,
     uint32_t                    port_map_length,

@@ -159,7 +159,7 @@ if ENV['BRANCH_NAME']
 else
     git_branch = %x(git symbolic-ref --short -q HEAD).chop
 end
-out_name = "mepa-#{git_id}@#{git_branch}"
+out_name = "mepa-#{git_id}-#{git_branch}"
 File.open("#{$ws}/.mscc-version", 'w') do |version|
     version.puts(%Q(mepa_sha="#{git_sha}"))
     version.puts(%Q(mepa_id="#{git_id}"))

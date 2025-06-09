@@ -47,6 +47,7 @@ void mscc_phy_vtrace_printf(mepa_trace_group_t group,
                             mepa_trace_level_t level,
                             const char *location,
                             uint32_t line,
+                            const char *file,
                             const char *format,
                             va_list args);
 
@@ -54,6 +55,7 @@ void mscc_phy_trace_printf(mepa_trace_group_t group,
                            mepa_trace_level_t level,
                            const char *location,
                            uint32_t line,
+                           const char *file,
                            const char *format,
                            ...);
 

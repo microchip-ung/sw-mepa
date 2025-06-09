@@ -15,6 +15,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/syscall.h>
+#include <pthread.h>
 
 #include "microchip/ethernet/switch/api.h"
 #include "microchip/ethernet/board/api.h"
@@ -26,15 +27,20 @@
 
 #define ARRSZ(_x_)  (sizeof(_x_) / sizeof((_x_)[0]))
 
+#ifdef MEPA_DEMO_EDSx
+#define I2C_PORT2DEV(p) ((p >= 12 && p <= 15) ? 1 : (p >= 16 && p <= 19) ? 2 : -1)
+#else
 #define I2C_PORT2DEV(p) (100 + p)
+#endif
 
 #define EDSX_PORT_CNT_9 9
 #define EDSX_SLOT1_START_PORT_CNT_9 0
 #define EDSX_SLOT2_START_PORT_CNT_9 4
 
-char *MEPA_RELEASE_VERSION = "v2025.06.04";
+char *MEPA_RELEASE_VERSION = "v2025.06.06";
 
 // Local data
+static int MUTEX_LOCKING = 1; /* Making this zero will not assign Mutex callouts */
 static int LOOP_PORT = -1;
 static int REF_BOARD_PCB = -1;
 static int REF_BOARD_PORT_COUNT = -1;
@@ -64,10 +70,12 @@ static mscc_appl_trace_group_t trace_groups[TRACE_GROUP_CNT] = {
     },
 };
 
+pthread_mutex_t m_lock_unlock;
+mepa_bool_t  thread_locked = 0; /* Global variable to check whether Mutex is locked or Not */
+
 static mscc_appl_init_t appl_init;
 static void init_modules(mscc_appl_init_t *init);
 
-#ifdef DAUGTER_CARD_EEPROM_I2C
 /**
  * Open i2c adapter from user space, return the file descriptor for further i2c read/write.
  * @param[in] adapter_nr zero by default
@@ -90,48 +98,6 @@ static int i2c_adapter_open(int adapter_nr, int i2c_addr)
     }
     return file;
 }
-#endif
-
-/**
- * \brief Function for doing i2c reads from the switch i2c controller
- *
- * \param port_no [IN] Port number
- * \param i2c_addr [IN] I2C device address
- * \param addr [IN]   Register address
- * \param data [OUT]  Pointer the register(s) data value.
- * \param cnt [IN]    Number of registers to read
- *
- * \return Return code.
- **/
-
-static mesa_rc phy_i2c_read(const mesa_port_no_t port_no,
-                            const uint8_t i2c_addr,
-                            const uint8_t addr,
-                            uint8_t *const data,
-                            const uint8_t cnt) 
-{
-     for(uint8_t i=0; i<cnt; i++) {
-         vtss_phy_10g_i2c_read(NULL, port_no, i2c_addr, (data + i));
-
-     } 
-     return MESA_RC_OK;
-
-}
-
-static mesa_rc phy_i2c_write(const mesa_port_no_t port_no,
-                         const uint8_t i2c_addr,
-                         uint8_t *const data,
-                         const uint8_t cnt)
-
-{
-      for(uint8_t i=0; i<cnt; i++) {
-          vtss_phy_10g_i2c_read(NULL, port_no, i2c_addr, (data + i));
-
-      }
-      return MESA_RC_OK;
-}
-
-#ifdef DAUGTER_CARD_EEPROM_I2C
 
 static mesa_rc i2c_read(const mesa_port_no_t port_no,
                         const uint8_t i2c_addr,
@@ -161,7 +127,7 @@ static mesa_rc i2c_read(const mesa_port_no_t port_no,
         /* Transfer the i2c packets to the kernel and verify it worked */
         packets.msgs  = messages;
         packets.nmsgs = ARRSZ(messages);
-        if(ioctl(file, I2C_RDWR, &packets) < 0) {
+        if (ioctl(file, I2C_RDWR, &packets) < 0) {
             T_I("I2C transfer failed: %s, port_no: %u, i2c_addr: %u, addr: %u, cnt: %u", strerror(errno), port_no, i2c_addr, addr, cnt);
         } else {
             rc = MESA_RC_OK;
@@ -174,7 +140,7 @@ static mesa_rc i2c_read(const mesa_port_no_t port_no,
 
 
 /**
- * \brief Function for doing i2c reads from the switch i2c controller
+ * \brief Function for doing i2c write from the switch i2c controller
  *
  * \param port_no [IN] Port number
  * \param i2c_addr [IN] I2C device address
@@ -194,7 +160,7 @@ static mesa_rc i2c_write(const mesa_port_no_t port_no,
         struct i2c_rdwr_ioctl_data packets;
         struct i2c_msg messages[1];
 
-        // Write portion
+	// Write portion
         messages[0].addr  = i2c_addr;
         messages[0].flags = 0;
         messages[0].len   = cnt;
@@ -203,17 +169,16 @@ static mesa_rc i2c_write(const mesa_port_no_t port_no,
         /* Transfer the i2c packets to the kernel and verify it worked */
         packets.msgs  = messages;
         packets.nmsgs = ARRSZ(messages);
-        if(ioctl(file, I2C_RDWR, &packets) < 0) {
+        if (ioctl(file, I2C_RDWR, &packets) < 0) {
             T_I("I2C transfer failed!: %s", strerror(errno));
         } else {
             rc = MESA_RC_OK;
         }
         close(file);
     }
-    T_D("i2c write port %d, addr 0x%x, %d bytes - RC %d", port_no, i2c_addr, cnt, rc);
+    T_I("i2c write port %d, addr 0x%x, %d bytes - RC %d", port_no, i2c_addr, cnt, rc);
     return rc;
 }
-#endif
 
 static mesa_bool_t int_from_str(const char *s, int *res)
 {
@@ -227,7 +192,7 @@ static mesa_bool_t int_from_str(const char *s, int *res)
     memset(local, 0, 5 * sizeof(char));
 
     while (*s) {
-        if(isdigit(*s)) {
+        if (isdigit(*s)) {
             local[i] = *s;
             i++;
         }
@@ -358,7 +323,7 @@ static uint32_t get_fa_port_cnt_default(uint32_t target, uint32_t pcb)
     case MESA_TARGET_7558:
         return  (pcb == 135) ? 57 : 21;
     default:
-        T_E("Unknown target '%x'",target);
+        T_E("Unknown target '%x'", target);
     }
     return 0;
 }
@@ -528,7 +493,7 @@ static mesa_rc board_conf_get(const char *tag, char *buf, size_t bufsize, size_t
         break;
 
     case MESA_CHIP_FAMILY_LAN966X:
-        if (!get_env("pcb",&REF_BOARD_PCB)) {
+        if (!get_env("pcb", &REF_BOARD_PCB)) {
             T_D("using default board type");
         }
         if ((REF_BOARD_PCB / 10) == 8385 || REF_BOARD_PCB == 8385) {
@@ -607,6 +572,14 @@ static void board_debug(meba_trace_level_t level,
     }
 }
 
+void mepa_mutex_init()
+{
+    if (pthread_mutex_init(&m_lock_unlock, NULL) != 0) {
+        T_E("%s", "\nError initializing mutex\n");
+    }
+    return;
+}
+
 /* MESA callouts */
 void mesa_callout_lock(const mesa_api_lock_t *const lock)
 {
@@ -614,6 +587,36 @@ void mesa_callout_lock(const mesa_api_lock_t *const lock)
 
 void mesa_callout_unlock(const mesa_api_lock_t *const lock)
 {
+}
+
+void mepa_callout_lock(const mepa_lock_t *const lock)
+{
+    T_I("\n %s function in %s file atempting for Mutex Lock\n", lock->function, lock->file);
+    if (thread_locked) {
+        T_E("\n Mutex is aldready locked, %s function in %s file atempting for Mutex Lock\n", lock->function, lock->file);
+    }
+    int ec = pthread_mutex_lock(&m_lock_unlock);
+    if (ec != 0) {
+        T_E("\n%s", "Error locking mutex\n");
+        return;
+    }
+    thread_locked = 1;
+    return;
+}
+
+void mepa_callout_unlock(const mepa_lock_t *const lock)
+{
+    T_I("\n %s function in %s file atempting for Mutex Unlock\n", lock->function, lock->file);
+    if (!thread_locked) {
+        T_E("\n Mutex is aldready un-locked, %s function in %s file atempting for Mutex Un-Lock\n", lock->function, lock->file);
+    }
+    int ec = pthread_mutex_unlock(&m_lock_unlock);
+    if (ec != 0) {
+        T_E("\n%s", "Error unlocking mutex\n");
+        return;
+    }
+    thread_locked = 0;
+    return;
 }
 
 static meba_board_interface_t board_info;
@@ -808,13 +811,13 @@ static void cli_cmd_board_dump(cli_req_t *req)
     uint16_t meba_cnt = MEBA_WRAP(meba_capability, appl_init.board_inst, MEBA_CAP_BOARD_PORT_COUNT);
     mesa_bool_t cap_sensor = MEBA_WRAP(meba_capability, appl_init.board_inst, MEBA_CAP_TEMP_SENSORS);
 
-    printf("Board name: %s\n",appl_init.board_inst->props.name);
-    printf("Ref board PCB: %d\n",appl_init.board_inst->props.board_type);
-    printf("API Target: 0x%x\n",appl_init.board_inst->props.target);
+    printf("Board name: %s\n", appl_init.board_inst->props.name);
+    printf("Ref board PCB: %d\n", appl_init.board_inst->props.board_type);
+    printf("API Target: 0x%x\n", appl_init.board_inst->props.target);
     printf("Compiled port count  (mesa): %d\n", mesa_port_cnt(NULL));
     printf("Ref board port count (meba): %d\n", meba_cnt);
     if (cap_sensor && mesa_temp_sensor_get(NULL, &temp_celsius) == MESA_RC_OK) {
-        printf("Chip temperature: %d (C)\n",temp_celsius);
+        printf("Chip temperature: %d (C)\n", temp_celsius);
     }
 }
 
@@ -836,7 +839,7 @@ static void main_cli_init(void)
     int i;
 
     /* Register commands */
-    for (i = 0; i < sizeof(cli_cmd_table)/sizeof(cli_cmd_t); i++) {
+    for (i = 0; i < sizeof(cli_cmd_table) / sizeof(cli_cmd_t); i++) {
         mscc_appl_cli_cmd_reg(&cli_cmd_table[i]);
     }
 }
@@ -907,8 +910,10 @@ static int SPI_REG_IO_SLOT2 = 0;
 
 static int  SPI_REG_IO = 0;
 static char SPI_DEVICE[512];
-static int  SPI_PAD = 0;
-static int  SPI_FREQ = 2000000;
+#define SPI_PADDING_MAX 15                 /* Maximum number of optional padding bytes */
+/* SPI_PAD max value shall be SPI_PADDING_MAX*/
+static int  SPI_PAD = 1;
+static int  SPI_FREQ = 8000000;
 static mesa_rc spidev_opt(char *parm)
 {
     char *s_pad, *s_freq;
@@ -919,6 +924,7 @@ static mesa_rc spidev_opt(char *parm)
         *s_pad = 0;
         s_pad++;
         SPI_PAD = atoi(s_pad);
+        SPI_PAD = (SPI_PAD > SPI_PADDING_MAX) ? SPI_PADDING_MAX : SPI_PAD;
 
         s_freq = strchr(s_pad, '@');
 
@@ -931,10 +937,11 @@ static mesa_rc spidev_opt(char *parm)
 
     strncpy(SPI_DEVICE, parm, sizeof(SPI_DEVICE));
     SPI_DEVICE[sizeof(SPI_DEVICE) - 1] = 0;
-    if(!strcmp(SPI_DEVICE ,"/dev/spidev0.1"))
+    if (!strcmp(SPI_DEVICE , "/dev/spidev0.1")) {
         SPI_REG_IO_SLOT1 = 1;
-    else if(!strcmp(SPI_DEVICE, "/dev/spidev0.2"))
+    } else if (!strcmp(SPI_DEVICE, "/dev/spidev0.2")) {
         SPI_REG_IO_SLOT2 = 1;
+    }
 
     printf("Using SPI device: %s with %d padding byte%s at %d Hz\n",
            SPI_DEVICE, SPI_PAD, (SPI_PAD == 0) ? "0" : "s", SPI_FREQ);
@@ -1021,6 +1028,13 @@ static void init_modules(mscc_appl_init_t *init)
     mscc_appl_phy_loopback_init(init);
     mscc_appl_phy_xconnect(init);
     mscc_appl_phy_diagnostics_demo(init);
+    mscc_appl_phy_restart(init);
+    mscc_appl_phy_kr_init(init);
+    mepa_demo_appl_ts_demo(init);
+#ifdef MEPA_HAS_LAN80XX
+    mscc_appl_m25gdiag_demo(init);
+    mscc_appl_mcu_fw_init(init);
+#endif
 }
 
 typedef struct {
@@ -1090,7 +1104,7 @@ static mesa_rc serdes_tap_get(const mesa_inst_t inst, mesa_port_no_t port_no,
 
 mesa_bool_t poll_cnt_us(uint32_t sleep_us, uint32_t *poll_cnt, uint32_t wait_usec)
 {
-    if ((sleep_us * *poll_cnt) % wait_usec == 0) {
+    if ((sleep_us **poll_cnt) % wait_usec == 0) {
         return 1;
     }
     if (*poll_cnt > 10000) {
@@ -1099,6 +1113,9 @@ mesa_bool_t poll_cnt_us(uint32_t sleep_us, uint32_t *poll_cnt, uint32_t wait_use
     return 0;
 }
 
+#define DEVICE_ID_REG_GLB_MMD   0x1E
+#define DEVICE_ID_REG_ADDR      0x0
+
 mesa_rc mepa_spi_reg_read_write (void *chip,
                                  mepa_port_no_t port_no,
                                  mepa_bool_t           read,
@@ -1106,7 +1123,7 @@ mesa_rc mepa_spi_reg_read_write (void *chip,
                                  uint16_t            reg_num,
                                  uint32_t            *const data)
 {
-    uint32_t addr = 0, ch_no = 0;
+    uint32_t addr = 0, dummy_addr = 0, ch_no = 0;
     uint32_t slot1_start = EDSX_25G_SLOT1_START;
     uint32_t slot1_end = EDSX_25G_SLOT1_END;
     uint32_t slot2_start = EDSX_25G_SLOT2_START;
@@ -1114,33 +1131,33 @@ mesa_rc mepa_spi_reg_read_write (void *chip,
 
     uint32_t port_cnt = MEBA_WRAP(meba_capability, appl_init.board_inst, MEBA_CAP_BOARD_PORT_MAP_COUNT);
     /* SFP Slots Port Numbers when EDSX Port Count is 9 */
-    if(port_cnt == EDSX_PORT_CNT_9) {
+    if (port_cnt == EDSX_PORT_CNT_9) {
         slot1_start = EDSX_SLOT1_START_PORT_CNT_9;
         slot1_end = EDSX_SLOT1_START_PORT_CNT_9 + 3;
         slot2_start =  EDSX_SLOT2_START_PORT_CNT_9;
         slot2_end = EDSX_SLOT2_START_PORT_CNT_9 + 3;
     }
 
-    if((port_no >= slot1_start && port_no <= slot1_end) ) {
+    if ((port_no >= slot1_start && port_no <= slot1_end) ) {
         ch_no = (slot1_end - port_no);
-        if(read){
+        if (read) {
             addr = ch_no << 21 | dev << 16 | reg_num;
+            dummy_addr = ch_no << 21 | DEVICE_ID_REG_GLB_MMD << 16 | DEVICE_ID_REG_ADDR;
             spi_read(SPI_USER_REG, addr, data);
-            spi_read(SPI_USER_REG, addr, data);
-        }
-        else if (data != NULL){
+            spi_read(SPI_USER_REG, dummy_addr, data);
+        } else if (data != NULL) {
             addr = 1 << 23 | ch_no << 21 | dev << 16 | reg_num;
-            spi_write(SPI_USER_REG, addr, *data); 
+            spi_write(SPI_USER_REG, addr, *data);
         }
     }
-    if((port_no >= slot2_start && port_no <= slot2_end)) {
+    if ((port_no >= slot2_start && port_no <= slot2_end)) {
         ch_no = (slot2_end - port_no);
-        if(read){
+        if (read) {
             addr = ch_no << 21 | dev << 16 | reg_num;
+            dummy_addr = ch_no << 21 | DEVICE_ID_REG_GLB_MMD << 16 | DEVICE_ID_REG_ADDR;
             spi_read(SPI_USER_FPGA, addr, data);
-            spi_read(SPI_USER_FPGA, addr, data);
-        }
-        else {
+            spi_read(SPI_USER_FPGA, dummy_addr, data);
+        } else {
             addr = 1 << 23 | ch_no << 21 | dev << 16 | reg_num;
             spi_write(SPI_USER_FPGA, addr, *data);
         }
@@ -1148,22 +1165,24 @@ mesa_rc mepa_spi_reg_read_write (void *chip,
     return MESA_RC_OK;
 
 }
-  
-mesa_rc mepa_phy_spi_read (struct mepa_callout_ctx *ctx,
-                            mepa_port_no_t port_no,
-                            uint8_t             dev,
-                            uint16_t            reg_num,
-                            uint32_t            *const data){
 
-     return mepa_spi_reg_read_write(ctx, port_no, 1, dev, reg_num, data);
+mesa_rc mepa_phy_spi_read (struct mepa_callout_ctx *ctx,
+                           mepa_port_no_t port_no,
+                           uint8_t             dev,
+                           uint16_t            reg_num,
+                           uint32_t            *const data)
+{
+
+    return mepa_spi_reg_read_write(ctx, port_no, 1, dev, reg_num, data);
 }
 
 mesa_rc mepa_phy_spi_write (struct mepa_callout_ctx *ctx,
                             mepa_port_no_t port_no,
                             uint8_t             dev,
                             uint16_t            reg_num,
-                            uint32_t            *const data){
-     return mepa_spi_reg_read_write(ctx, port_no, 0, dev, reg_num, data);
+                            uint32_t            *const data)
+{
+    return mepa_spi_reg_read_write(ctx, port_no, 0, dev, reg_num, data);
 }
 
 #if 0
@@ -1171,21 +1190,23 @@ mesa_rc mepa_spi2_spi_read (struct mepa_callout_ctx *ctx,
                             mepa_port_no_t port_no,
                             uint8_t             dev,
                             uint16_t            reg_num,
-                            uint32_t            *const data){
-     return mepa_spi2_reg_read_write(ctx, port_no, 1, dev, reg_num, data);
+                            uint32_t            *const data)
+{
+    return mepa_spi2_reg_read_write(ctx, port_no, 1, dev, reg_num, data);
 }
 
 mesa_rc mepa_spi2_spi_write (struct mepa_callout_ctx *ctx,
-                            mepa_port_no_t port_no,
-                            uint8_t             dev,
-                            uint16_t            reg_num,
-                            uint32_t            *const data){
-     return mepa_spi2_reg_read_write(ctx, port_no, 0, dev, reg_num, data);
+                             mepa_port_no_t port_no,
+                             uint8_t             dev,
+                             uint16_t            reg_num,
+                             uint32_t            *const data)
+{
+    return mepa_spi2_reg_read_write(ctx, port_no, 0, dev, reg_num, data);
 }
 
 #endif
 
- 
+
 int main(int argc, char **argv)
 {
     mesa_rc            rc;
@@ -1247,7 +1268,7 @@ int main(int argc, char **argv)
 
     memset(&board_info, 0, sizeof(board_info));
     if (SPI_REG_IO_SLOT1) {
-        rc = spi_io_init(SPI_USER_REG, "/dev/spidev0.1",SPI_FREQ, SPI_PAD);
+        rc = spi_io_init(SPI_USER_REG, "/dev/spidev0.1", SPI_FREQ, SPI_PAD);
         board_info.mepa_spi_slot1_reg_read = mepa_phy_spi_read;
         board_info.mepa_spi_slot1_reg_write = mepa_phy_spi_write;
     }
@@ -1261,7 +1282,7 @@ int main(int argc, char **argv)
         reg_read = uio_reg_read;
         reg_write = uio_reg_write;
     }
-    
+
     if (rc != MESA_RC_OK) {
         return 1;
     }
@@ -1282,8 +1303,8 @@ int main(int argc, char **argv)
     // Initialize MEBA
     board_info.reg_read = reg_read;
     board_info.reg_write = reg_write;
-    board_info.i2c_read = phy_i2c_read;
-    board_info.i2c_write = phy_i2c_write;
+    board_info.i2c_read = i2c_read;
+    board_info.i2c_write = i2c_write;
     board_info.conf_get = board_conf_get;
     board_info.debug = board_debug;
     board_info.trace = mscc_mepa_trace_printf;
@@ -1309,6 +1330,12 @@ int main(int argc, char **argv)
     if (SPI_REG_IO_SLOT2) {
         init->board_inst->iface.mepa_spi_slot2_reg_read = mepa_phy_spi_read;
         init->board_inst->iface.mepa_spi_slot2_reg_write = mepa_phy_spi_write;
+    }
+
+    if (MUTEX_LOCKING) {
+        mepa_mutex_init();
+        init->board_inst->iface.lock_enter = mepa_callout_lock;
+        init->board_inst->iface.lock_exit = mepa_callout_unlock;
     }
 
 
@@ -1342,8 +1369,8 @@ int main(int argc, char **argv)
 #ifdef MEPA_DEMO_EDSx
 #define CPU_REGS_GENERAL_CTRL_IF_SI2_ENA (0x22) // Enable interface mode for SPI2 GPIOs.
 #define IF_SI2_ENA (1 << 2)
-    uint32_t val=0;
-    if(mesa_reg_read(NULL, 0, CPU_REGS_GENERAL_CTRL_IF_SI2_ENA, &val) != MESA_RC_OK) {
+    uint32_t val = 0;
+    if (mesa_reg_read(NULL, 0, CPU_REGS_GENERAL_CTRL_IF_SI2_ENA, &val) != MESA_RC_OK) {
         T_E(" SI2 enabled failed with mesa_reg_read()");
         return 1;
     }
@@ -1436,10 +1463,10 @@ int main(int argc, char **argv)
             init->cmd = MSCC_INIT_CMD_POLL_FAST;
             init_modules(init);
         }
-       // if (SPI_REG_IO_MEPA) {
-       //     mepa_spi_reg_read_write (NULL, 12, 1, 0x1,0xf000, &data);
-       //     cli_printf("SPI read %x\n", data);
-       // }
+        // if (SPI_REG_IO_MEPA) {
+        //     mepa_spi_reg_read_write (NULL, 12, 1, 0x1,0xf000, &data);
+        //     cli_printf("SPI read %x\n", data);
+        // }
     }
 
     return 0;

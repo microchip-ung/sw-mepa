@@ -39,7 +39,7 @@ load this binary images to EDSx Board. `XXX` referrs to `TSN` or `MSEC`.
 whereas `MSEC` binary images has both PTP and MACsec MEPA API support along with all other features supported in PHY.
 
 NOTE: If you Already have the Build image for EDS2 `armv7_lan966x.itb` or
-`armv7_lan966x.ext4.gz`, then you can directly Skip to Section 7 to know how to
+`armv7_lan966x.ext4.gz`, then you can directly Skip to Section 6 to know how to
 load the Binary Images to EDS2 Board.
 
 === Installing basic SW dependencies

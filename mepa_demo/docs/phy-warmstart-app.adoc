@@ -1,0 +1,45 @@
+// Copyright (c) 2004-2020 Microchip Technology Inc. and its subsidiaries.
+// SPDX-License-Identifier: MIT
+
+= PHY WarmStart Demo Application
+
+== PHY WarmStart Demo Application Description
+The purpose of a warmstart is to allow CPU restart/failover without affecting the traffic flow (High Availability).
+The following are the example use cases for the warm start feature.
+    * Explicit warm start requested by the system administrator
+    * Warm start done after upgrading the system software
+    * Warm start done due to failoverto another CPU system
+
+== Directory
+* `./mepa_demo/mepa_apps/phy_warmstart_demo.c` - Source File for Warm start Demo Application
+
+== Prerequisites
+Warm Start Demo Application to run on EDSx Platform User needs to flash `.ext4` image on 
+eMMC flash, the application will not work with `.itb` image because it doesn't have the Linux File System.
+To store and load back phy data we use JSON file format in Linux File System.
+
+
+== Procedure to Execute Warm Start Demo Application
+To Run Warm Start Demo Application the 'mepa-demo-edsx' application needs to be running.
+Refer Section link:#mepa_demo/docs/getting-started[Getting-Started] to know about the procedure 
+to run 'mepa-demo-edsx' Application.
+
+Once 'mepa-demo-edsx' application is started the Warm start can be enabled with the command
+'mepa-cmd phy warmstart enable'.
+
+----
+#mepa-cmd phy warmstart enable 
+----
+
+The above command is used to enable Warmstart for connected M25G PHYs
+
+----
+#mepa-cmd phy warmstart perform 
+----
+
+The above command demonstrates the process of performing a warm start on a PHY device. 
+When executed, this command will back up all the current PHY configurations and store them 
+in a file located at /root/mepa_scripts/phy_data_ws.json. It will then proceed to destroy the 
+existing PHY instance, recreate a new PHY instance, and subsequently reload the saved configurations 
+from the phy_data_ws.json file. This entire process is designed to be seamless, ensuring that 
+network traffic remains unaffected throughout the operation.

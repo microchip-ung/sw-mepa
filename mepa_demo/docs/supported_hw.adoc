@@ -14,7 +14,26 @@ Switches.
 |===
 | PHY       | SKU     | Host Interface
 | Malibu10G | VSC8258 | SFI
+| Malibu25G | LAN80XX | SFI
 |===
+
+Below diagram illustrates the port number to channel ID mapping in LAN80XX PHY.
+
+[ditaa]
+....
+        +---------------+                     +---------------+
+        |             1 |                     | 3             |
+        |             2 |                     | 2             |
+        | Slot1 Ports 3 | ------------------->| 1 Channel ID  |
+        |             4 |                     | 0             |
+ EDSX	+---------------+                     +---------------+  LAN80XX
+        |             5 |                     | 3             |
+        |             6 |                     | 2             |
+        | Slot2 Ports 7 | ------------------->| 1 Channel ID  |
+        |             8 |                     | 0             |
+        +---------------+                     +---------------+
+
+....
 
 === EDS2 Supported PHYs
 

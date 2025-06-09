@@ -120,9 +120,9 @@ typedef mesa_rc (*meba_sfp_status_get_t)(struct meba_inst *inst,
 // port_no   [IN] The port number to configure.
 // state     [IN] The new port state
 typedef mesa_rc (*meba_port_admin_state_set_t)(
-        struct meba_inst *inst,
-        mesa_port_no_t port_no,
-        const meba_port_admin_state_t *state);
+    struct meba_inst *inst,
+    mesa_port_no_t port_no,
+    const meba_port_admin_state_t *state);
 
 // Update a status LED according to provided data.
 // type      [IN] The LED type.

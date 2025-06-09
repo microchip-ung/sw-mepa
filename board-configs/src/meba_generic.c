@@ -10,31 +10,31 @@
 mesa_ptp_event_type_t meba_generic_ptp_source_to_event(meba_inst_t inst, meba_event_t event_id)
 {
     switch (event_id) {
-        case MEBA_EVENT_SYNC:
-            return MESA_PTP_SYNC_EV;
-        case MEBA_EVENT_EXT_SYNC:
-            return MESA_PTP_EXT_SYNC_EV;
-        case MEBA_EVENT_EXT_1_SYNC:
-            return MESA_PTP_EXT_1_SYNC_EV;
-        case MEBA_EVENT_CLK_ADJ:
-            return MESA_PTP_CLK_ADJ_EV;
-        case MEBA_EVENT_CLK_TSTAMP:
-            return MESA_PTP_TX_TSTAMP_EV;
-        case MEBA_EVENT_PTP_PIN_0:
-            return MESA_PTP_PIN_0_SYNC_EV;
-        case MEBA_EVENT_PTP_PIN_1:
-            return MESA_PTP_PIN_1_SYNC_EV;
-        case MEBA_EVENT_PTP_PIN_2:
-            return MESA_PTP_PIN_2_SYNC_EV;
-        case MEBA_EVENT_PTP_PIN_3:
-            return MESA_PTP_PIN_3_SYNC_EV;
-        case MEBA_EVENT_PTP_PIN_4:
-            return MESA_PTP_PIN_4_SYNC_EV;
-        case MEBA_EVENT_PTP_PIN_5:
-            return MESA_PTP_PIN_5_SYNC_EV;
-        default:
-            T_E(inst, "Unknown event %d", event_id);
-            MEBA_ASSERT(0);
+    case MEBA_EVENT_SYNC:
+        return MESA_PTP_SYNC_EV;
+    case MEBA_EVENT_EXT_SYNC:
+        return MESA_PTP_EXT_SYNC_EV;
+    case MEBA_EVENT_EXT_1_SYNC:
+        return MESA_PTP_EXT_1_SYNC_EV;
+    case MEBA_EVENT_CLK_ADJ:
+        return MESA_PTP_CLK_ADJ_EV;
+    case MEBA_EVENT_CLK_TSTAMP:
+        return MESA_PTP_TX_TSTAMP_EV;
+    case MEBA_EVENT_PTP_PIN_0:
+        return MESA_PTP_PIN_0_SYNC_EV;
+    case MEBA_EVENT_PTP_PIN_1:
+        return MESA_PTP_PIN_1_SYNC_EV;
+    case MEBA_EVENT_PTP_PIN_2:
+        return MESA_PTP_PIN_2_SYNC_EV;
+    case MEBA_EVENT_PTP_PIN_3:
+        return MESA_PTP_PIN_3_SYNC_EV;
+    case MEBA_EVENT_PTP_PIN_4:
+        return MESA_PTP_PIN_4_SYNC_EV;
+    case MEBA_EVENT_PTP_PIN_5:
+        return MESA_PTP_PIN_5_SYNC_EV;
+    default:
+        T_E(inst, "Unknown event %d", event_id);
+        MEBA_ASSERT(0);
 
     }
     return (mesa_ptp_event_type_t)0;
@@ -43,23 +43,23 @@ mesa_ptp_event_type_t meba_generic_ptp_source_to_event(meba_inst_t inst, meba_ev
 mepa_ts_event_t meba_generic_phy_ts_source_to_event(meba_inst_t inst, meba_event_t event_id)
 {
     switch (event_id) {
-        case MEBA_EVENT_INGR_ENGINE_ERR:
-            return MEPA_TS_INGR_ENGINE_ERR;
-        case MEBA_EVENT_INGR_RW_PREAM_ERR:
-            return MEPA_TS_INGR_RW_PREAM_ERR;
-        case MEBA_EVENT_INGR_RW_FCS_ERR:
-            return MEPA_TS_INGR_RW_FCS_ERR;
-        case MEBA_EVENT_EGR_ENGINE_ERR:
-            return MEPA_TS_EGR_ENGINE_ERR;
-        case MEBA_EVENT_EGR_RW_FCS_ERR:
-            return MEPA_TS_EGR_RW_FCS_ERR;
-        case MEBA_EVENT_EGR_TIMESTAMP_CAPTURED:
-            return MEPA_TS_EGR_TIMESTAMP_CAPTURED;
-        case MEBA_EVENT_EGR_FIFO_OVERFLOW:
-            return MEPA_TS_EGR_FIFO_OVERFLOW;
-        default:
-            T_E(inst, "Unknown event %d", event_id);
-            MEBA_ASSERT(0);
+    case MEBA_EVENT_INGR_ENGINE_ERR:
+        return MEPA_TS_INGR_ENGINE_ERR;
+    case MEBA_EVENT_INGR_RW_PREAM_ERR:
+        return MEPA_TS_INGR_RW_PREAM_ERR;
+    case MEBA_EVENT_INGR_RW_FCS_ERR:
+        return MEPA_TS_INGR_RW_FCS_ERR;
+    case MEBA_EVENT_EGR_ENGINE_ERR:
+        return MEPA_TS_EGR_ENGINE_ERR;
+    case MEBA_EVENT_EGR_RW_FCS_ERR:
+        return MEPA_TS_EGR_RW_FCS_ERR;
+    case MEBA_EVENT_EGR_TIMESTAMP_CAPTURED:
+        return MEPA_TS_EGR_TIMESTAMP_CAPTURED;
+    case MEBA_EVENT_EGR_FIFO_OVERFLOW:
+        return MEPA_TS_EGR_FIFO_OVERFLOW;
+    default:
+        T_E(inst, "Unknown event %d", event_id);
+        MEBA_ASSERT(0);
     }
 
     return (mepa_ts_event_t)0;
@@ -287,11 +287,16 @@ static void mem_free(struct mepa_callout_ctx *ctx, void *ptr)
 static mepa_port_interface_t rgmii_id_convert(mepa_port_interface_t interface)
 {
     switch (interface) {
-    case MESA_PORT_INTERFACE_RGMII:      return MESA_PORT_INTERFACE_RGMII_ID;
-    case MESA_PORT_INTERFACE_RGMII_ID:   return MESA_PORT_INTERFACE_RGMII;
-    case MESA_PORT_INTERFACE_RGMII_RXID: return MESA_PORT_INTERFACE_RGMII_TXID;
-    case MESA_PORT_INTERFACE_RGMII_TXID: return MESA_PORT_INTERFACE_RGMII_RXID;
-    default: return interface;
+    case MESA_PORT_INTERFACE_RGMII:
+        return MESA_PORT_INTERFACE_RGMII_ID;
+    case MESA_PORT_INTERFACE_RGMII_ID:
+        return MESA_PORT_INTERFACE_RGMII;
+    case MESA_PORT_INTERFACE_RGMII_RXID:
+        return MESA_PORT_INTERFACE_RGMII_TXID;
+    case MESA_PORT_INTERFACE_RGMII_TXID:
+        return MESA_PORT_INTERFACE_RGMII_RXID;
+    default:
+        return interface;
     }
 }
 void meba_phy_driver_init(meba_inst_t inst)
@@ -324,7 +329,7 @@ void meba_phy_driver_init(meba_inst_t inst)
         // steps during their initialization that require no
         // activity on the MAC interface as it interferes with
         // the calibration.
-        if(port_no >16) {
+        if (port_no > 16) {
             inst->mepa_callout.spi_read_write = NULL;
         }
         if (inst->phy_devices[port_no] != NULL) {

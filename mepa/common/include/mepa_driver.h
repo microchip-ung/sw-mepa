@@ -30,6 +30,7 @@ void MEPA_trace(mepa_trace_group_t  group,
                 mepa_trace_level_t  level,
                 const char         *location,
                 uint32_t            line,
+                const char         *file,
                 const char         *format,
                 ...);
 
@@ -698,7 +699,7 @@ typedef mepa_rc (*mepa_driver_selftest_read_t)(struct mepa_device *dev, mepa_sel
  *   MEPA_RC_NOT_IMPLEMENTED when not supported. \n
  *   MEPA_RC_OK on success.
  **/
-typedef mepa_rc (*mepa_driver_prbs_set_t)(struct mepa_device *dev, mepa_phy_prbs_type_t type, mepa_phy_prbs_direction_t direction, mepa_phy_prbs_generator_conf_t *const prbs_conf);
+typedef mepa_rc (*mepa_driver_prbs_set_t)(struct mepa_device *dev, mepa_phy_prbs_type_t type, mepa_phy_prbs_direction_t direction, const mepa_phy_prbs_generator_conf_t *const prbs_conf);
 
 /**
  * \brief To Get PRBS
@@ -722,7 +723,7 @@ typedef mepa_rc (*mepa_driver_prbs_get_t)(struct mepa_device *dev, mepa_phy_prbs
  *   MEPA_RC_NOT_IMPLEMENTED when not supported. \n
  *   MEPA_RC_OK on success.
  **/
-typedef mepa_rc (*mepa_driver_prbs_monitor_set_t)(struct mepa_device *dev, mepa_phy_prbs_monitor_conf_t *const value);
+typedef mepa_rc (*mepa_driver_prbs_monitor_set_t)(struct mepa_device *dev, const mepa_phy_prbs_monitor_conf_t *const value);
 
 /**
  * \brief To Get  an error status
@@ -962,6 +963,9 @@ mepa_drivers_t mepa_lan887x_driver_init(void);
 
 /** \brief Returns drivers for lan867x PHY */
 mepa_drivers_t mepa_lan867x_driver_init(void);
+
+/** \brief Returns drivers for lan80xx PHY */
+mepa_drivers_t mepa_lan80xx_driver_init();
 
 /** \brief Dummy SW driver */
 mepa_drivers_t mepa_dummy_driver_init();

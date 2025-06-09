@@ -10,5 +10,19 @@
     "enable": 1,
     "filter": "VTSS_PHY_10G_AUTO_FAILOVER_FILTER_NONE",
     "fltr_val": 127
+   },
+ "phy_m25g": {
+    "enable": 1,
+    "src_event": 0,
+    "mode": "LAN80XX_AUTO_FAILOVER_1_PLUS_1_PROTECTION",
+    "role": "LAN80XX_WPS_PHY_ROLE",
+    "is_mac_change": 0,
+    "reversion": 0,
+    "filter_ena": 0,
+    "assert_filter_val": 0,
+    "deassert_filter_val": 0,
+    "active_host": "LAN80XX_WPS_0_1_DEFAULT_ACTIVE_H0_H3",
+    "fc_signal_enable": 1,
+    "ack_timer": 0
    }
 }

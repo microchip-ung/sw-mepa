@@ -862,51 +862,34 @@ char *misc_mem_print(const uint8_t *in_buf, size_t in_sz, char *out_buf, size_t 
     return out_buf;
 }
 
-char sfp_v_name[16];
+uint8_t sfp_v_name[16];
 static void cli_cmd_sfp_phy_read(cli_req_t *req)
 {
-    //uint8_t SFP_V_START = 20;    
-    mesa_port_no_t         uport, iport;
-    mesa_port_status_t     ps;
-    port_entry_t           *entry;
+    mepa_port_no_t         port_no;
     mesa_port_conf_t       conf;
-    for (iport = 0; iport < mesa_port_cnt(NULL); iport++) {
-        uport = iport2uport(iport);
-        entry = &port_table[iport];
-        if (req->port_list[uport] != 0 ) {
-           mesa_port_status_get(NULL, iport, &ps);
-           mesa_port_conf_get(NULL, iport, &conf);
-/*
-           for(int i=0; i< 16; i++) {
-                if(vtss_phy_10g_i2c_read(NULL, uport, SFP_V_START++, &sfp_v_name[i]) != MESA_RC_OK){
-                   cli_printf("10G sfp not found\n");
-                } 
-           }
-*/         meba_sfp_device_info_t info;
-           if (!meba_sfp_device_info_get(meba_global_inst, uport, &info)) {
-                T_E("Port:%u SFP read (i2c) failed", uport);
-                //entry->sfp_device = NULL;
-                return;
-           } 
-           cli_printf("Port(cli)  SFP-type        Known Vendor          Product Name    Rev     SN              Los   API-IF      Speed Link\n");
- 
-           cli_printf("%-10d %-15s %-5s %-15s %-15s %-7s %-15s %-5s %-11s %-5s %-5s\n",
-           uport,
-           mesa_sfp_if2txt(entry->sfp_type),
-           "yes",
-           info.vendor_name,
-           info.vendor_pn ,
-           info.vendor_rev,
-           info.vendor_sn ,
-           entry->sfp_type == MEBA_SFP_TRANSRECEIVER_10G_DAC ||
-           entry->sfp_type == MEBA_SFP_TRANSRECEIVER_25G_DAC ? "-" :
-           entry->sfp_status.los ? "yes" : "no",
-           mesa_port_if2txt(conf.if_type),
-           mesa_port_spd2txt(conf.speed),
-           ps.link ? "yes" : "no"); 
-        }
+    mepa_status_t         status_mepa;
+    port_no = req->port_no;
+    mesa_port_conf_get(NULL, port_no, &conf);
+    
+    meba_sfp_device_info_t info;
+    if (!meba_sfp_device_info_get(meba_global_inst, port_no, &info)) {
+        T_E("Port:%u SFP read (i2c) failed", (req->port_no + 1));
+        return;
     }
-
+    mepa_poll(meba_global_inst->phy_devices[port_no], &status_mepa);
+    cli_printf("Port       SFP-type        Known Vendor          Product Name    Rev     SN              API-IF      Speed Link\n");
+ 
+    cli_printf("%-10d %-15s %-5s %-15s %-15s %-7s %-15s %-11s %-5s %-5s\n",
+               (req->port_no + 1),
+               mesa_sfp_if2txt(info.transceiver),
+               "yes",
+               info.vendor_name,
+               info.vendor_pn ,
+               info.vendor_rev,
+               info.vendor_sn ,
+               mesa_port_if2txt(conf.if_type),
+               mesa_port_spd2txt(conf.speed),
+               status_mepa.link ? "yes" : "no"); 
 }
 
 static void cli_cmd_phy_spi_read(cli_req_t *req)
@@ -1075,8 +1058,9 @@ static void cli_cmd_phy_id(cli_req_t *req)
     for (uint32_t port_no = 0; port_no < mesa_port_cnt(NULL); port_no++) {
         if ((rc = meba_phy_info_get(meba_global_inst, port_no, &phy_id)) == MESA_RC_OK) {
             meba_phy_if_get(meba_global_inst, port_no, 1, &mac_if);
-            sprintf(spd, "%s", phy_id.cap & MEPA_CAP_SPEED_MASK_2G5 ? "2G5" : phy_id.cap & MEPA_CAP_SPEED_MASK_10G ? "10G" : "1G");
-            cli_printf("%-10d %-10d %-10d %-10s %s\n", port_no, phy_id.part_number, phy_id.revision, spd, mesa_port_if2txt(mac_if));
+            sprintf(spd, "%s", phy_id.cap & MEPA_CAP_SPEED_MASK_2G5 ? "2G5" : phy_id.cap & MEPA_CAP_SPEED_MASK_10G ? "10G" :
+                    phy_id.cap & MEPA_CAP_SPEED_MASK_25G ? "25G" : "1G");
+            cli_printf("%-10d %-10d 0x%-8x %-10s %s\n", port_no, phy_id.part_number, phy_id.revision, spd, mesa_port_if2txt(mac_if));
         }
     }
 }
@@ -1477,7 +1461,7 @@ static cli_cmd_t cli_cmd_table[] = {
         cli_cmd_sfp_dump
     },
     {
-        "SFP vendor [<port_list>]",
+        "SFP vendor <port_no>",
         "Shows vendor id SFPs",
         cli_cmd_sfp_phy_read
     },

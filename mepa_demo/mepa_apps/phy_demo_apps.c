@@ -14,13 +14,21 @@
 
 mepa_rc phy_family_detect(meba_inst_t meba_instance, mepa_port_no_t port_no, demo_phy_info_t *phy_info)
 {
-   mepa_rc rc;
-   mepa_phy_info_t phy_info_part;
-   if ((rc = mepa_phy_info_get(meba_instance->phy_devices[port_no], &phy_info_part)) != MEPA_RC_OK) {
+    mepa_rc rc;
+    mepa_phy_info_t phy_info_part;
+    if ((rc = mepa_phy_info_get(meba_instance->phy_devices[port_no], &phy_info_part)) != MEPA_RC_OK) {
         cli_printf(" Error in Getting PHY Info on port : %d\n", port_no);
         return MEPA_RC_ERROR;
     }
-    switch(phy_info_part.part_number) {
+    switch (phy_info_part.part_number) {
+    case PHY_TYPE_8021:
+    case PHY_TYPE_8022:
+    case PHY_TYPE_8041:
+    case PHY_TYPE_8042:
+    case PHY_TYPE_8043:
+    case PHY_TYPE_8044:
+        phy_info->family = PHY_FAMILY_MALIBU_25G;
+        break;
     case PHY_TYPE_8256:
     case PHY_TYPE_8257:
     case PHY_TYPE_8258:
@@ -53,13 +61,13 @@ mepa_rc phy_family_detect(meba_inst_t meba_instance, mepa_port_no_t port_no, dem
 
 mepa_rc mepa_dev_create_check(meba_inst_t meba_instance, mepa_port_no_t port_no)
 {
-    if(!meba_instance->phy_devices[port_no]) {
+    if (!meba_instance->phy_devices[port_no]) {
         return MEPA_RC_ERROR;
     }
     return MEPA_RC_OK;
 }
 
-int atoi_Conversion(const char* strg)
+int atoi_Conversion(const char *strg)
 {
 
     // Initialize res to 0

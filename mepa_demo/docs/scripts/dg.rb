@@ -304,9 +304,9 @@ def process_adoc dir, base, ext, content
             end
 
         when /^(mepa_\w+)$/, /^(mepa_\w+)\([^\)]*\)$/, /^(MEPA_\w+)$/,
-             /^(debug_\w+)$/, /^(debug_\w+)\([^\)]*\)$/,
+             /^(debug_\w+)$/, /^(debug_\w+)\([^\)]*\)$/, /^(lan80xx_\w+)\([^\)]*\)$/, /^(phy_25g_\w+)$/, /^(phy25g_\w+)$/,
              /^(miim_\w+)$/, /^(miim_\w+)\([^\)]*\)$/,
-             /^(mmd_\w+)$/, /^(mmd_\w+)\([^\)]*\)$/, /^(cli_\w+)$/, 
+             /^(mmd_\w+)$/, /^(mmd_\w+)\([^\)]*\)$/, /^(cli_\w+)$/, /^(vtss_\w+)$/,
              /^(port_miim_\w+)$/, /^(port_miim_\w+)\([^\)]*\)$/
             sym = $symbol_index[$1]
             sym_name = $1
@@ -325,7 +325,7 @@ def process_adoc dir, base, ext, content
             end
 
         # Members in structures
-        when /^(mepa_\w+)::(\w+)$/, /^(mepa_\w+)::(\w+)\([^\)]*\)$/,
+        when /^(mepa_\w+)::(\w+)$/, /^(mepa_\w+)::(\w+)\([^\)]*\)$/, /^(vtss_\w+)::(\w+)$/, /^(lan80xx_\w+)::(\w+)$/, /^(phy_25g_\w+)::(\w+)$/, /^(phy25g_\w+)::(\w+)$/,
              /^(mscc_phy_\w+)::(\w+)$/, /^(mscc_phy_\w+)::(\w+)\([^\)]*\)$/
             sym_name = "#{$1}::#{$2}"
             idx = $1.size + 2

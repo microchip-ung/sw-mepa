@@ -13,6 +13,7 @@
 #include "phy_port_config.h"
 #include "phy_demo_apps.h"
 #include "microchip/lan8814_cs.h"
+#include "lan80xx.h"
 
 static mepa_callout_t mepa_callout;
 static mepa_board_conf_t board_conf = {};
@@ -48,11 +49,16 @@ typedef struct {
     uint8_t               dsh_time;
     mesa_port_speed_t     speed;
     mepa_bool_t           fdx;
+    phy25g_oper_mode_t    phy_mode;
+    mepa_bool_t           rfec;
+    mepa_bool_t           rsfec;
+    mepa_adv_side_t       fec_direction;
 } port_cli_req_t;
 
 meba_inst_t meba_phy_inst;
 
-static int phy_assign_callout(void) {
+static int phy_assign_callout(void)
+{
     mepa_callout.mmd_read = meba_mmd_read;
     mepa_callout.mmd_read_inc = meba_mmd_read_inc;
     mepa_callout.mmd_write = meba_mmd_write;
@@ -67,18 +73,19 @@ static int phy_assign_callout(void) {
     return MEPA_RC_OK;
 }
 
-static int mepa_drv_create(const mepa_port_no_t port_no) {
+static int mepa_drv_create(const mepa_port_no_t port_no)
+{
     cli_printf("\n creating dev\n");
     meba_port_entry_t   entry;
     mepa_rc rc;
     mepa_phy_info_t phy_info = {0};
     port_cnt = meba_phy_inst->api.meba_capability(meba_phy_inst, MEBA_CAP_BOARD_PORT_COUNT);
-    if(port_cnt <= 0) {
+    if (port_cnt <= 0) {
         T_E("Invalid port number from meba\n");
         return MESA_RC_ERROR;
     }
 
-    if(meba_phy_inst->phy_devices[port_no]) {
+    if (meba_phy_inst->phy_devices[port_no]) {
         T_E("Device Already existing on %d", port_no);
         return MESA_RC_ERROR;
     }
@@ -97,8 +104,8 @@ static int mepa_drv_create(const mepa_port_no_t port_no) {
     /*Removing the vtss_instance_create approach to match with the default vtss instance created in sw-mepa application */
 
     meba_phy_inst->phy_devices[port_no] = mepa_create(&(mepa_callout),
-                                          &meba_phy_inst->phy_device_ctx[port_no],
-                                          &board_conf);
+                                                      &meba_phy_inst->phy_device_ctx[port_no],
+                                                      &board_conf);
 
     if ((meba_phy_inst->phy_devices[port_no]) && (meba_phy_inst->phy_devices[entry.phy_base_port])) {
         T_I("Phy has been probed on port %d, MAC I/F = %d", port_no, entry.mac_if);
@@ -111,7 +118,11 @@ static int mepa_drv_create(const mepa_port_no_t port_no) {
         T_E("Probe failed on %d", port_no);
         return MESA_RC_ERROR;
     }
-
+    if (meba_phy_inst->phy_devices[port_no] && meba_phy_inst->phy_devices[entry.phy_base_port]) {
+        (void)mepa_link_base_port(meba_phy_inst->phy_devices[port_no],
+                                  meba_phy_inst->phy_devices[entry.phy_base_port],
+                                  entry.map.chip_port);
+    }
     mepa_reset_param_t phy_reset = {};
     phy_reset.media_intf = MESA_PHY_MEDIA_IF_CU;
     phy_reset.reset_point = MEPA_RESET_POINT_PRE;
@@ -120,7 +131,7 @@ static int mepa_drv_create(const mepa_port_no_t port_no) {
         return MESA_RC_ERROR;
     }
     meba_phy_info_get(meba_phy_inst, port_no, &phy_info);
-    phy_reset.media_intf = ((phy_info.part_number & 0xfff0) != MALIBU_SPECIFIC_CHECK)?MESA_PHY_MEDIA_IF_CU:MESA_PHY_MEDIA_IF_FI_10G_LAN;
+    phy_reset.media_intf = ((phy_info.part_number & 0xfff0) != MALIBU_SPECIFIC_CHECK) ? MESA_PHY_MEDIA_IF_CU : MESA_PHY_MEDIA_IF_FI_10G_LAN;
     phy_reset.reset_point = MEPA_RESET_POINT_DEFAULT;
     if ((mepa_reset(meba_phy_inst->phy_devices[port_no], &phy_reset) != MESA_RC_OK)) {
         T_E("Default reset failed %d", port_no);
@@ -128,7 +139,7 @@ static int mepa_drv_create(const mepa_port_no_t port_no) {
     }
     phy_reset.reset_point = MEPA_RESET_POINT_POST;
 
-    if ((mepa_reset(meba_phy_inst->phy_devices[port_no], &phy_reset)!= MESA_RC_OK)) {
+    if ((mepa_reset(meba_phy_inst->phy_devices[port_no], &phy_reset) != MESA_RC_OK)) {
         T_E("Post reset failed %d", port_no);
         return MESA_RC_ERROR;
     }
@@ -139,18 +150,18 @@ static int mepa_drv_create(const mepa_port_no_t port_no) {
 }
 
 
-static int mepa_drv_del(const mepa_port_no_t port_no) {
+static int mepa_drv_del(const mepa_port_no_t port_no)
+{
     cli_printf("\nDeleting dev port_no %u\n", port_no);
-    if(meba_phy_inst->phy_devices[port_no]) {
-        if(mepa_delete(meba_phy_inst->phy_devices[port_no]) != MEPA_RC_OK) {
+    if (meba_phy_inst->phy_devices[port_no]) {
+        if (mepa_delete(meba_phy_inst->phy_devices[port_no]) != MEPA_RC_OK) {
             T_E("Unable to delete the mepa device %d", port_no);
             return MESA_RC_ERROR;
         }
         memset(&meba_phy_inst->phy_device_ctx[port_no], 0, sizeof(mepa_callout_ctx_t));
         meba_phy_inst->phy_devices[port_no] = NULL;
         board_conf.vtss_instance_ptr = NULL;
-    }
-    else {
+    } else {
         T_E("No Dev created for port_no %d\n", port_no);
         return MESA_RC_ERROR;
     }
@@ -158,7 +169,8 @@ static int mepa_drv_del(const mepa_port_no_t port_no) {
 }
 
 /*map phy to the chip port */
-static void cli_cmd_dev_attach(cli_req_t *req) {
+static void cli_cmd_dev_attach(cli_req_t *req)
+{
     mesa_port_conf_t      conf;
     port_cli_req_t *mreq = req->module_req;
     mepa_device_t *dev;
@@ -166,18 +178,21 @@ static void cli_cmd_dev_attach(cli_req_t *req) {
     if (mesa_port_conf_get(NULL, req->port_no, &conf) != MESA_RC_OK) {
         req->rc = -1;
         T_E("mesa_port_conf_get(%u) failed", req->port_no);
-    } else
+    } else {
         req->rc = 0;
+    }
     conf.if_type = mreq->interface;
     if (mesa_port_conf_set(NULL, req->port_no, &conf) != MESA_RC_OK) {
         req->rc = -1;
         T_E("mesa_port_conf_set(%u) failed %d\n", req->port_no);
-    } else
+    } else {
         req->rc = 0;
+    }
     if (mepa_if_set(dev, mreq->interface) != MESA_RC_OK) {
         T_E("mepa_if_set(%u) failed %d\n", req->port_no);
-    } else
+    } else {
         req->rc = 0;
+    }
 
 }
 
@@ -186,9 +201,9 @@ static void cli_cmd_dev_create(cli_req_t *req)
     if (mepa_drv_create(req->port_no) != MESA_RC_OK) {
         req->rc = -1;
         T_E("Error in mepa drv creation\n");
-    }
-    else
+    } else {
         req->rc = 0;
+    }
 
 }
 
@@ -204,40 +219,41 @@ static void cli_cmd_phy_conf(cli_req_t *req)
     char port_config_file[100];
     char *buffer;
     dev = meba_phy_inst->phy_devices[req->port_no];
-    if(dev != NULL) {
+    if (dev != NULL) {
         snprintf(port_config_file, sizeof(port_config_file), "/root/mepa_scripts/%s", mreq->filename);
         FILE *fp = fopen(port_config_file, "r");
-        if(fp == NULL) {
+        if (fp == NULL) {
             T_E("%s : file open error", mreq->filename);
             return;
         }
-        if(!(fseek(fp, 0, SEEK_END)) && ftell(fp)) {
+        if (!(fseek(fp, 0, SEEK_END)) && ftell(fp)) {
             size = ftell(fp);
-            buffer = (char*)malloc(size);
-            if(buffer == NULL) {
+            buffer = (char *)malloc(size);
+            if (buffer == NULL) {
                 T_E("Fatal: failed to allocate %d bytes.\n", size);
                 return;
             }
             fseek(fp, 0, SEEK_SET);
-            if(!fread(buffer, 1, size, fp)) {
+            if (!fread(buffer, 1, size, fp)) {
                 T_E("File read error");
                 goto file_close;
             }
             jobj = json_tokener_parse(buffer);
-            if(jobj == NULL) {
+            if (jobj == NULL) {
                 T_E("could not parse parms from file: %s", mreq->filename);
                 goto file_close;
             }
-            if(json_rpc_get_name_json_object(&json_req, jobj, "port_config", &json_req.params) != MESA_RC_OK) {
+            if (json_rpc_get_name_json_object(&json_req, jobj, "port_config", &json_req.params) != MESA_RC_OK) {
                 T_E("port_config object name not found in file: %s", mreq->filename);
                 goto file_close;
             }
-            if(json_rpc_get_mepa_conf_t(&json_req, json_req.params, &conf) != MESA_RC_OK) {
+            if (json_rpc_get_mepa_conf_t(&json_req, json_req.params, &conf) != MESA_RC_OK) {
                 T_E("Error in the json configuration");
                 goto file_close;
             }
-            if(mepa_conf_set(dev, &conf) != MESA_RC_OK)
+            if (mepa_conf_set(dev, &conf) != MESA_RC_OK) {
                 T_E("Error in Configuring the PHY");
+            }
 file_close:
             free(buffer);
             fclose(fp);
@@ -252,9 +268,9 @@ static void cli_cmd_dev_del(cli_req_t *req)
     if (mepa_drv_del(req->port_no) != MESA_RC_OK) {
         req->rc = -1;
         T_E("Error in mepa drv delete\n");
-    }
-    else
+    } else {
         req->rc = 0;
+    }
 
 }
 
@@ -265,9 +281,9 @@ static void cli_cmd_coma_mode(cli_req_t *req)
     if (mesa_gpio_write(NULL, 0, COMA_MODE_GPIO_NUM, req->enable) != MESA_RC_OK) {
         req->rc = -1;
         T_E("Error in coma mode enable/disable\n");
-    }
-    else
+    } else {
         req->rc = 0;
+    }
 
 }
 
@@ -275,7 +291,7 @@ static void cli_cmd_fpp_set(cli_req_t *req)
 {
     mepa_rc rc;
     demo_phy_info_t phy_family;
-    if(meba_phy_inst->phy_devices[req->port_no] == NULL) {
+    if (meba_phy_inst->phy_devices[req->port_no] == NULL) {
         cli_printf(" Dev is Not Created for the port : %d\n", req->port_no);
         return;
     }
@@ -284,7 +300,7 @@ static void cli_cmd_fpp_set(cli_req_t *req)
         T_E("\n Error in Detecting PHY Family on Port %d\n", req->port_no);
         return;
     }
-    if((phy_family.family != PHY_FAMILY_LAN8814) && (phy_family.family != PHY_FAMILY_MALIBU_25G)) {
+    if ((phy_family.family != PHY_FAMILY_LAN8814) && (phy_family.family != PHY_FAMILY_MALIBU_25G)) {
         T_E("\n PHY on Port :%d doesn't support Frame Preemption\n", req->port_no);
         return;
     }
@@ -300,7 +316,7 @@ static void cli_cmd_fpp_get(cli_req_t *req)
     mepa_rc rc;
     demo_phy_info_t phy_family;
     mepa_bool_t val = 0;
-    if(meba_phy_inst->phy_devices[req->port_no] == NULL) {
+    if (meba_phy_inst->phy_devices[req->port_no] == NULL) {
         cli_printf(" Dev is Not Created for the port : %d\n", req->port_no);
         return;
     }
@@ -309,7 +325,7 @@ static void cli_cmd_fpp_get(cli_req_t *req)
         T_E("\n Error in Detecting PHY Family on Port %d\n", req->port_no);
         return;
     }
-    if((phy_family.family != PHY_FAMILY_LAN8814) && (phy_family.family != PHY_FAMILY_MALIBU_25G)) {
+    if ((phy_family.family != PHY_FAMILY_LAN8814) && (phy_family.family != PHY_FAMILY_MALIBU_25G)) {
         T_E("\n PHY on Port :%d doesn't support Frame Preemption\n", req->port_no);
         return;
     }
@@ -321,20 +337,63 @@ static void cli_cmd_fpp_get(cli_req_t *req)
     return;
 }
 
+static void line_media_select(struct meba_inst *meba_inst, mepa_port_no_t port_no, mesa_port_speed_t speed, meba_sfp_device_info_t *device_info,
+                              phy_media_t *media)
+{
+    uint8_t length = 0;
+    uint8_t eeprom_reg_addr = 18;
+    uint8_t read_length_byte = 1;
+    meba_sfp_device_info_get(meba_inst, port_no, device_info);
+    mepa_i2c_read(meba_inst->phy_devices[port_no], 0, eeprom_reg_addr, 0, 0, read_length_byte, &length);
+    switch (device_info->transceiver) {
+    case MEBA_SFP_TRANSRECEIVER_25G_DAC:
+        *media = (length == 1) ? MEPA_MEDIA_TYPE_SFP28_25G_DAC1M : MEPA_MEDIA_TYPE_SFP28_25G_DAC2M;
+        break;
+    case MEBA_SFP_TRANSRECEIVER_10G_DAC:
+        *media = MEPA_MEDIA_TYPE_DAC;
+        break;
+    case MEBA_SFP_TRANSRECEIVER_10G_SR:
+        *media = MEPA_MEDIA_TYPE_SR;
+        break;
+    case MEBA_SFP_TRANSRECEIVER_10G_LR:
+    case MEBA_SFP_TRANSRECEIVER_10G_LRM:
+        *media = MEPA_MEDIA_TYPE_LR;
+        break;
+    case MEBA_SFP_TRANSRECEIVER_10G_ER:
+        *media = MEPA_MEDIA_TYPE_ER;
+        break;
+    case MEBA_SFP_TRANSRECEIVER_25G_SR:
+        *media = MEPA_MEDIA_TYPE_SFP28_25G_SR;
+        break;
+    case MEBA_SFP_TRANSRECEIVER_25G_LR:
+        *media = MEPA_MEDIA_TYPE_SFP28_25G_LR;
+        break;
+    case MEBA_SFP_TRANSRECEIVER_25G_ER:
+        *media = MEPA_MEDIA_TYPE_SFP28_25G_ER;
+        break;
+    default:
+        *media = (speed == MESA_SPEED_25G) ? MEPA_MEDIA_TYPE_SFP28_25G_SR : MEPA_MEDIA_TYPE_SR;
+        break;
+    }
+    return;
+}
+
 static void cli_cmd_force_speed(cli_req_t *req)
 {
     mepa_rc rc;
     demo_phy_info_t phy_family;
     port_cli_req_t *mreq = req->module_req;
-    mepa_conf_t  conf;
+    mepa_conf_t  conf = {0};
     mepa_port_no_t  port_no;
+    meba_sfp_device_info_t info = {0};
+    phy_media_t media;
 
-    for(int iport = 0; iport < 20; iport++) {
+    for (int iport = 0; iport < 20; iport++) {
         port_no = iport2uport(iport);
         if (req->port_list[port_no] == 0) {
             continue;
         }
-        if(meba_phy_inst->phy_devices[iport] == NULL) {
+        if (meba_phy_inst->phy_devices[iport] == NULL) {
             cli_printf(" Dev is Not Created for the port : %d\n", iport);
             continue;
         }
@@ -342,36 +401,91 @@ static void cli_cmd_force_speed(cli_req_t *req)
             T_E("\n Error in Detecting PHY Family on Port %d\n", iport);
             continue;
         }
-        if(phy_family.family == PHY_FAMILY_MALIBU_10G) {
-            if(mreq->speed != MESA_SPEED_10G && mreq->speed != MESA_SPEED_1G) {
+        if (phy_family.family == PHY_FAMILY_MALIBU_10G) {
+            if (mreq->speed != MESA_SPEED_10G && mreq->speed != MESA_SPEED_1G) {
                 T_E("\n Error: Speed Not Support on Port %d\n", iport);
                 continue;
             }
+            if (mreq->rfec || mreq->rsfec) {
+                T_E("\n Error: FEC Not Support on Port %d\n", iport);
+                continue;
+            }
+        } else if (phy_family.family == PHY_FAMILY_MALIBU_25G) {
+            if (mreq->speed != MESA_SPEED_10G && mreq->speed != MESA_SPEED_1G && mreq->speed != MESA_SPEED_25G) {
+                T_E("\n Error: Speed Not Support on Port %d\n", iport);
+                return;
+            }
         }
-        memset(&conf, 0, sizeof(mepa_conf_t));
-
         if ((rc = mepa_conf_get(meba_phy_inst->phy_devices[iport], &conf)) != MESA_RC_OK) {
             T_E("\n mepa_conf_get failed on port %d\n", iport);
             continue;
         }
         conf.speed = mreq->speed;
         conf.fdx = mreq->fdx;
-        if(phy_family.family == PHY_FAMILY_VIPER || phy_family.family == PHY_FAMILY_TESLA || phy_family.family == PHY_FAMILY_LAN8814) {
+        if (phy_family.family == PHY_FAMILY_VIPER || phy_family.family == PHY_FAMILY_TESLA || phy_family.family == PHY_FAMILY_LAN8814) {
             conf.flow_control = 1;
-            conf.admin.enable = 1;  
+            conf.admin.enable = 1;
             conf.mac_if_aneg_ena = 1;
             conf.man_neg = MEPA_MANUAL_NEG_DISABLED;
             conf.mdi_mode = MEPA_MEDIA_MODE_AUTO;
             conf.force_ams_mode_sel = MEPA_PHY_MEDIA_FORCE_AMS_SEL_NORMAL;
-        } else if(phy_family.family == PHY_FAMILY_MALIBU_10G) {
+        } else if (phy_family.family == PHY_FAMILY_MALIBU_10G) {
+            line_media_select(meba_phy_inst, iport, mreq->speed, &info, &media);
             conf.conf_10g.oper_mode = (mreq->speed == MESA_SPEED_10G) ? MEPA_PHY_LAN_MODE : MEPA_PHY_1G_MODE;
             conf.conf_10g.interface_mode = MEPA_PHY_SFI_XFI;
             conf.conf_10g.h_media = MEPA_MEDIA_TYPE_SR;
-            conf.conf_10g.l_media = MEPA_MEDIA_TYPE_SR;
+            conf.conf_10g.l_media = (media == MEPA_MEDIA_TYPE_DAC) ? MEPA_MEDIA_TYPE_DAC : MEPA_MEDIA_TYPE_SR;
             conf.conf_10g.channel_high_to_low = 1;
+        } else if (phy_family.family == PHY_FAMILY_MALIBU_25G) {
+            conf.conf_25g.polarity.line_tx = 0;
+            conf.conf_25g.polarity.line_rx = 0;
+            conf.conf_25g.polarity.host_tx = 0;
+            conf.conf_25g.polarity.host_rx = 0;
+            line_media_select(meba_phy_inst, iport, mreq->speed, &info, &media);
+            conf.conf_25g.line_media = media;
+            conf.conf_25g.host_media = (mreq->speed == MESA_SPEED_25G) ? MEPA_MEDIA_TYPE_SFP28_25G_DAC1M : MEPA_MEDIA_TYPE_DAC;
+            conf.conf_25g.base_r_10gfec = conf.conf_25g.base_r_25gfec =  mreq->rfec;
+            conf.conf_25g.rs_fec_25g = mreq->rsfec;
+            conf.aneg.advertise_dir = mreq->fec_direction;
+            if ((mreq->rfec || mreq->rsfec) && (mreq->fec_direction == MEPA_ADV_SIDE_NONE)) {
+                T_E("\n FEC Direction Not Selected on Port :%d\n", iport);
+                continue;
+            }
         }
         if ((rc = mepa_conf_set(meba_phy_inst->phy_devices[iport], &conf)) != MESA_RC_OK) {
             T_E("mepa_conf_set failed on port %u", iport);
+            continue;
+        }
+    }
+    return;
+}
+
+static void cli_cmd_phy_flow_control(cli_req_t *req)
+{
+    mepa_rc rc;
+    demo_phy_info_t phy_family;
+    mepa_port_no_t  port_no;
+
+    for (int iport = 0; iport < 20; iport++) {
+        port_no = iport2uport(iport);
+        if (req->port_list[port_no] == 0) {
+            continue;
+        }
+        if (meba_phy_inst->phy_devices[iport] == NULL) {
+            cli_printf(" Dev is Not Created for the port : %d\n", iport);
+            continue;
+        }
+        if ((rc = phy_family_detect(meba_phy_inst, iport, &phy_family)) != MEPA_RC_OK) {
+            T_E("\n Error in Detecting PHY Family on Port %d\n", iport);
+            continue;
+        }
+        if (phy_family.family == PHY_FAMILY_MALIBU_25G) {
+            if ((rc = lan80xx_flow_control_set(meba_phy_inst->phy_devices[iport], iport, req->enable)) != MESA_RC_OK) {
+                T_E("\n mepa_conf_get failed on port %d\n", iport);
+                continue;
+            }
+        } else {
+            T_E("\n Flow Control Command not Supported for PHY in Port : %d \n", iport);
             continue;
         }
     }
@@ -393,7 +507,7 @@ static void cli_cmd_downshift_conf(cli_req_t *req)
         if (req->port_list[uport] == 0) {
             continue;
         }
-        if(meba_phy_inst->phy_devices[port_no] == NULL) {
+        if (meba_phy_inst->phy_devices[port_no] == NULL) {
             cli_printf(" Dev is Not Created for the port : %d\n", req->port_no);
             continue;
         }
@@ -425,10 +539,30 @@ static void cli_cmd_downshift_conf(cli_req_t *req)
             continue;
         }
         if (downshift_conf.dsh_enable) {
-            cli_printf("\n Downshift configured for port:%d with downshift time:%d\n",port_no, downshift_conf.dsh_thr_cnt);
+            cli_printf("\n Downshift configured for port:%d with downshift time:%d\n", port_no, downshift_conf.dsh_thr_cnt);
         } else {
             cli_printf("\n Disabled Downshift on Port:%d\n", port_no);
         }
+    }
+    return;
+}
+
+static void cli_cmd_oper_mode_set(cli_req_t *req)
+{
+    mepa_rc rc;
+    demo_phy_info_t phy_family;
+    port_cli_req_t *mreq = req->module_req;
+    if ((rc = phy_family_detect(meba_phy_inst, req->port_no, &phy_family)) != MEPA_RC_OK) {
+        T_E("\n Error in Detecting PHY Family on Port %d\n", req->port_no);
+        return;
+    }
+    if (phy_family.family != PHY_FAMILY_MALIBU_25G) {
+        T_E("\n Command Supported only for LAN80XX PHY \n", req->port_no);
+        return;
+    }
+    if (lan80xx_operating_mode_set(meba_phy_inst->phy_devices[req->port_no], req->port_no, mreq->phy_mode) != MEPA_RC_OK) {
+        T_E("\n Error in Configuring Operating Mode on Port :%d \n", req->port_no);
+        return;
     }
     return;
 }
@@ -462,25 +596,35 @@ static cli_cmd_t cli_cmd_table[] = {
         cli_cmd_coma_mode
     },
     {
-        "fpp_set [<port_no>] [enable|disable]",
+        "fpp_set <port_no> [enable|disable]",
         "Enable/Disable Frame Preemption on PHY",
         cli_cmd_fpp_set
     },
     {
-        "fpp_get [<port_no>]",
+        "fpp_get <port_no>",
         "Get the Frame Preemption Status on PHY",
         cli_cmd_fpp_get
     },
     {
-        "phy speed <port_list> [10hdx|10fdx|100hdx|100fdx|1000fdx|10g|25g]",
+        "phy speed <port_list> [10hdx|10fdx|100hdx|100fdx|1000fdx|10g|25g] [r-fec] [rs-fec] [fec-host|fec-line|fec-h-l]",
         "Configure Forced Fixed Speed of PHY",
         cli_cmd_force_speed,
     },
     {
         "downshift <port_list> <dsh_time> [enable|disable]",
         "Enable/Disable Downshift on PHY",
-        cli_cmd_downshift_conf
+        cli_cmd_downshift_conf,
     },
+    {
+        "phy mode <port_no> <pcs_retimer|mac_retimer>",
+        "Configure Operating Mode of PHY",
+        cli_cmd_oper_mode_set
+    },
+    {
+        "phy flow control <port_list> [enable|disable]",
+        "Configure PHY flow control mode",
+        cli_cmd_phy_flow_control,
+    }
 
 };
 
@@ -490,9 +634,9 @@ static int cli_parm_keyword(cli_req_t *req)
     port_cli_req_t *mreq = req->module_req;
     if ((found = cli_parse_find(req->cmd, req->stx)) == NULL) {
         /* Take the file input from the cli */
-        if(mreq->file && !strcmp(req->stx,"[filename]")) {
-            strcpy(mreq->filename,req->cmd);
-            strcpy(req->file_name,req->cmd);
+        if (mreq->file && !strcmp(req->stx, "[filename]")) {
+            strcpy(mreq->filename, req->cmd);
+            strcpy(req->file_name, req->cmd);
             return 0;
         }
         return 1;
@@ -501,24 +645,44 @@ static int cli_parm_keyword(cli_req_t *req)
         mreq->interface = MESA_PORT_INTERFACE_QSGMII;
     }
 
-    if (!strncasecmp(found, "sgmii", 5))
+    if (!strncasecmp(found, "sgmii", 5)) {
         mreq->interface = MESA_PORT_INTERFACE_SGMII;
-
-    if (!strncasecmp(found, "sfi", 3))
-        mreq->interface = MESA_PORT_INTERFACE_SFI;
-
-    if (!strncasecmp(found, "-f", 2)) {
-	req->file = 1;
-        mreq->file = 1;
     }
 
+    if (!strncasecmp(found, "sfi", 3)) {
+        mreq->interface = MESA_PORT_INTERFACE_SFI;
+    }
+
+    if (!strncasecmp(found, "-f", 2)) {
+        req->file = 1;
+        mreq->file = 1;
+    }
+    if (!strncasecmp(found, "r-fec", strlen(req->cmd))) {
+        mreq->rfec = 1;
+    }
+    if (!strncasecmp(found, "rs-fec", strlen(req->cmd))) {
+        mreq->rsfec = 1;
+    }
     return 0;
 
 
 }
 
+static int cli_parm_mode_select(cli_req_t *req)
+{
+    port_cli_req_t *mreq = req->module_req;
+    if (!strncasecmp(req->cmd, "pcs_retimer", strlen(req->cmd))) {
+        mreq->phy_mode = PCS_RETIMER;
+    } else if (!strncasecmp(req->cmd, "mac_retimer", strlen(req->cmd))) {
+        mreq->phy_mode = MAC_RETIMER;
+    } else {
+        return 1;
+    }
+    return 0;
+}
+
 static int cli_parm_speed_select(cli_req_t *req)
-{ 
+{
     port_cli_req_t *mreq = req->module_req;
 
     if (!strncasecmp(req->cmd, "10hdx", strlen(req->cmd))) {
@@ -542,6 +706,23 @@ static int cli_parm_speed_select(cli_req_t *req)
     } else if (!strncasecmp(req->cmd, "25g", strlen(req->cmd))) {
         mreq->speed = MESA_SPEED_25G;
         mreq->fdx   = 1;
+    } else {
+        return 1;
+    }
+    return 0;
+}
+
+static int cli_parm_direction(cli_req_t *req)
+{
+    port_cli_req_t *mreq = req->module_req;
+    if (!strncasecmp(req->cmd, "fec-host", strlen(req->cmd))) {
+        mreq->fec_direction = MEPA_ADV_SIDE_HOST;
+    } else if (!strncasecmp(req->cmd, "fec-line", strlen(req->cmd))) {
+        mreq->fec_direction = MEPA_ADV_SIDE_LINE;
+    } else if (!strncasecmp(req->cmd, "fec-h-l", strlen(req->cmd))) {
+        mreq->fec_direction = MEPA_ADV_SIDE_HOST_LINE;
+    } else {
+        mreq->fec_direction = MEPA_ADV_SIDE_NONE;
     }
     return 0;
 }
@@ -560,6 +741,15 @@ static cli_parm_t cli_parm_table[] = {
         "SFI         :  SerDes Framer Interface (supports Malibu)\n",
         CLI_PARM_FLAG_NO_TXT | CLI_PARM_FLAG_SET,
         cli_parm_keyword
+    },
+
+    {
+        "fec-host|fec-line|fec-h-l",
+        "fec-host    : Enables FEC in HOST side \n"
+        "fec-line    : Enables FEC in LINE Side \n"
+        "fec-h-l     : Enables FEC on both HOST and LINE Side \n",
+        CLI_PARM_FLAG_NO_TXT | CLI_PARM_FLAG_SET,
+        cli_parm_direction,
     },
 
     {
@@ -600,7 +790,26 @@ static cli_parm_t cli_parm_table[] = {
         "<dsh_time>",
         "dsh_time     :  Downshift Time configuration for the PHY (supports only LAN8814) \n",
         CLI_PARM_FLAG_NO_TXT | CLI_PARM_FLAG_SET,
-        cli_parm_downshift_time
+        cli_parm_downshift_time,
+    },
+    {
+        "<pcs_retimer|mac_retimer>",
+        "pcs_retimer : Port Configure to PCS RETIMER Mode \n"
+        "mac_retimer : Port Configure to MAC RETIMER Mode \n",
+        CLI_PARM_FLAG_SET,
+        cli_parm_mode_select,
+    },
+    {
+        "r-fec",
+        "Enable Base-R FEC on PHY",
+        CLI_PARM_FLAG_SET,
+        cli_parm_keyword,
+    },
+    {
+        "rs-fec",
+        "Enable RS FEC on PHY",
+        CLI_PARM_FLAG_SET,
+        cli_parm_keyword,
     },
 };
 
@@ -609,11 +818,11 @@ static int phy_cli_init(void)
     int i;
 
     /* Register commands */
-    for (i = 0; i < sizeof(cli_cmd_table)/sizeof(cli_cmd_t); i++) {
+    for (i = 0; i < sizeof(cli_cmd_table) / sizeof(cli_cmd_t); i++) {
         mscc_appl_cli_cmd_reg(&cli_cmd_table[i]);
     }
     /* Register parameters */
-    for (i = 0; i < sizeof(cli_parm_table)/sizeof(cli_parm_t); i++) {
+    for (i = 0; i < sizeof(cli_parm_table) / sizeof(cli_parm_t); i++) {
         mscc_appl_cli_parm_reg(&cli_parm_table[i]);
     }
     return MESA_RC_OK;
@@ -628,10 +837,12 @@ void mscc_appl_phy_init(mscc_appl_init_t *init)
         break;
 
     case MSCC_INIT_CMD_INIT:
-        if(phy_cli_init() != MEPA_RC_OK)
+        if (phy_cli_init() != MEPA_RC_OK) {
             T_E("Couldn't load port config module");
-        if(phy_assign_callout() != MEPA_RC_OK)
+        }
+        if (phy_assign_callout() != MEPA_RC_OK) {
             T_E("Couldn't assign the callout");
+        }
         break;
     default:
         break;

@@ -183,8 +183,10 @@ end.order!
 
 $cmake_presents = YAML.load_file("#{$top}/.cmake/cmake-presets_new.yaml")
 $bsp_deps = JSON.load_file("#{$top}/.cmake/deps-bsp.json").filter{|x| x["id"] == "bsp"}
+$mesa_deps = JSON.load_file("#{$top}/.cmake/deps-mesa.json").filter{|x| x["id"] == "mesa"}
 raise "Exepcted to find one and only one BSP record in .cmake/deps-bsp.json" if $bsp_deps.size != 1
 $bsp_deps = $bsp_deps.first
+$mesa_deps = $mesa_deps.first
 
 if ARGV.size < 1
   puts "Usage: create_cmake_project <preset name> [output-folder]"
@@ -222,24 +224,29 @@ end
 base = nil
 
 if c[:mesa]
-  mesa_base = "#{c[:mesa]}"
-  branch = "#{c[:mesa_branch]}"
+  mesa_name = "#{$mesa_deps["build-artifact-version-string"]}"
+  mesa_base = "/opt/mchp/#{mesa_name}"
 
   if File.exist? "sw-mesa"
     puts "Removing old code base..."
     run "sh -c \"rm -r sw-mesa\""
   end
   puts "Fetching latest copy..."
-  dw_file = "mesa-#{c[:mesa]}"
-  if c[:mesa_id]
-      dw_file += "-#{c[:mesa_id]}"
+  
+  if not File.exist? mesa_base
+    if is_internal?
+      sys "wget --quiet -O- #{$mesa_deps["build-artifact-url"]}/#{mesa_name}.tar.gz | tar -xz -C /opt/mchp/"
+    else
+      package = "mesa-#{$mesa_deps["release-version"]}"
+      puts "Please install the latest MESA package: #{mesa_base}"
+      puts ""
+      puts "This may be done by using the following command:"
+      puts "sudo sh -c \"mkdir -p /opt/mchp && wget -O- https://github.com/microchip-ung/mesa/releases/download/#{$mesa_deps["release-version"]}/#{package}.tar.gz | tar -xz -C /opt/mchp/\""
+      exit 1
+    end
   end
-  if c[:mesa_branch]
-      dw_file += "@#{c[:mesa_branch]}"
-  end
-  bcmd = ".cmake/docker/mchp-install-pkg -t mesa/#{c[:mesa]}-#{c[:mesa_id]}@#{c[:mesa_branch]} #{dw_file}"
-  run bcmd
-  run "mkdir -p sw-mesa && cp -r /opt/mscc/#{dw_file}/* sw-mesa"
+
+  run "mkdir -p sw-mesa && cp -r /opt/mchp/#{mesa_name}/* sw-mesa"
 end
 
 # Not all presets uses a brsdk, some only uses the toolchain
@@ -283,6 +290,7 @@ if not File.exist? $tc_path
   end
 end
 
+
 if not File.exist? out
   run "mkdir -p #{out}"
 end
@@ -303,6 +311,7 @@ cmd = [cmake]
 cmd << "-DCMAKE_TOOLCHAIN_FILE=#{base}/#{c[:toolchainfile]}"
 cmd << "-DBUILD_ALL=on" if $opt[:all]
 cmd << "-G Ninja" if $opt[:ninja]
+cmd << "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 cmd << c[:cmake_flags] if c[:cmake_flags]
 cmd << src
 
@@ -317,6 +326,8 @@ if $opt[:build]
     cpu_cnt, e, s = run("cat /proc/cpuinfo | grep processor | wc -l")
     sys "make -j#{cpu_cnt.strip}"
   end
+ 
+  run "cp compile_commands.json #{$top}/compile_commands.json"
 
   if $opt[:pack] and c[:package_list]
     cd $top

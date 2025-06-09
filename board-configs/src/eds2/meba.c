@@ -64,8 +64,8 @@ typedef struct meba_board_state {
 #define GPIO_PUSH_BUTTON 55
 
 static const meba_ptp_rs422_conf_t lan966x_rs422_conf = {
-    .gpio_rs422_1588_mstoen = (15<<8)+1,
-    .gpio_rs422_1588_slvoen = (15<<8)+0,
+    .gpio_rs422_1588_mstoen = (15 << 8) + 1,
+    .gpio_rs422_1588_slvoen = (15 << 8) + 0,
     .ptp_pin_ldst           = 2,
     .ptp_pin_ppso           = 0,
     .ptp_rs422_pps_int_id   = MEBA_EVENT_PTP_PIN_0,
@@ -77,13 +77,13 @@ static const meba_ptp_rs422_conf_t lan966x_rs422_conf = {
 static const meba_event_t init_int_source_id[VTSS_TS_IO_ARRAY_SIZE] = {MEBA_EVENT_PTP_PIN_0, MEBA_EVENT_PTP_PIN_1, MEBA_EVENT_PTP_PIN_2, MEBA_EVENT_PTP_PIN_3, MEBA_EVENT_LAST, MEBA_EVENT_LAST, MEBA_EVENT_LAST};
 
 static const uint32_t pin_conf_lan9668[VTSS_TS_IO_ARRAY_SIZE] = {
-(MEBA_PTP_IO_CAP_PIN_IN),
-(MEBA_PTP_IO_CAP_UNUSED),
-(MEBA_PTP_IO_CAP_UNUSED),
-(MEBA_PTP_IO_CAP_PIN_OUT),
-(MEBA_PTP_IO_CAP_UNUSED),
-(MEBA_PTP_IO_CAP_UNUSED),
-(MEBA_PTP_IO_CAP_UNUSED),
+    (MEBA_PTP_IO_CAP_PIN_IN),
+    (MEBA_PTP_IO_CAP_UNUSED),
+    (MEBA_PTP_IO_CAP_UNUSED),
+    (MEBA_PTP_IO_CAP_PIN_OUT),
+    (MEBA_PTP_IO_CAP_UNUSED),
+    (MEBA_PTP_IO_CAP_UNUSED),
+    (MEBA_PTP_IO_CAP_UNUSED),
 };
 
 // NB: No SFP support!
@@ -123,7 +123,7 @@ static mesa_rc eds2_board_init(meba_inst_t inst)
 
             for (port = 0; port < 12; port++) {
                 pc = &conf.port_conf[port];
-                pc->enabled = (port >=2 && port < 4); // Port 4-7 unused
+                pc->enabled = (port >= 2 && port < 4); // Port 4-7 unused
 
                 // Input port 1: SFP0_TXFAULT, SFP1_TXFAULT (Tx fault)
                 // Input port 2: SFP0_LOS, SFP0_MODDET (Module detect)
@@ -186,54 +186,53 @@ static void eds2_phy_addr_map(meba_inst_t inst, const int mux, uint32_t *const p
                               uint16_t *const phy_slot1, uint16_t *const phy_slot2)
 {
     eds2_phy_options_t options = (eds2_phy_options_t) mux;
-    switch(options)
-    {
-        case SLOT1_LAN8814_SLOT2_LAN8814:
-            inst->props.mux_mode = MESA_PORT_MUX_MODE_0;
-            *port_cnt = 8;
-            *phy_slot1 = 0x07;
-            *phy_slot2 = 0x0f;
-            break;
-        case SLOT1_LAN89x1_SLOT2_LAN8814:
-            inst->props.mux_mode = MESA_PORT_MUX_MODE_1;
-            *port_cnt = 8;
-            *phy_slot1 = 0x01;
-            *phy_slot2 = 0x0f;
-            break;
-        case SLOT1_LAN884x_SLOT2_LAN884x:
-            inst->props.mux_mode = MESA_PORT_MUX_MODE_2;
-            *port_cnt = 5;
-            *phy_slot1 = 0x01;
-            *phy_slot2 = 0x03;
-            break;
-        case SLOT1_LAN89x1_SLOT2_LAN89x1:
-            inst->props.mux_mode = MESA_PORT_MUX_MODE_5;
-            *port_cnt = 5;
-            *phy_slot1 = 0x01;
-            *phy_slot2 = 0x03;
-            break;
-        case SLOT1_VSC8574_SLOT2_VSC8574:
-            inst->props.mux_mode = MESA_PORT_MUX_MODE_0;
-            *port_cnt = 8;
-            *phy_slot1 = 0x10;
-            *phy_slot2 = 0x14;
-            break;
-        case SLOT1_LAN89X1_SLOT2_VSC8574:
-            inst->props.mux_mode = MESA_PORT_MUX_MODE_1;
-            *port_cnt = 8;
-            *phy_slot1 = 0x01;
-            *phy_slot2 = 0x14;
-            break;
-        case SLOT1_LAN8814_SLOT2_VSC8574:
-            inst->props.mux_mode = MESA_PORT_MUX_MODE_0;
-            *port_cnt = 8;
-            *phy_slot1 = 0x07;
-            *phy_slot2 = 0x14;
-            break;
-        default:
-            inst->props.mux_mode = MESA_PORT_MUX_MODE_2;
-            *port_cnt = 2;
-            break;
+    switch (options) {
+    case SLOT1_LAN8814_SLOT2_LAN8814:
+        inst->props.mux_mode = MESA_PORT_MUX_MODE_0;
+        *port_cnt = 8;
+        *phy_slot1 = 0x07;
+        *phy_slot2 = 0x0f;
+        break;
+    case SLOT1_LAN89x1_SLOT2_LAN8814:
+        inst->props.mux_mode = MESA_PORT_MUX_MODE_1;
+        *port_cnt = 8;
+        *phy_slot1 = 0x01;
+        *phy_slot2 = 0x0f;
+        break;
+    case SLOT1_LAN884x_SLOT2_LAN884x:
+        inst->props.mux_mode = MESA_PORT_MUX_MODE_2;
+        *port_cnt = 5;
+        *phy_slot1 = 0x01;
+        *phy_slot2 = 0x03;
+        break;
+    case SLOT1_LAN89x1_SLOT2_LAN89x1:
+        inst->props.mux_mode = MESA_PORT_MUX_MODE_5;
+        *port_cnt = 5;
+        *phy_slot1 = 0x01;
+        *phy_slot2 = 0x03;
+        break;
+    case SLOT1_VSC8574_SLOT2_VSC8574:
+        inst->props.mux_mode = MESA_PORT_MUX_MODE_0;
+        *port_cnt = 8;
+        *phy_slot1 = 0x10;
+        *phy_slot2 = 0x14;
+        break;
+    case SLOT1_LAN89X1_SLOT2_VSC8574:
+        inst->props.mux_mode = MESA_PORT_MUX_MODE_1;
+        *port_cnt = 8;
+        *phy_slot1 = 0x01;
+        *phy_slot2 = 0x14;
+        break;
+    case SLOT1_LAN8814_SLOT2_VSC8574:
+        inst->props.mux_mode = MESA_PORT_MUX_MODE_0;
+        *port_cnt = 8;
+        *phy_slot1 = 0x07;
+        *phy_slot2 = 0x14;
+        break;
+    default:
+        inst->props.mux_mode = MESA_PORT_MUX_MODE_2;
+        *port_cnt = 2;
+        break;
     }
     return;
 }
@@ -253,7 +252,7 @@ static void eds2_port_table_fill(meba_inst_t inst, uint32_t *const port_cnt, con
         if (mux_mode == MESA_PORT_MUX_MODE_0) { //port_cnt will be 8
             eds2_port_table[i].miim_controller = MESA_MIIM_CONTROLLER_0;
             eds2_port_table[i].mac_if = MESA_PORT_INTERFACE_QSGMII;
-            eds2_port_table[i].miim_addr = ((i <4) ? (phy_addr_slot1) : (phy_addr_slot2))+ (i % 4);
+            eds2_port_table[i].miim_addr = ((i < 4) ? (phy_addr_slot1) : (phy_addr_slot2)) + (i % 4);
         } else if (mux_mode == MESA_PORT_MUX_MODE_1) { // port_cnt will be 8
             // handle MAC IF
             eds2_port_table[i].miim_controller = MESA_MIIM_CONTROLLER_0;
@@ -261,39 +260,38 @@ static void eds2_port_table_fill(meba_inst_t inst, uint32_t *const port_cnt, con
                 eds2_port_table[i].miim_controller = MESA_MIIM_CONTROLLER_1;
                 eds2_port_table[i].mac_if = MESA_PORT_INTERFACE_SGMII;
                 eds2_port_table[i].miim_addr = phy_npi_addr++;
-            } else if (i>= 2 && i < *port_cnt -5) {
+            } else if (i >= 2 && i < *port_cnt - 5) {
                 eds2_port_table[i].mac_if = MESA_PORT_INTERFACE_SGMII_2G5;
                 eds2_port_table[i].miim_addr = phy_addr_slot1;
             } else if (i == 3) {
                 eds2_port_table[i].mac_if = MESA_PORT_INTERFACE_NO_CONNECTION;
                 eds2_port_table[i].miim_addr = 0;
-            }
-            else {
+            } else {
                 eds2_port_table[i].mac_if = MESA_PORT_INTERFACE_QSGMII;
-                eds2_port_table[i].miim_addr = phy_addr_slot2 + (i %4);
+                eds2_port_table[i].miim_addr = phy_addr_slot2 + (i % 4);
             }
         } else if (mux_mode == MESA_PORT_MUX_MODE_2) {
             // port_cnt will be 2 if mux is 0 (Default config for internal ports) else port_cnt is 5
             // handle MAC IF
             eds2_port_table[i].miim_controller = MESA_MIIM_CONTROLLER_0;
-            if (i < *port_cnt -3) {
+            if (i < *port_cnt - 3) {
                 eds2_port_table[i].miim_controller = MESA_MIIM_CONTROLLER_1;
                 eds2_port_table[i].mac_if = MESA_PORT_INTERFACE_SGMII;
                 eds2_port_table[i].miim_addr = phy_npi_addr++;
-            } else if (i >=2 && i < *port_cnt) {
+            } else if (i >= 2 && i < *port_cnt) {
                 eds2_port_table[i].mac_if = (i < 4) ? MESA_PORT_INTERFACE_RGMII : MESA_PORT_INTERFACE_NO_CONNECTION;
                 if (i < 4) {
-                    eds2_port_table[i].miim_addr = (i ==2) ? phy_addr_slot1 : phy_addr_slot2;
+                    eds2_port_table[i].miim_addr = (i == 2) ? phy_addr_slot1 : phy_addr_slot2;
                 } else {
                     eds2_port_table[i].miim_addr = 0;
                 }
             }
         } else if (mux_mode == MESA_PORT_MUX_MODE_5) { // port_cnt will be 5
-            if (i< *port_cnt -3) {
+            if (i < *port_cnt - 3) {
                 eds2_port_table[i].miim_controller = MESA_MIIM_CONTROLLER_1;
                 eds2_port_table[i].mac_if = MESA_PORT_INTERFACE_SGMII;
                 eds2_port_table[i].miim_addr = phy_npi_addr++;
-            } else if (i >= 2 && i < *port_cnt){
+            } else if (i >= 2 && i < *port_cnt) {
                 eds2_port_table[i].miim_controller = MESA_MIIM_CONTROLLER_0;
                 eds2_port_table[i].mac_if = MESA_PORT_INTERFACE_SGMII_2G5;
                 if (i > 2) {
@@ -305,7 +303,7 @@ static void eds2_port_table_fill(meba_inst_t inst, uint32_t *const port_cnt, con
         }
         eds2_port_table[i].poe_support = 1;
         eds2_port_table[i].cap = MEBA_EDS2_CAP;
-        T_D(inst," eds2_port_table[%d]:%d, MAC_IF:%d, miim_addr:%d",i, eds2_port_table[i].chip_port, eds2_port_table[i].mac_if ,eds2_port_table[i].miim_addr);
+        T_D(inst, " eds2_port_table[%d]:%d, MAC_IF:%d, miim_addr:%d", i, eds2_port_table[i].chip_port, eds2_port_table[i].mac_if, eds2_port_table[i].miim_addr);
     }
 
     return ;
@@ -318,18 +316,18 @@ static mesa_rc eds2_port_reorder(meba_inst_t inst, const uint32_t port_cnt, port
         port_map_t temp[4];
         for (int i = 0; i < port_cnt; i++) {
             if (eds2_port_table[i].mac_if == MESA_PORT_INTERFACE_QSGMII) {
-                 for (int j = 0, k =i; j < 4; j++, k++) {
-                     temp[(j + 2) % 4] = eds2_port_table[k];
-                 }
-                 memcpy(&eds2_port_table[i], temp, 4 * sizeof(port_map_t));
-                 i = i+3;
+                for (int j = 0, k = i; j < 4; j++, k++) {
+                    temp[(j + 2) % 4] = eds2_port_table[k];
+                }
+                memcpy(&eds2_port_table[i], temp, 4 * sizeof(port_map_t));
+                i = i + 3;
             }
         }
     }
     return MESA_RC_OK;
 }
 static mesa_rc eds2_ptp_rs422_conf_get(meba_inst_t inst,
-                                          meba_ptp_rs422_conf_t *conf)
+                                       meba_ptp_rs422_conf_t *conf)
 {
     mesa_rc rc = MESA_RC_OK;
     //meba_board_state_t *board = INST2BOARD(inst);
@@ -345,8 +343,7 @@ static mesa_rc eds2_ptp_external_io_conf_get(meba_inst_t inst, uint32_t io_pin, 
     if (io_pin >= VTSS_TS_IO_ARRAY_SIZE) {
         return MESA_RC_ERROR;
     }
-    if (board->type == BOARD_TYPE_8PORT)
-    {
+    if (board->type == BOARD_TYPE_8PORT) {
         *board_assignment = pin_conf_lan9668[io_pin];
     }
     *source_id = init_int_source_id[io_pin];
@@ -360,79 +357,79 @@ static uint32_t eds2_capability(meba_inst_t inst, int cap)
     meba_board_state_t *board = INST2BOARD(inst);
     T_N(inst, "Called - %d", cap);
     switch (cap) {
-        case MEBA_CAP_1588_CLK_ADJ_DAC:
-        case MEBA_CAP_1588_REF_CLK_SEL:
-            return false;
-	    
-        case MEBA_CAP_POE:
-            return true;
+    case MEBA_CAP_1588_CLK_ADJ_DAC:
+    case MEBA_CAP_1588_REF_CLK_SEL:
+        return false;
 
-        case MEBA_CAP_TEMP_SENSORS:
-            return 0;
+    case MEBA_CAP_POE:
+        return true;
 
-        case MEBA_CAP_BOARD_PORT_COUNT:
-        case MEBA_CAP_BOARD_PORT_MAP_COUNT:
-            // On this platform port count and port map count are identical (no loop ports)
-            return board->port_cnt;
+    case MEBA_CAP_TEMP_SENSORS:
+        return 0;
 
-        case MEBA_CAP_LED_MODES:
-            return 1;    /* No alternate led mode support */
+    case MEBA_CAP_BOARD_PORT_COUNT:
+    case MEBA_CAP_BOARD_PORT_MAP_COUNT:
+        // On this platform port count and port map count are identical (no loop ports)
+        return board->port_cnt;
 
-        case MEBA_CAP_DYING_GASP:
-        case MEBA_CAP_FAN_SUPPORT:
-        case MEBA_CAP_LED_DIM_SUPPORT:
-        case MEBA_CAP_BOARD_HAS_PCB107_CPLD:
-        case MEBA_CAP_PCB107_CPLD_CS_VIA_MUX:
-        case MEBA_CAP_BOARD_HAS_PCB135_CPLD:
-            return false;
+    case MEBA_CAP_LED_MODES:
+        return 1;    /* No alternate led mode support */
 
-        case MEBA_CAP_SYNCE_PTP_CLOCK_OUTPUT:      // NOTE: Capability currently not used on lan966x. Therefore, it has been set to -1
-            return -1;
-        case MEBA_CAP_SYNCE_HO_POST_FILTERING_BW:  // NOTE: Capability currently not used on lan966x. Therefore, it has been set to 0
-            return 0;
-        case MEBA_CAP_SYNCE_CLOCK_DPLL:            // NOTE: Capability currently not used on lan966x. Therefore, it has been set to -1
-            return -1;
-        case MEBA_CAP_SYNCE_CLOCK_OUTPUT_CNT:      // NOTE: Capability currently not used on lan966x. Therefore, it has been set to 0
-            return 0;
-        case MEBA_CAP_SYNCE_CLOCK_EEC_OPTION_CNT:  // NOTE: Capability currently not used on lan966x. Therefore, it has been set to 0
-            return 0;
-        case MEBA_CAP_ONE_PPS_INT_ID:
-            return MEBA_EVENT_PTP_PIN_3;
+    case MEBA_CAP_DYING_GASP:
+    case MEBA_CAP_FAN_SUPPORT:
+    case MEBA_CAP_LED_DIM_SUPPORT:
+    case MEBA_CAP_BOARD_HAS_PCB107_CPLD:
+    case MEBA_CAP_PCB107_CPLD_CS_VIA_MUX:
+    case MEBA_CAP_BOARD_HAS_PCB135_CPLD:
+        return false;
 
-        case MEBA_CAP_SYNCE_DPLL_MODE_SINGLE:
-            return 0;
-        case MEBA_CAP_SYNCE_DPLL_MODE_DUAL:
-            if (board->type == BOARD_TYPE_EDS2) {
-                meba_synce_clock_hw_id_t dpll_type;
+    case MEBA_CAP_SYNCE_PTP_CLOCK_OUTPUT:      // NOTE: Capability currently not used on lan966x. Therefore, it has been set to -1
+        return -1;
+    case MEBA_CAP_SYNCE_HO_POST_FILTERING_BW:  // NOTE: Capability currently not used on lan966x. Therefore, it has been set to 0
+        return 0;
+    case MEBA_CAP_SYNCE_CLOCK_DPLL:            // NOTE: Capability currently not used on lan966x. Therefore, it has been set to -1
+        return -1;
+    case MEBA_CAP_SYNCE_CLOCK_OUTPUT_CNT:      // NOTE: Capability currently not used on lan966x. Therefore, it has been set to 0
+        return 0;
+    case MEBA_CAP_SYNCE_CLOCK_EEC_OPTION_CNT:  // NOTE: Capability currently not used on lan966x. Therefore, it has been set to 0
+        return 0;
+    case MEBA_CAP_ONE_PPS_INT_ID:
+        return MEBA_EVENT_PTP_PIN_3;
 
-                if ((meba_synce_spi_if_get_dpll_type(inst, &dpll_type) == MESA_RC_OK) && (dpll_type != MEBA_SYNCE_CLOCK_HW_NONE)) {
-                    return 1;
-                } else {
-                    return 0;
-                }
+    case MEBA_CAP_SYNCE_DPLL_MODE_SINGLE:
+        return 0;
+    case MEBA_CAP_SYNCE_DPLL_MODE_DUAL:
+        if (board->type == BOARD_TYPE_EDS2) {
+            meba_synce_clock_hw_id_t dpll_type;
+
+            if ((meba_synce_spi_if_get_dpll_type(inst, &dpll_type) == MESA_RC_OK) && (dpll_type != MEBA_SYNCE_CLOCK_HW_NONE)) {
+                return 1;
             } else {
                 return 0;
             }
-
-        case MEBA_CAP_POE_BT:
-            return true;
-
-        case MEBA_CAP_SYNCE_STATION_CLOCK_MUX_SET:
-            return false;
-
-        case MEBA_CAP_CPU_PORTS_COUNT:
+        } else {
             return 0;
+        }
 
-        default:
-            T_E(inst, "Unknown capability %d", cap);
-            MEBA_ASSERT(0);
+    case MEBA_CAP_POE_BT:
+        return true;
+
+    case MEBA_CAP_SYNCE_STATION_CLOCK_MUX_SET:
+        return false;
+
+    case MEBA_CAP_CPU_PORTS_COUNT:
+        return 0;
+
+    default:
+        T_E(inst, "Unknown capability %d", cap);
+        MEBA_ASSERT(0);
     }
     return 0;
 }
 
 static mesa_rc eds2_port_entry_get(meba_inst_t inst,
-                                      mesa_port_no_t port_no,
-                                      meba_port_entry_t *entry)
+                                   mesa_port_no_t port_no,
+                                   meba_port_entry_t *entry)
 {
     mesa_rc rc;
     meba_board_state_t *board = INST2BOARD(inst);
@@ -448,7 +445,7 @@ static mesa_rc eds2_port_entry_get(meba_inst_t inst,
 }
 
 static mesa_rc eds2_reset(meba_inst_t inst,
-                             meba_reset_point_t reset)
+                          meba_reset_point_t reset)
 {
     meba_board_state_t *board = INST2BOARD(inst);
     mesa_rc rc = MESA_RC_OK;
@@ -460,18 +457,18 @@ static mesa_rc eds2_reset(meba_inst_t inst,
         break;
 
     case MEBA_PORT_LED_INITIALIZE:
-            mesa_port_no_t   port_no;
-            mepa_gpio_conf_t conf;
+        mesa_port_no_t   port_no;
+        mepa_gpio_conf_t conf;
 
-            conf.gpio_no = 17;
-            for (port_no = 0; port_no < board->port_cnt; port_no++) {
-                conf.led_num = MEPA_LED0;
-                conf.mode = MEPA_GPIO_MODE_LED_LINK10_100_ACTIVITY;
-                (void)meba_phy_gpio_mode_set(inst, port_no, &conf);
-                conf.led_num = MEPA_LED1;
-                conf.mode = MEPA_GPIO_MODE_LED_LINK1000_ACTIVITY;
-                (void)meba_phy_gpio_mode_set(inst, port_no, &conf);
-            }
+        conf.gpio_no = 17;
+        for (port_no = 0; port_no < board->port_cnt; port_no++) {
+            conf.led_num = MEPA_LED0;
+            conf.mode = MEPA_GPIO_MODE_LED_LINK10_100_ACTIVITY;
+            (void)meba_phy_gpio_mode_set(inst, port_no, &conf);
+            conf.led_num = MEPA_LED1;
+            conf.mode = MEPA_GPIO_MODE_LED_LINK1000_ACTIVITY;
+            (void)meba_phy_gpio_mode_set(inst, port_no, &conf);
+        }
         break;
 
     case MEBA_PORT_RESET:
@@ -483,9 +480,9 @@ static mesa_rc eds2_reset(meba_inst_t inst,
     case MEBA_POE_INITIALIZE:
         break;
     case MEBA_INTERRUPT_INITIALIZE:
-           // GPIO 24 is IRQ from PHYs
-            (void)mesa_gpio_mode_set(NULL, 0, GPIO_IRQ, MESA_GPIO_ALT_4);
-            (void)mesa_gpio_event_enable(NULL, 0, GPIO_IRQ, true);
+        // GPIO 24 is IRQ from PHYs
+        (void)mesa_gpio_mode_set(NULL, 0, GPIO_IRQ, MESA_GPIO_ALT_4);
+        (void)mesa_gpio_event_enable(NULL, 0, GPIO_IRQ, true);
         break;
     case MEBA_PHY_INITIALIZE:
         inst->phy_devices = (mepa_device_t **)&board->phy_devices;
@@ -500,13 +497,13 @@ static mesa_rc eds2_reset(meba_inst_t inst,
 }
 
 static mesa_rc eds2_sfp_i2c_xfer(meba_inst_t inst,
-                                    mesa_port_no_t port_no,
-                                    mesa_bool_t write,
-                                    uint8_t i2c_addr,
-                                    uint8_t addr,
-                                    uint8_t *data,
-                                    uint8_t cnt,
-                                    mesa_bool_t word_access)
+                                 mesa_port_no_t port_no,
+                                 mesa_bool_t write,
+                                 uint8_t i2c_addr,
+                                 uint8_t addr,
+                                 uint8_t *data,
+                                 uint8_t cnt,
+                                 mesa_bool_t word_access)
 {
     mesa_rc rc;
     uint8_t i2c_data[3];
@@ -523,7 +520,7 @@ static mesa_rc eds2_sfp_i2c_xfer(meba_inst_t inst,
 }
 
 static mesa_rc eds2_sfp_insertion_status_get(meba_inst_t inst,
-                                                mesa_port_list_t *present)
+                                             mesa_port_list_t *present)
 {
     mesa_rc                rc = MESA_RC_OK;
     meba_board_state_t     *board = INST2BOARD(inst);
@@ -542,8 +539,8 @@ static mesa_rc eds2_sfp_insertion_status_get(meba_inst_t inst,
 }
 
 static mesa_rc eds2_sfp_status_get(meba_inst_t inst,
-                                      mesa_port_no_t port_no,
-                                      meba_sfp_status_t *status)
+                                   mesa_port_no_t port_no,
+                                   meba_sfp_status_t *status)
 {
     mesa_rc                rc = MESA_RC_OK;
     meba_board_state_t     *board = INST2BOARD(inst);
@@ -561,8 +558,8 @@ static mesa_rc eds2_sfp_status_get(meba_inst_t inst,
 }
 
 static mesa_rc eds2_port_admin_state_set(meba_inst_t inst,
-                                            mesa_port_no_t port_no,
-                                            const meba_port_admin_state_t *state)
+                                         mesa_port_no_t port_no,
+                                         const meba_port_admin_state_t *state)
 {
     mesa_rc            rc = MESA_RC_OK;
     meba_board_state_t *board = INST2BOARD(inst);
@@ -643,13 +640,13 @@ static mesa_rc sgpio_handler(meba_inst_t inst, meba_board_state_t *board, meba_e
 // call again the procedure to clear the interrupt lines.
 static mesa_rc gpio_handler_active(mesa_bool_t *button, mesa_bool_t *phy)
 {
-	mesa_gpio_read(NULL, 0, GPIO_IRQ, phy);
-	mesa_gpio_read(NULL, 0, GPIO_PUSH_BUTTON, button);
+    mesa_gpio_read(NULL, 0, GPIO_IRQ, phy);
+    mesa_gpio_read(NULL, 0, GPIO_PUSH_BUTTON, button);
 
-	*phy = !(*phy);
-	*button = !(*button);
+    *phy = !(*phy);
+    *button = !(*button);
 
-	return *phy == true || *button == true ? MESA_RC_OK : MESA_RC_ERROR;
+    return *phy == true || *button == true ? MESA_RC_OK : MESA_RC_ERROR;
 }
 
 static mesa_rc gpio_handler(meba_inst_t inst, meba_board_state_t *board, meba_event_signal_t signal_notifier)
@@ -689,8 +686,9 @@ repeat_handler:
 
     // If the GPIO line is still active at this point, it is required to
     // reiterate over all the devices and see why they are polling the line.
-    if (gpio_handler_active(&button, &phy) == MESA_RC_OK)
+    if (gpio_handler_active(&button, &phy) == MESA_RC_OK) {
         goto repeat_handler;
+    }
 
     return (handled ? MESA_RC_OK : MESA_RC_ERROR);
 }
@@ -707,8 +705,8 @@ static mesa_rc cu_phy_handler(meba_inst_t inst, meba_board_state_t *board,
 }
 
 static mesa_rc eds2_irq_handler(meba_inst_t inst,
-                                   mesa_irq_t chip_irq,
-                                   meba_event_signal_t signal_notifier)
+                                mesa_irq_t chip_irq,
+                                meba_event_signal_t signal_notifier)
 {
     meba_board_state_t *board = INST2BOARD(inst);
 
@@ -765,8 +763,8 @@ static mesa_rc eds2_irq_requested(meba_inst_t inst, mesa_irq_t chip_irq)
 }
 
 static mesa_rc eds2_event_enable(meba_inst_t inst,
-                                    meba_event_t event_id,
-                                    mesa_bool_t enable)
+                                 meba_event_t event_id,
+                                 mesa_bool_t enable)
 {
     mesa_rc               rc = MESA_RC_OK;
     meba_board_state_t    *board = INST2BOARD(inst);
@@ -797,7 +795,7 @@ static mesa_rc eds2_event_enable(meba_inst_t inst,
             if (is_phy_port(board->entry[port_no].cap)) {
                 T_D(inst, "Enable event MEBA_EVENT_FLNK for port %d", port_no);
                 if ((rc = meba_phy_event_enable_set(inst, port_no, VTSS_PHY_LINK_FFAIL_EV, enable)) != MESA_RC_OK) {
-                    T_E(inst ,"Event MEBA_EVENT_FLINK Set is failed for port:%d", port_no);
+                    T_E(inst, "Event MEBA_EVENT_FLINK Set is failed for port:%d", port_no);
                 }
             }
         }
@@ -866,7 +864,7 @@ meba_inst_t meba_initialize(size_t callouts_size,
     board = INST2BOARD(inst);
 
     // Always allocate for 8 ports
-    board->entry = (lan966x_port_info_t*) calloc(8, sizeof(lan966x_port_info_t));
+    board->entry = (lan966x_port_info_t *) calloc(8, sizeof(lan966x_port_info_t));
     if (board->entry == NULL) {
         fprintf(stderr, "Port table malloc failure\n");
         goto error_out;

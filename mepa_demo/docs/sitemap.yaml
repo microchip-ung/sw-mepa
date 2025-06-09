@@ -25,6 +25,8 @@ pages:
         - src: "mepa_demo/docs/loopback-demo.adoc"
         - src: "mepa_demo/docs/diagnostics-demo.adoc"
         - src: "mepa_demo/docs/crossconnect-demo.adoc"
+        - src: "mepa_demo/docs/phy-warmstart-app.adoc"
+        - src: "mepa_demo/docs/timestamp-demo.adoc"
 
     - name: "MEPA App Reference"
       pages:

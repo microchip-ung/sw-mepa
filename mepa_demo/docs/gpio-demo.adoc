@@ -9,20 +9,23 @@ configured through GPIO Registers.
 
 Each GPIO Pin in PHY can perform one of the following functions +
 
-* `GPIO Input` +
-* `GPIO Output` +
-* `GPIO Alternate Function` +
+* GPIO Input +
+* GPIO Output +
+* GPIO Alternate Function +
 
 == Directory
 * `./mepa_demo/mepa_apps/phy_gpio_demo.h` - Header File for GPIO Demo Application
 * `./mepa_demo/mepa_apps/phy_gpio_demo.c` - Source File for GPIO Demo Application
 
 == GPIO Application Supported Commands
-GPIO Sample Application has following three commands to configure the GPIO Pin of the PHY.
+GPIO Sample Application has following commands to configure the GPIO Pin and events of the PHY.
 
     * link:#mepa_demo/docs/gpio-demo@_gpio_mode_configuration[gpio_conf] -- GPIO Pin Mode Configuration
     * link:#mepa_demo/docs/gpio-demo@_gpio_write[gpio_out_set] -- Configure the Value for GPIO Pin
     * link:#mepa_demo/docs/gpio-demo@_gpio_read[gpio_in_get] -- Get the Current value of GPIO Pin
+    * link:#mepa_demo/docs/gpio-demo@_gpio_toggle[gpio_toggle] -- Toggle the Current value of GPIO Pin
+    * link:#mepa_demo/docs/gpio-demo@_event_set[event_set] -- Enable/Disable the Events
+    * link:#mepa_demo/docs/gpio-demo@_event_poll[event_poll] -- Enable the polling and get the events triggered
 
 == GPIO Mode Configuration
 GPIO Pin can be configured as *Output* or *Input* or *Alternate Mode* with help of the following Application 
@@ -318,6 +321,110 @@ multiple data rates. In VSC8258 daughter Card it is forced pull up which means i
 NOTE: The Aggregate Interrupts Configuration is not supported now in application due to API Configuration issue, it is reported as 
 know issue.
 
+=== GPIO Configuration for LAN80XX PHY
+LAN80XX PHY has 40 GPIO Pins and each pin can be configured as `Output` or `Input` mode or else it can be configured
+as `Alternate` function.
+
+GPIO pins of LAN80XX can be set to any function as needed, but this GPIO Sample app will use the recommended GPIO configuration
+from the LAN80XX datasheet (Table 2-4) for Alternate function configuration.
+
+The Command `gpio_conf` will configure the GPIO Pin as any of the following Mode: +
+
+    * link:#mepa_demo/docs/gpio-demo@_output_mode_configuration[Output Mode] +
+    * link:#mepa_demo/docs/gpio-demo@_input_mode_configuration[Input Mode]  +
+    * link:#mepa_demo/docs/gpio-demo@_alternate_mode_configuration[Alternate Function] +
+
+The Command `gpio_conf` is used with port number as argument of command to configure the GPIO Pin, below is the
+example provided.
+
+----
+#
+#
+#mepa-cmd gpio_conf 1
+
+         1 . Output Mode
+         2 . Input Mode
+         3 . Alternate Mode
+
+         ==Enter the Mode of GPIO Pin : <input>
+#
+#
+----
+
+ * Once the *gpio_conf* is given application will provide the list of options, user have to select the option based on
+the requirement.
+
+ * If the GPIO Pin needs to configured in *Output* mode user should enter `<Output>` as 1, if the Pin to be configured as
+*Input* mode then the value of `<input>` should be 2 and for *Alternate Function* it should be 3.
+
+
+==== Output Mode Configuration
+If user selects the Mode of the GPIO as *Output* then user needs to provide the GPIO Number, push-pull or open
+drain mode.
+
+Below example provides the Configuration of GPIO Pin 4 as Output.
+
+----
+# mepa-cmd gpio_conf 4
+
+         1 . Output Mode
+         2 . Input Mode
+         3 . Alternate Mode
+         Enter the Mode of GPIO Pin : 1
+
+         Enter GPIO Number to be configured as Output mode: 4
+
+         Enter the GPIO in 1 - Push pull mode or 0 - Open drain mode : 1
+
+GPIO Configured succesfully
+#
+----
+
+==== Input Mode Configuration
+If user selects the Mode of the GPIO as *Input* then user needs to provide the GPIO Number, push-pull or open
+drain mode and GPIO pins state change interrupt.
+
+Below example provides the Configuration of GPIO Pin 10 as Input and trigger interrupt if any state change
+occurs to GPIO_INTR1
+
+----
+# mepa-cmd gpio_conf 4
+
+         1 . Output Mode
+         2 . Input Mode
+         3 . Alternate Mode
+         Enter the Mode of GPIO Pin : 2
+
+         Enter GPIO Number to be configured as Input mode: 10
+
+         Enter the GPIO in 1 - Push pull mode or 0 - Open drain mode : 1
+
+         Enter the GPIO interrupt [0 -  GPIO_INTR_NONE or 1 - GPIO_INTR0 or 2 - GPIO_INTR1 : 2
+GPIO Configured succesfully
+#
+----
+
+==== Alternate Mode Configuration
+If user selects the Mode of the GPIO as *Alternate* then user needs to provide the GPIO Number,push-pull or open
+drain mode.
+
+Below example provides the Configuration of GPIO Pin 34 as alternate function.
+
+----
+# mepa-cmd gpio_conf 4
+
+         1 . Output Mode
+         2 . Input Mode
+         3 . Alternate Mode
+         Enter the Mode of GPIO Pin : 3
+
+         Enter GPIO Number to be configured as Alternate mode: 34
+
+         Enter the GPIO in 1 - Push pull mode or 0 - Open drain mode : 1
+
+GPIO Configured succesfully
+#
+----
 === GPIO Read
 The Current value of the GPIO Pin can be read directly through the corresponding GPIO Data Register which will be done
 through the command `gpio_in_get`.
@@ -348,8 +455,203 @@ Below example writes 1 to GPIO pin 4
 
 ----
 #
-#
 # mepa-cmd gpio_out_set 17 4 enable
 #
+----
+
+=== GPIO Toggle
+The value of a GPIO pin configured as an output can be toggled directly by configuring it through the GPIO Data Register using the `gpio_toggle` command.
+
+The syntax for command to toggle GPIO +
+
+    * `mepa-cmd gpio_toggle <port_no> <gpio_num>`
+
+Below example toggles GPIO pin 4
+
+----
+#
+# mepa-cmd gpio_toggle 1 4
 #
 ----
+
+=== Event Set
+All events can be enabled or disabled, and interrupts can be routed to either aggregate interrupt A or B using the event_set command for the specified port.
+
+The syntax for command to enable event +
+
+    * `mepa-cmd event_set <port_no> <event_list> [enable|disable] [intr_a|intr_b]`
+
+To List the all available arguments in the event_set run the below mentioned command.
+
+----
+mepa-cmd event_set 4 ?
+Description:
+Event set configuration.
+
+Syntax:
+event_set <port_no> <event_list> [enable|disable] [intr_a|intr_b]
+
+Parameters:
+: Port number or zero
+: Set the events and extended events list
+Below mentioned are the list of events:
+        "127 - L3_FIFO_ERROR_INTR"
+        "126 - L2_FIFO_ERROR_INTR"
+        "125 - L1_FIFO_ERROR_INTR"
+        "124 - L0_FIFO_ERROR_INTR"
+        "123 - H3_FIFO_ERROR_INTR"
+        "122 - H2_FIFO_ERROR_INTR"
+        "121 - H1_FIFO_ERROR_INTR"
+        "120 - H0_FIFO_ERROR_INTR"
+        "119 - L3_COND_ALT_UNF_DET_INTR"
+        "118 - L2_COND_ALT_UNF_DET_INTR"
+        "117 - L1_COND_ALT_UNF_DET_INTR"
+        "116 - L0_COND_ALT_UNF_DET_INTR"
+        "115 - H3_COND_ALT_UNF_DET_INTR"
+        "114 - H2_COND_ALT_UNF_DET_INTR"
+        "113 - H1_COND_ALT_UNF_DET_INTR"
+        "112 - H0_COND_ALT_UNF_DET_INTR"
+        "111 - L3_COND_ALT_DET_INTR"
+        "110 - L2_COND_ALT_DET_INTR"
+        "109 - L1_COND_ALT_DET_INTR"
+        "108 - L0_COND_ALT_DET_INTR"
+        "107 - H3_COND_ALT_DET_INTR"
+        "106 - H2_COND_ALT_DET_INTR"
+        "105 - H1_COND_ALT_DET_INTR"
+        "104 - H0_COND_ALT_DET_INTR"
+        "103 - L3_SWITCH_INTR"
+        "102 - L2_SWITCH_INTR"
+        "101 - L1_SWITCH_INTR"
+        "100 - L0_SWITCH_INTR"
+        "99 - H3_SWITCH_INTR"
+        "98 - H2_SWITCH_INTR"
+        "97 - H1_SWITCH_INTR"
+        "96 - H0_SWITCH_INTR"
+        "95 - WPS0_FAILOVER_INTR"
+        "94 - WPS1_FAILOVER_INTR"
+        "93 - WPS0_CONN_FAULT_INTR"
+        "92 - WPS1_CONN_FAULT_INTR"
+        "91 - WPS0_FC_ACK_TIMER_INTR"
+        "90 - WPS1_FC_ACK_TIMER_INTR"
+        "89 - LINE_PMA_RXEI_FILTERED_INTR"
+        "88 - LINE_PMA_RESET_DONE_INTR"
+        "87 - HOST_PMA_RXEI_FILTERED_INTR"
+        "86 - HOST_PMA_RESET_DONE_INTR"
+        "85 - LINE_MAC_MM_PRMPT_UNEXP_TX_PFRM_INTR"
+        "84 - LINE_MAC_MM_PRMPT_UNEXP_RX_PFRM_INTR"
+        "83 - LINE_MAC_MM_PRMPT_ACTIVE_INTR"
+        "82 - HOST_MAC_MM_PRMPT_UNEXP_TX_PFRM_INTR"
+        "81 - HOST_MAC_MM_PRMPT_UNEXP_RX_PFRM_INTR"
+        "80 - HOST_MAC_MM_PRMPT_ACTIVE_INTR"
+        "79 - LINE_PMAC_RX_PREAMBLE_SHRINK"
+        "78 - LINE_PMAC_RX_PREAMBLE_MISMATCH"
+        "77 - LINE_PMAC_RX_PREAMBLE_ERR"
+        "76 - LINE_PMAC_RX_NON_STD_PREAMBLE_INTR"
+        "75 - LINE_PMAC_RX_MPLS_MC_INTR"
+        "74 - LINE_PMAC_RX_MPLS_UC_INTR"
+        "73 - LINE_PMAC_TX_UNDERFLOW_INTR"
+        "72 - LINE_PMAC_TX_ABORT_INTR"
+        "71 - HOST_PMAC_RX_PREAMBLE_SHRINK"
+        "70 - HOST_PMAC_RX_PREAMBLE_MISMATCH"
+        "69 - HOST_PMAC_RX_PREAMBLE_ERR"
+        "68 - HOST_PMAC_RX_NON_STD_PREAMBLE_INTR"
+        "67 - HOST_PMAC_RX_MPLS_MC_INTR"
+        "66 - HOST_PMAC_RX_MPLS_UC_INTR"
+        "65 - HOST_PMAC_TX_UNDERFLOW_INTR"
+        "64 - HOST_PMAC_TX_ABORT_INTR"
+        "63 - GPIO_INTR_1"
+        "62 - GPIO_INTR_0"
+        "61 - LINE_MAC_LOCAL_ERR_STATE_INTR"
+        "60 - LINE_MAC_REMOTE_ERR_STATE_INTR"
+        "59 - LINE_MAC_IDLE_STATE_INTR"
+        "58 - LINE_MAC_DIS_STATE_INTR"
+        "57 - HOST_MAC_LOCAL_ERR_STATE_INTR"
+        "56 - HOST_MAC_REMOTE_ERR_STATE_INTR"
+        "55 - HOST_MAC_IDLE_STATE_INTR"
+        "54 - HOST_MAC_DIS_STATE_INTR"
+        "53 - LINE_MAC_RX_IPG_SHRINK_INTR"
+        "52 - LINE_MAC_RX_PREAMBLE_SHRINK_INTR"
+        "51 - LINE_MAC_RX_PREAMBLE_MISMATCH_INTR"
+        "50 - LINE_MAC_RX_PREAM_ERR_INTR"
+        "49 - LINE_MAC_RX_NON_STD_PREAMBLE_INTR"
+        "48 - LINE_MAC_RX_MPLS_MC_INTR"
+        "47 - LINE_MAC_RX_MPLS_UC_INTR"
+        "46 - LINE_MAC_RX_TAG_INTR"
+        "45 - LINE_MAC_TX_UNDERFLOW_INTR"
+        "44 - LINE_MAC_TX_ABORT_INTR"
+        "43 - HOST_MAC_RX_IPG_SHRINK_INTR"
+        "42 - HOST_MAC_RX_PREAMBLE_SHRINK_INTR"
+        "41 - HOST_MAC_RX_PREAMBLE_MISMATCH_INTR"
+        "40 - HOST_MAC_RX_PREAM_ERR_INTR"
+        "39 - HOST_MAC_RX_NON_STD_PREAMBLE_INTR"
+        "38 - HOST_MAC_RX_MPLS_MC_INTR"
+        "37 - HOST_MAC_RX_MPLS_UC_INTR"
+        "36 - HOST_MAC_RX_TAG_INTR"
+        "35 - HOST_MAC_TX_UNDERFLOW_INTR"
+        "34 - HOST_MAC_TX_ABORT_INTR"
+        "33 - EGR_FC_BUFFER_FAULT_READ"
+        "32 - EGR_FC_BUFFER_DED_INTR"
+        "31 - EGR_FC_BUFFER_SEC_INTR"
+        "30 - INGR_FC_BUFFER_FAULT_READ_INTR"
+        "29 - INGR_FC_BUFFER_DED_INTR"
+        "28 - INGR_FC_BUFFER_SEC_INTR"
+        "27 - EGR_FC_BUFFER_INIT_DONE_INTR"
+        "26 - INGR_FC_BUFFER_INIT_DONE_INTR"
+        "25 - EGR_ECC_INTERRUPT_STATUS_INTR"
+        "24 - INGR_ECC_INTERRUPT_STATUS_INTR"
+        "23 - RX_UNDERFLOW_DROP_INTR"
+        "22 - RX_OVERFLOW_DROP_INTR"
+        "21 - TX_DATA_QUEUE_UNDERFLOW_DROP_INTR"
+        "20 - TX_DATA_QUEUE_OVERFLOW_DROP_INTR"
+        "19 - TX_CTRL_QUEUE_UNDERFLOW_DROP_INTR"
+        "18 - TX_CTRL_QUEUE_OVERFLOW_DROP_INTR"
+        "17 - RX_UNCORRECTED_FRM_DROP_INTR"
+        "16 - TX_UNCORRECTED_FRM_DROP_INTR"
+        "15 - XON_PAUSE_GEN_INTR"
+        "14 - XOFF_PAUSE_GEN_INTR"
+        "13 - L2H_RA_FIFO_OVERFLOW_INTR"
+        "12 - L2H_RA_FIFO_UNDERFLOW_INTR"
+        "11 - H2L_RA_FIFO_OVERFLOW_INTR"
+        "10 - H2L_RA_FIFO_UNDERFLOW_INTR"
+        "9 - HOST_PCS25G_HI_BER_INTR"
+        "8 - HOST_PCS25G_BLOCK_LOCK_INTR"
+        "7 - HOST_PCS25G_ALIGN_DONE_INTR"
+        "6 - LINE_PCS25G_HI_BER_INTR"
+        "5 - LINE_PCS25G_BLOCK_LOCK_INTR"
+        "4 - LINE_PCS25G_ALIGN_DONE_INTR"
+        "3 - HOST_PCS1G_OUT_OF_SYNC_INTR"
+        "2 - HOST_PCS1G_LINK_DOWN_INTR"
+        "1 - LINE_PCS1G_OUT_OF_SYNC_INTR"
+        "0 - LINE_PCS1G_LINK_DOWN_INTR",
+
+enable : Enable
+disable : Disable
+(default: Show mode)
+intr_a : Enable aggregate interrupt A
+intr_b : Enable aggregate interrupt B
+----
+
+Below example configures event 4,5,88 to aggregate interrupt A
+
+----
+#
+# mepa-cmd event_set 4 4,55,88 enable intr_a
+Event configured successfully
+#
+----
+
+=== Event Poll
+Enable the polling and retrieve the triggered events using `event_poll` command.
+
+The syntax for command event_poll +
+   * `mepa-cmd event_poll <port_no> [enable|disable]`
+
+Below example to enable polling on port 1
+
+----
+#
+# mepa-cmd event_poll 1 enable
+#
+----
+
+Note:: 1G Host PCS Link down interrupt not get cleared is an known issue.

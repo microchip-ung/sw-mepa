@@ -3340,7 +3340,7 @@ int gpy2xx_ptp_resetauxfifo(struct gpy211_device *phy)
 	}
 
 	/* after reset, re-enable auxiliary snapshot */
-	_data0 = (_data0 && ~GMACF_MAC_AUXILIARY_CONTROL_L_ATSFC_MASK);
+	_data0 = (_data0 & ~GMACF_MAC_AUXILIARY_CONTROL_L_ATSFC_MASK);
 	FIELD_REPLACE(_data0, 1, GMACF_MAC_AUXILIARY_CONTROL_L_ATSEN0);
 	ret = PHY_MBOX_HWWR(phy, _gmacf_base_addr + GMACF_MAC_AUXILIARY_CONTROL_L, _data0);
 

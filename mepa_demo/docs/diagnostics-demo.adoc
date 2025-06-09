@@ -3,50 +3,372 @@
 
 = Diagnostics Demo Application
 
-Following are the diagnostic features supported by the Application for 1G PHYs:
+== Diagnostics Demo Application Description
+PHYs supports different Diagnostics Features which will help to get the Optimized data path and also it is
+used to troubleshoot issues in the PHY.
 
-* `Cable Diagnostics` +
+Following are the Debug Features supported by the Application:
+
+*  link:#mepa_demo/docs/diagnostics-demo@_register_dump_of_phy[Register Dump of PHY] +
+*  link:#mepa_demo/docs/diagnostics-demo@_rx_eye_diagram[Rx EYE Diagram] +
+*  link:#mepa_demo/docs/diagnostics-demo@_serdes_tx_equalizer_configuration[Tx Equalizer Config] +
+*  link:#mepa_demo/docs/diagnostics-demo@_serdes_rx_equalizer_configuration[Rx Equalizer Config] +
+*  link:#mepa_demo/docs/diagnostics-demo@_csr_register_read_and_write[CSR Read and Write] +
+*  link:#mepa_demo/docs/diagnostics-demo@_packet_bist_test[Packet BIST] +
+*  link:#mepa_demo/docs/diagnostics-demo@_serdes_prbs_testing[PRBS] +
+*  link:#mepa_demo/docs/diagnostics-demo@_sfp_eeprom_read[SFP Read] 
+
 
 == Directory
-* `./mepa_demo/mepa_apps/phy_diagnostics.c` - Source File for Diagnostics Sample Application
+* `./mepa_demo/mepa_apps/phy25g_diagnostics.c` - Source File for Diagnostics Sample Application
 
 == Diagnostics Application Features
 Following Sections describe the various features supported by this application.
 
-== Cable Diagnostics
-Cable diagnostic suite provides extensive network cable information such as
-link status, cable length, termination status and open/short fault location.
+=== Register Dump of PHY
+The following command is used to retrieve and display all the registers of the PHY connected to the specified port number.
+It reads all the registers of the PHY associated with that port and presents the register values in a block-wise format,
+which can be utilized for debugging purposes.
 
 ----
-#mepa-cmd cable_diagnostics <port_no>
+mepa-cmd debug api cil phy <port_no>
 ----
 
-The above command is used to start the Cable Diagnostics and display the Cable diagnostics results for for the particular port of PHYDescriptions of various arguments in the command is listed below.
+=== Serdes Tx Equalizer Configuration
+The Following command is used to configure the Tx Equalizer Coefficients
+
+----
+#mepa-cmd tx_eqa <port_no> <host|line> amp <equ_val> tap_dly <equ_val> tap_adv <equ_val>
+----
+
+The Configurable Coefficients supported by the commands are
+
+* *TAP_DLY*
+* *TAP_ADV*
+* *AMP CODE*
+
+Coefficients of either HOST or LINE side Serdes can be changed by using the *[host|line]* argument of the
+command.
+
+NOTE: For EDSx + M25G Setup the Port configuration API will configure the Optimal Tx Equalizer Parameters which provides Stable Link and
+Error Free Traffic for selected Media type selected. Customer can change the Tx Equalizers using this command to tune Filter Coefficients in TX Path
+to improve the Signal Strength and get Error Free Path, where the Signal Strength depends on on Placement of chip, Boards and Environmental Conditions. 
+
+=== Serdes Rx Equalizer Configuration
+
+The Following command is used to configure the Rx Equalizer Coefficients
+
+----
+#mepa-cmd rx_eqa <port_no> <host|line> <dfe_adp|dfe_man|disable> ctle_r <equ_val> ctle_c <equ_val> vga <equ_val>
+----
+
+The Configurable Coefficients supported by the commands are
+
+* *DFE* +
+
+    * *dfe_adp* -- Adaptive DFE Enable 
+    * *dfe_man* -- Manual DFE Enable 
+    * *disable* -- Disable Both Adaptive and Manual Mode DFE 
+
+* *CTLE R* +
+* *CTLE C* +
+* *VGA* +
+
+Coefficients of either HOST or LINE side Serdes can be changed by using the *<host|line>* argument of the
+command.
+
+Note:: DFE Manual Mode is Not-Supported in M25G MEPA.
+
+NOTE: For EDSx + M25G Setup the Port configuration API will configure the Optimal Rx Equalizer Parameters which provides Stable Link and
+Error Free Traffic for selected Media type selected. Customer can change the Rx Equalizers using this command to tune Filter Coefficients in RX Path
+to improve the Signal Strength and get Error Free Path, where the Signal Strength depends on on Placement of chip, Boards and Environmental Conditions.
+
+=== Rx EYE Diagram
+Eye diagram is crucial for visualizing and understanding the data recovery and processing on the receiver side of
+the serdes. This Eye Diagram is used to analyze the integrity of data path and we can analyze the ammount of
+distortion/noise in the Datapath.
+
+----
+#mepa-cmd eye_diag <port_no> <normal|fast> <host|line>
+----
+
+The above command is used to get the Rx Eye Diagram and Eye height of the Port.Descriptions of various arguments in 
+the command is listed below.
 
 * `port_no`       -- Port Number +
+* `[normal|fast]` -- Normal Eye Scan or Fast Eye Scan +
+* `[host|line]`   -- Eye Diagram of HOST Serdes or LINE Serdes +
 
+This Command will also lists the Tx and Rx Equalizer Coefficients of the Port.
 
-Following Example shows the Cable Diagnostics of the Port for Open Fault case
+LAN80XX supports two types of EYE scan *Fast Scan* and *Normal Scan*, Where Normal Scan will Display the full Eye Diagram
+of the Serdes and Fast scan will give only the Eye Height.
+
+Following Example shows the Normal Eye Diagram of the Port
 
 ----
 #
-# mepa-cmd cable_diagnostics 1
-
-Cable Diagnostics started on Port : 0
-
-Cable Diagnostic Result on Port 0
+# mepa-cmd eye_diag 14 normal line
 
 
-LINK     PAIR     STATUS     LENGTH 
- 0       A        OPEN       123
- 0       B        OPEN       120
- 0       C        OPEN       124
- 0       D        OPEN       120
+ Port 14, LINE
+=================
+
+
+ Equalizers Coefficients
+ --------------------------------
+
+ Tx Coefficients :
+         Tap Dly : 16
+         Tap Adv : 0
+         Amp Code: 87
+
+ Rx Coefficients :
+         DFE     : Disabled
+         VGA     : 7
+         CTLE R  : 3
+         CTLE C  : 2
+
+ Scan Type : Normal Scan
+
+ Vref |
+ --------------------------------------------------------------------------
+ 000  | 11111111111111111111111000000000010000000001111111111111111111111
+ 008  | 11111111111111111111110000000000000000000000000000111111111111111
+ 016  | 11111111111111111111100000000000000000000000000000001111111111111
+ 024  | 11111111111111111111100000000000000000000000000000000011111111111
+ 032  | 11111111111111111111000000000000000000000000000000000001111111111
+ 040  | 11111111111111110000000000000000000000000000000000000000011111111
+ 048  | 11111111111111100000000000000000000000000000000000000000001111111
+ 056  | 11111111111111000000000000000000000000000000000000000000000111111
+ 064  | 11111111110000000000000000000000000000000000000000000000000011111
+ 072  | 11111111100000000000000000000000000000000000000000000000001111111
+ 080  | 11111111110000000000000000000000000000000000000000000000001111111
+ 088  | 11111111111110000000000000000000000000000000000000000001111111111
+ 096  | 11111111111111100000000000000000000000000000000000000011111111111
+ 104  | 11111111111111111000000000000000000000000000000000011111111111111
+ 112  | 11111111111111111111100000000000000000000000000100111111111111111
+ 120  | 11111111111111111111110000000000000000000001111111111111111111111
+ 127  | 11111111111111111111111110000111111111111111111111111111111111111
+#
+#
+#
 ----
-When Link is Up here is the result of Cable Diagnostics for the Port 
+
+=== CSR Register Read and Write
+The Following two Commands will do `Clause 45` CSR Register Read and Write.
+
 ----
-# mepa-cmd cable_diagnostics 1
+#mepa-cmd cl45_read <port_no> <mmd> <address>
+----
 
-Cable Diagnostics cannot be performed for the Port 0 when link is UP
+----
+#mepa-cmd cl45_write <port_no> <mmd> <address> <reg_val>
+----
 
+Note:: The Arguments *mmd*, *address* and *reg_val* are accepted as Hexadecimal Value so enter
+the values as Hexadecimal.
+
+Following is example log of clause 45 CSR Read and Write
+
+----
+# mepa-cmd cl45_read 16 1f c40
+
+Port  MMD   Address  31      24 23       16 15       8   7       0    Value
+----  ----  -------  -----------------------------------------------  -----
+16    31    0x0c40   0000. 0000. 0000. 0000. 0000. 0010. 0000. 0001   201
+#
+#
+#
+#
+# mepa-cmd cl45_write 16 1f c40 201
+#
+#
+#
+# mepa-cmd cl45_read 16 1f c40
+
+Port  MMD   Address  31      24 23       16 15       8   7       0    Value
+----  ----  -------  -----------------------------------------------  -----
+16    31    0x0c40   0000. 0000. 0000. 0000. 0000. 0010. 0000. 0001   201
+#
+#
+#
+----
+
+=== Packet BIST Test
+
+PHY has internal Packet generator which can generate Configurable Ethernet packet and send to either LINE side
+or HOST side of the Port.
+
+The parameters Ethertype, DMAC and SMAC are Configurable, and PHY also has Internal packet Checker where the packet generated
+by the Generator is looped back Externally and forward it to packet checker to validate the packet.
+
+Following are the commands which are used to Configure the Packet bist Block and get the packet Checker Counters.
+
+----
+mepa-cmd pkt_bist <port_no> <eth|ptp> <egr|ingr> <conti|single> <ethtype> <src_mac> <dst_mac> <gen_enable|gen_disable> <mon_enable|mon_disable>
+----
+
+* *<eth|ptp>* -- Ethernet packet or PTP packet
+* *<egr|ingr>* -- Forward packet in Egress or Ingress Direction
+* *<conti|single>* -- Continous Packet or Single packet
+* *<ethtype>* -- Ethtype of packet (Not valid when PTP packet is Selected)
+* *<src_mac>* -- Source MAC Address of packet
+* *<dst_mac>* -- Destination MAC Address of packet
+* *<gen_enable|gen_disable>* -- Enable or Disable Packet Generator
+* *<mon_enable|mon_disable>* -- Enable or Disable Packet Monitor/Checker
+
+
+Below Command is Used to get the Statistics of Packet Checker
+
+----
+mepa-cmd pkt_mon <port_no> reset [enable|disable]
+----
+
+* *reset [enable|disable]* -- Reset the Statistics Once read (Enable or Disable)
+
+
+Following Example will Generate a Single IPv4 Ethernet packet and Forward it to port 16 LINE side
+
+----
+#
+# mepa-cmd pkt_bist 16 ptp egr single 2048 00-01-02-03-04-05 aa-bb-cc-dd-ee-ff g
+en_enable mon_enable
+#
+#
+# mepa-cmd pkt_mon 16 reset disable
+
+
+ Port 16
+=================
+
+ Good CRC      : 1
+ Bad  CRC      : 0
+ Fragmented    : 0
+ Local Fault   : 0
+ BER           : 0
+#
+#
+----
+
+=== Serdes PRBS Testing
+Serdes has a PRBS Generator and PRBS Checker which helps to test the Signal Integrity, Bit Error
+and Clock Recovery of the Serdes, this can be used to verify that the Serdes Data path is Error free.
+
+Following are the different PRBS Commands which can used to Generate the PRBS Patterns from Serdes and
+Get the Status of PRBS Checker.
+
+==== PRBS Generator and PRBS Checker Config
+
+Following Command is used to configure the PRBS Generator, PRBS pattern and PRBS Checker
+
+----
+#mepa-cmd prbs_test <port_no> <host|line> <prbs7|prbs9|prbs11|prbs15|prbs23|prbs31|user_ptn> <gen_enable|gen_disable> <mon_enable|mon_disable> [<user_val>]
+----
+
+* *<port_no>* -- Port to be configured
+* *<host|line>* -- Configure HOST Side PRBS or LINE Side PRBS
+* *<prbs7|prbs9|prbs11|prbs15|prbs23|prbs31|user_ptn>* -- Different PRBS Patterns Supported
+* *<gen_enable|gen_disable>* -- Enable or Disable PRBS Generator
+* *<mon_enable|mon_disable>* -- Enable od Disable PRBS Checker
+* *[<user_val>]* -- User Define PRBS Pattern, Mandatory when Used Selected `user_ptn` as PRBS Pattern
+
+Note:: Formate of `[<user_val>]` ---> X,X,X,X,X,X,X,X  where X can vary from 0 - 255 all together will create a 8 Byte 
+User defined PRBS Pattern.
+
+Example Command to Configure PRBS15 to LINE Side of Port 16
+
+----
+#mepa-cmd prbs_test 16 line prbs7 gen_enable mon_enable
+----
+
+Example Comamnd to Configure User Defined Pattern to Line Side of Port 16
+
+----
+#mepa-cmd prbs_test 16 line prbs7 gen_enable mon_enable 170,170,170,170,170,170,170,170
+----
+
+
+==== PRBS Status Get
+
+Once the PRBS Generator and PRBS Monitor is configured we can see the PRBS BIST Status of the Port which was Configured using
+`prbs_test` command.
+
+----
+#mepa-cmd prbs_status <port_no> <host|line>
+----
+
+Following Example Shows the Status of Port 16 LINE Side PRBS
+
+----
+#
+# mepa-cmd prbs_status 16 line
+
+
+
+ Port 16, LINE
+=================
+
+PRBS Generator       : Enabled
+PRBS Monitor         : Enabled
+PRBS Type            : Serdes
+PRBS Pattern         : PRBS 7
+
+
+BIST Active          : Yes
+BIST Status          : BIST Ok
+BIST Error           : No
+BIST Incomplete      : No
+BIST Error Count     : 0
+#
+#
+----
+
+=== PHY Port Status
+
+The following command is used to get the Current Status of PCS and PMA of the Port, Speed of the PHY Port and Operating Mode
+of the PHY Port.This command also indicates the current status of Flow Control and FEC configuration on the port.
+
+----
+#mepa-cmd phy state <port_no>
+----
+
+Following Example shows the Port Status of the PHY
+----
+#
+# mepa-cmd phy state 1
+
+
+Port : 1
+==============
+
+Port Speed              : 10G
+
+Line PCS25G Rx Link     : Down
+Line PCS25G Rx Fault    : No
+Line PCS25G Tx Fault    : No
+
+Host PCS25G Rx Link     : Down
+Host PCS25G Rx Fault    : No
+Host PCS25G Tx Fault    : No
+
+PMA Rx Link             : Down
+PMA Rx Fault            : Yes
+PMA Tx Fault            : No
+
+Port Mode               : PCS Retimer
+Flow Control            : Disabled
+FEC Enabled             : R-FEC
+FEC Direction           : HOST-LINE
+#
+#
+----
+
+=== SFP EEPROM Read
+
+The following command will read the EEPROM registers of SFP module connected to the LINE side of the port and provide
+details about the SFP Transceiver Connected (Vendor Details and Type of Transceiver connected).
+
+----
+#mepa-cmd sfp vendor <port_no>
 ----

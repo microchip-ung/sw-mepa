@@ -1,0 +1,9 @@
+[
+    {
+        "id": "mesa",
+        "type": "build-artifact",
+        "release-version": "v2024.12",
+        "build-artifact-url": "https://artifacts-aws.devops.microchip.com/artifactory/ung-generic-dev-local/ci/UNGE/sw-mesa/2024.12-soak/12/",
+        "build-artifact-version-string": "mesa-v2024.12-1-g67a62ea88@2024.12-soak"
+    }
+]

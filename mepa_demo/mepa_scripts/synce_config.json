@@ -9,5 +9,14 @@
     "freq": "VTSS_PHY_10G_SCKOUT_125_00",
     "squelch_inv": 0,
     "enable": 1
+   },
+  "25g_synce": {
+    "src": "LAN80XX_SREFCLK",
+    "freq": "LAN80XX_RCKOUT_75_00",
+    "rcvd_clk_enable": 1,
+    "los_squelch_enable": 1,
+    "link_sts_enable": 1,
+    "auto_squelch_enable": 1,
+    "rckout_sel": "LAN80XX_RCKOUTA"
    }
 }

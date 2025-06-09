@@ -1872,8 +1872,8 @@ mesa_rc meba_synce_mux_set(meba_inst_t  inst,
             // represented by two device ids in the graph, one for clock 0 and one for clock 1.
             // Each lan8814 phy handle four ports, so the phy index need to be multiplied by four to get the
             // first port handled by the phy
-            int dev_index = (dev_id-800)/2;
-            int phy_port = dev_index*4;
+            int dev_index = (dev_id - 800) / 2;
+            int phy_port = dev_index * 4;
             phy_dev = inst->phy_devices[phy_port];
             conf.src = MEPA_SYNCE_CLOCK_SRC_CLOCK_IN_1 + input;
         }

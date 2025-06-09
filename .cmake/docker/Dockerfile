@@ -38,19 +38,34 @@ RUN sh -c "echo mchp-ca.crt >> /etc/ca-certificates.conf" \
 FROM ubuntu_base AS build-env-oss
 
 RUN apt-get install -y \
+    clang \
+    clang-format \
+    clang-tidy \
+    clangd \
     cmake \
     cmake-curses-gui \
+    gnupg \
+    libclang-dev \
     libjson-c-dev \
     libpcap-dev \
+    lsb-release \
     ninja-build \
     ruby-full \
     ruby-parslet \
+    software-properties-common \
     sudo \
+    wget \
     zlib1g-dev
 
-RUN gem install nokogiri -v '1.10.8' --source 'https://rubygems.org/' \
+RUN wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh \
+  && chmod +x /tmp/llvm.sh  \
+  && /tmp/llvm.sh 18 \
+  && apt-get install -y \
+    clang-format-18
+
+RUN gem install nokogiri -v '1.15.3' --source 'https://rubygems.org/' \
  && gem install asciidoctor -v '2.0.8' --source 'https://rubygems.org/' \
- && gem install mini_portile2 -v '2.4.0' --source 'https://rubygems.org/' \
+ && gem install mini_portile2 -v '2.8.2' --source 'https://rubygems.org/' \
  && gem install json_schemer -v '2.3.0' --source 'https://rubygems.org/' \
  && gem install hexdump packetfu ox
 
@@ -69,6 +84,23 @@ COPY ./.cmake/docker/mscc-download-pkg /usr/local/bin/.
 COPY ./.cmake/docker/mscc-install-pkg /usr/local/bin
 
 ENTRYPOINT [ "/entrypoint.sh" ]
+
+#########################################################################################################
+FROM ubuntu_base AS coverity-install
+
+WORKDIR /tmp
+
+# When updating Coverity, remember to update ".deps" as well
+RUN curl -s -X GET -O https://artifacts-aws.devops.microchip.com:443/artifactory/ung-generic-dev-local/coverity/cov-analysis-linux64-2024.12.0.sh
+RUN curl -s -X GET -O https://artifacts-aws.devops.microchip.com:443/artifactory/ung-generic-dev-local/coverity/license-coverity-2025-06-tmp.dat
+RUN sh /tmp/cov-analysis-linux64-2024.12.0.sh -q \
+        --installation.dir=/opt/coverity/analysis/ \
+        --license.agreement=agree \
+        --license.region=0 \
+        --license.type.choice=0 \
+        --license.cov.path=/tmp/license-coverity-2025-06-tmp.dat \
+        --component.sdk=false \
+        --component.skip.documentation=true
 
 
 ###############################################################################
@@ -93,5 +125,7 @@ FROM scratch AS build-env-mchp
 
 COPY --from=build-env-oss / /
 COPY --from=build-env-bsp /opt/ /opt/
+COPY --from=coverity-install /opt/coverity /opt/coverity
+ENV PATH="$PATH:/opt/coverity/analysis/bin"
 
 ENTRYPOINT [ "/entrypoint.sh" ]

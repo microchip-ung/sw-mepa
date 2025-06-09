@@ -123,11 +123,14 @@ The configuration is passed to the respective port from the file_name, the file 
 mepa_conf_t structure in the json format. the json string should start with the json object
 "port_config"
 
-        mepa-cmd phy speed <port_list> [10hdx|10fdx|100hdx|100fdx|1000fdx|10g|25g]
+        mepa-cmd phy speed <port_list> [10hdx|10fdx|100hdx|100fdx|1000fdx|10g|25g] [r-fec] [rs-fec] [fec-host|fec-line|fec-h-l]
 
 User can either use `dev conf` command or `phy speed` command to configure the Dev of the Port,
 This `phy speed` command will configure the Fixed Speed to the port by hardcoding few parameters of
 the structure `mepa_conf_t`
+
+When user wants to enable either BASE-R FEC or RS-FEC, then it is manadatory to select the direction in which FEC to be enabled,
+Host side or Line Side or both sides.
 
  
 == Deleting the Dev
@@ -136,6 +139,9 @@ the structure `mepa_conf_t`
 
 The Dev instance can be deleted with the above command, when the dev deletion is done 
 The dev will be freed and the application deletes the PHY from the respective port no.\
+
+NOTE: The base port instance of the PHY should be deleted last, as it is linked to other port instances, first port of
+each PHY is base port of the PHY.
 
 For sample json-file refer to :link:#mepa_demo/mepa_scripts/port_config_json[JSON config]
 
@@ -175,3 +181,71 @@ NOTE: The 'dsh_time' can be given as input from the Range of 0 to 6 secs
 	mepa-cmd downshift <port_list> <dsh_time> disable
 
 This command will disable the Downshift for the list of PHY ports.
+
+== PHY Port Operating Mode
+
+        mepa-cmd phy mode <port_no> [pcs_retimer|mac_retimer]
+
+This Command is used to configure the Operating Mode of the PHY Port.LAN80xx PHY Supports
+two operating Modes(PCS Retimer and MAC Retimer).
+
+NOTE: This command `phy mode` is supported only for LAN80xx PHYs
+
+== Flow Control Configuration in PHY
+
+        mepa-cmd phy flow control <port_list> [enable|disable]
+
+Above command is used to Enable or Disable Flow Control in PHY Port.
+
+NOTE: The command `phy flow control` is supported only for LAN80XX PHYs
+
+== Frame Preemption Configuration in PHY
+
+	mepa-cmd fpp_set <port_no> [enable|disable]
+
+        mepa-cmd fpp_get <port_no>
+
+Command `fpp_set` is used to Enable or Disable Frame Preemption in PHY Port. +
+The command `fpp_get` to know the current configuration status of Frame Preemption on PHY Port.
+
+== KR ANEG Configuration in PHY
+
+	mepa - cmd phy kr aneg < port - list > [adv - 1g] [adv - 10g] [adv - 25g] [adv - 25g - krs] [rfec - 10g] [rfec - 25g] [rsfec] [np] [np - rfec] [np - rsfec] [fw - res] [train] [disable]
+
+Above command is used to Enable or Disable KR ANEG in phy ports.
+
+NOTE: User should connect Link partners on both HOST side and LINE side and then run `phy kr aneg` command so negotiate, if any of the
+link patner is not avaialble, then ANEG will fail.
+
+=== Enable / start KR ANEG
+	To start ANEG, the command shall be given with the required advertisement abilities.
+Example :
+
+	mepa - cmd phy kr aneg 1 adv - 10g
+
+=== Disable / stop KR ANEG
+	To stop ANEG, the command shall be given with 'disable'.
+Example :
+
+	mepa - cmd phy kr aneg disable
+
+NOTE: If 'disable' is along with advertisement abilities, then KR ANEG will be stopped.
+
+=== parameter details
+	All the supported advertisement abilites are given as parameter to this command. here are the brief detials about each parameter
+		'adv-1g'		-	advertise 1g
+		'adv-10g'		-	advertise 10g
+		'adv-25g'		-	advertise 25g base kr
+		'adv-25g-krs'	        -	advertise 25g krs
+		'rfec-10g'		-	10g base R - FEC
+		'rfec-25g'		-	25g base R - FEC
+		'rsfec'			-	RS - FEC
+		'np'			-	Extended Next page with 25G
+		'np-rfec'		-	Extended Next page with R - FEC
+		'np-rsfec'		-	Extended Next page with RS - FEC
+		'fw-res'		-	Enable Firmware resolve
+		'train'			-	Enable KR Training
+		'disable'		-	Disable / stop kr aneg
+
+NOTE: Next page 'np' feature to work / handle for HCD calculation, the 'fw-res' must be enabled.
+

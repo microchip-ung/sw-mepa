@@ -43,7 +43,8 @@ typedef enum {
 
 // Union that contains all the values for address modes.  Enumeration
 // meba_sfp_driver_address_mode_t decides which address type to be used.
-typedef union { mscc_sfp_driver_address_t mscc_address; // Mscc address value.
+typedef union {
+    mscc_sfp_driver_address_t mscc_address; // Mscc address value.
 } meba_sfp_driver_address_val_t;
 
 // Main structure that contains the address mode and the addres value.

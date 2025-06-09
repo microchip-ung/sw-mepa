@@ -54,36 +54,36 @@ typedef struct {
 // controller [OUT]   PoE controller
 // handle     [OUT]   PoE port handle
 typedef mesa_rc (*meba_poe_get_controller_handle_t)(
-        struct meba_inst               *inst,
-        mesa_port_no_t                  port_no,
-        meba_poe_ctrl_inst_t          **controller,
-        meba_poe_port_handle_t         *handle);
+    struct meba_inst               *inst,
+    mesa_port_no_t                  port_no,
+    meba_poe_ctrl_inst_t          **controller,
+    meba_poe_port_handle_t         *handle);
 
 
 // Setup PoE for a given port.
 // port_no   [IN]  Port to configure.
 // cfg       [IN]  Port configuration.
 typedef mesa_rc (*meba_poe_port_cfg_set_t)(
-        struct meba_inst               *inst,
-        mesa_port_no_t                  port_no,
-        meba_poe_port_cfg_t            *cfg);
+    struct meba_inst               *inst,
+    mesa_port_no_t                  port_no,
+    meba_poe_port_cfg_t            *cfg);
 
 
 // Get PoE status for a given port
 // port_no   [IN]  Port number.
 // status    [IN]  Port PoE status.
 typedef mesa_rc (*meba_poe_port_status_get_t)(
-        struct meba_inst               *inst,
-        mesa_port_no_t                  port_no,
-        meba_poe_port_status_t         *const status);
+    struct meba_inst               *inst,
+    mesa_port_no_t                  port_no,
+    meba_poe_port_status_t         *const status);
 
 // Get a data structure with all the PoE controllers in the system. This
 // may only be called once for every meba instance.
 //
 // system    [OUT] System.
 typedef mesa_rc (*meba_poe_system_get_t)(
-        struct meba_inst               *inst,
-        meba_poe_system_t             **const system);
+    struct meba_inst               *inst,
+    meba_poe_system_t             **const system);
 
 
 // Initialize the MEBA PoE subsystem.
@@ -91,14 +91,14 @@ typedef mesa_rc (*meba_poe_system_get_t)(
 // inst              [IN] Reference to the meba instance
 // meba_poe_init_params_t *tPoe_init_params [IN]
 typedef mesa_rc (*meba_poe_system_initialize_t)(
-        struct meba_inst       *inst,
-        meba_poe_init_params_t *tPoe_init_params);
+    struct meba_inst       *inst,
+    meba_poe_init_params_t *tPoe_init_params);
 
 
 // Perform chip detection.
 //
 typedef mesa_rc (*meba_poe_do_detection_t)(
-        struct meba_inst               *inst);
+    struct meba_inst               *inst);
 
 // Perform chip initialization.
 typedef mesa_rc (*meba_poe_chip_initialization_t)(
@@ -108,49 +108,49 @@ typedef mesa_rc (*meba_poe_chip_initialization_t)(
 
 // Perform chip synchronization
 typedef mesa_rc (*meba_poe_sync_t)(
-        struct meba_inst               *inst);
+    struct meba_inst               *inst);
 
 // Set a PoE controller configuration.
 // cfg    [IN]  Port configuration.
 typedef mesa_rc (*meba_poe_cfg_set_t)(
-        struct meba_inst               *inst,
-        meba_poe_global_cfg_t          *cfg);
+    struct meba_inst               *inst,
+    meba_poe_global_cfg_t          *cfg);
 
 // Get PoE controller status.
 // status [OUT] Controller status.
 typedef mesa_rc (*meba_poe_status_get_t)(
-        struct meba_inst               *inst,
-        meba_poe_status_t              *status);
+    struct meba_inst               *inst,
+    meba_poe_status_t              *status);
 
 
 // Get PoE controller status.
 // status [OUT] Controller capabilities.
 typedef mesa_rc (*meba_poe_capabilities_get_t)(
-        struct meba_inst               *inst,
-        meba_poe_ctrl_cap_t            *capabilities);
+    struct meba_inst               *inst,
+    meba_poe_ctrl_cap_t            *capabilities);
 
 // Reset PoE controller.
 typedef mesa_rc (*meba_poe_reset_command_t)(
-        struct meba_inst               *inst);
+    struct meba_inst               *inst);
 
 // Save PoE controller parameters
 typedef mesa_rc (*meba_poe_save_command_t)(
-        struct meba_inst               *inst);
+    struct meba_inst               *inst);
 
 // Enable debug traces.
 // port_no   [IN]  Port number.
 // trace_buf [OUT] Buffer to receive debug traces
 // buf_size  [IN]  Size of buffer.
 typedef mesa_rc (*meba_poe_debug_t)(
-        struct meba_inst               *inst,
-        mesa_port_no_t                  port_no,
-        char                           *var,
-        uint32_t                        str_len,
-        char                           *title ,
-        char                           *tx_str ,
-        char                           *rx_str ,
-        char                           *msg,
-        int                             max_msg_len);
+    struct meba_inst               *inst,
+    mesa_port_no_t                  port_no,
+    char                           *var,
+    uint32_t                        str_len,
+    char                           *title,
+    char                           *tx_str,
+    char                           *rx_str,
+    char                           *msg,
+    int                             max_msg_len);
 
 // Perform the Firmware upgrade.
 // This function upgrades the PoE controller firmware.  The poe_firmware_upgrade
@@ -160,10 +160,10 @@ typedef mesa_rc (*meba_poe_debug_t)(
 // size          [IN]  Size of firmware data in bytes.
 // firmware      [IN]  Firmware to load.
 typedef int (*meba_poe_firmware_upgrade_t)(
-        struct meba_inst               *inst,
-        mesa_bool_t                     reset,
-        uint32_t                        size,
-        const char                     *firmware);
+    struct meba_inst               *inst,
+    mesa_bool_t                     reset,
+    uint32_t                        size,
+    const char                     *firmware);
 
 // Preparation of Firmware upgrade.
 // If the version_check parameter is true, this function will check the firmware
@@ -181,10 +181,10 @@ typedef int (*meba_poe_firmware_upgrade_t)(
 // size          [IN]  Size of firmware data in bytes.
 // firmware      [IN]  Firmware to load.
 typedef mesa_rc (*meba_poe_prepare_firmware_upgrade_t)(
-        struct meba_inst               *inst,
-        mesa_bool_t                     version_check,
-        uint32_t                        size,
-        const char                     *firmware);
+    struct meba_inst               *inst,
+    mesa_bool_t                     version_check,
+    uint32_t                        size,
+    const char                     *firmware);
 
 // Get PoE supply limits
 // max             [OUT] Maximum supply power
@@ -199,17 +199,17 @@ typedef mesa_rc (*meba_poe_supply_limits_get_t)(
 // port_no       [IN]  Port number
 // capabilities  [OUT] Port capabilities
 typedef mesa_rc (*meba_poe_port_capabilities_get_t)(
-        struct meba_inst               *inst,
-        mesa_port_no_t                  port_no,
-        meba_poe_port_cap_t            *capabilities);
+    struct meba_inst               *inst,
+    mesa_port_no_t                  port_no,
+    meba_poe_port_cap_t            *capabilities);
 
 // Set PD configuration
 // port_no   [IN]  Port number.
 // pd_data   [IN]  PD data to configure.
 typedef mesa_rc (*meba_poe_port_pd_data_set_t)(
-        struct meba_inst               *inst,
-        mesa_port_no_t                  port_no,
-        meba_poe_pd_data_t             *pd_data);
+    struct meba_inst               *inst,
+    mesa_port_no_t                  port_no,
+    meba_poe_pd_data_t             *pd_data);
 
 // Set PoE BT PD configuration.
 // This function shall be called when the PoE application receives a type 3 or
@@ -227,17 +227,17 @@ typedef mesa_rc (*meba_poe_port_pd_bt_data_set_t)(
 // Clear port lldp mode
 // port_no   [IN]  Port number.
 typedef mesa_rc (*meba_poe_port_pd_data_clear_t)(
-        struct meba_inst               *inst,
-        mesa_port_no_t                  port_no);
+    struct meba_inst               *inst,
+    mesa_port_no_t                  port_no);
 
 // Get PoE controller firmware version.
 // inst     [IN]  Controller instance.
 // max_size [IN]  The maximum size of firmware version.
 // version  [OUT] The firmware version.
 typedef mesa_rc (*meba_poe_version_get_t)(
-        struct meba_inst               *inst,
-        uint32_t                        max_size,
-        char                           *version);
+    struct meba_inst               *inst,
+    uint32_t                        max_size,
+    char                           *version);
 
 // List of PoE APIs
 #define MEBA_LIST_OF_API_POE_CALLS                     \

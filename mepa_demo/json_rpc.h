@@ -7,6 +7,9 @@
 #include "microchip/ethernet/board/api.h"
 #include <vtss_phy_api.h>
 #include <json-c/json.h>
+#include <lan80xx_macsec.h>
+#include <lan80xx.h>
+#include <../src/lan80xx_types.h>
 
 extern meba_inst_t meba_global_inst;
 
@@ -136,3 +139,8 @@ mesa_rc json_rpc_get2_mesa_qos_egress_map_t(json_rpc_req_t *req, json_object *ob
 mesa_rc json_rpc_add2_mesa_qos_egress_map_t(json_rpc_req_t *req, json_object *obj, mesa_qos_egress_map_t *parm);
 mesa_rc json_rpc_get_idx_vtss_debug_printf_t(json_rpc_req_t *req, struct json_object *obj, int *idx, vtss_debug_printf_t *pr);
 mesa_rc json_rpc_add_name_mepa_phy_cap_t(json_rpc_req_t *req, json_object *obj, const char *name, mepa_phy_cap_t *parm);
+
+mesa_rc json_rpc_get2_phy25g_ts_engine_flow_conf_t(json_rpc_req_t *req, json_object *obj, phy25g_ts_engine_flow_conf_t *parm);
+mesa_rc json_rpc_add2_phy25g_ts_engine_flow_conf_t(json_rpc_req_t *req, json_object *obj,  phy25g_ts_engine_flow_conf_t *parm);
+mesa_rc json_rpc_get2_phy25g_ts_engine_action_t(json_rpc_req_t *req, json_object *obj, phy25g_ts_engine_action_t *parm);
+mesa_rc json_rpc_add2_phy25g_ts_engine_action_t(json_rpc_req_t *req, json_object *obj,  phy25g_ts_engine_action_t *parm);

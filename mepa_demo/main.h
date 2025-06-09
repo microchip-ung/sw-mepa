@@ -11,6 +11,7 @@ extern "C" {
 
 
 #include "microchip/ethernet/switch/api.h"
+#include "../mepa/include/microchip/ethernet/phy/api/types.h"
 
 #define EDSX_25G_SLOT1_START 12
 #define EDSX_25G_SLOT1_END  15
@@ -70,6 +71,11 @@ void mepa_demo_appl_gpio_lp_demo(mscc_appl_init_t *init);
 void mscc_appl_phy_loopback_init(mscc_appl_init_t *init);
 void mscc_appl_phy_diagnostics_demo(mscc_appl_init_t *init);
 void mscc_appl_phy_xconnect(mscc_appl_init_t *init);
+void mscc_appl_mcu_fw_init(mscc_appl_init_t *init);
+void mscc_appl_m25gdiag_demo(mscc_appl_init_t *init);
+void mscc_appl_phy_restart(mscc_appl_init_t *init);
+void mscc_appl_phy_kr_init(mscc_appl_init_t *init);
+void mepa_demo_appl_ts_demo(mscc_appl_init_t *init);
 
 typedef enum {
     SPI_USER_REG,  // Switch register access
@@ -117,6 +123,9 @@ int fd_read_register(int fd, fd_read_callback_t callback, void *ref);
 
 void get_mac_addr(uint8_t *mac);
 void ip_mac_setup(mesa_vid_t vid, mesa_bool_t add);
+void mepa_callout_lock(const mepa_lock_t *const lock);
+void mepa_callout_unlock(const mepa_lock_t *const lock);
+
 
 #ifdef __cplusplus
 }

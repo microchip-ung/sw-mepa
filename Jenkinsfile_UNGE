@@ -2,17 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 pipeline {
-    // Options directive is for configuration that applies to the whole job
     options {
-        timestamps ()
-                // Only keep 5 builds at a time to avoid fill up the storage
-                buildDiscarder(logRotator(numToKeepStr:'5'))
-                // Make sure this build doesn't hang forever
-                timeout(time: 5, unit: 'HOURS')
-                skipDefaultCheckout()
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+        timeout(time: 5, unit: 'HOURS')
+        skipDefaultCheckout()
     }
 
-    // agent none;
     agent { kubernetes { yamlFile '.cmake/pod-base.yaml' } }
 
     environment {
@@ -28,64 +24,91 @@ pipeline {
             steps {
                 container('pod-mepa-base') {
                     checkout([
-                             $class: 'GitSCM',
-                             branches: scm.branches,
-                             extensions: scm.extensions + [[$class: 'CloneOption', noTags: false, shallow: false]],
-                             userRemoteConfigs: scm.userRemoteConfigs
+                        $class: 'GitSCM',
+                        branches: scm.branches,
+                        extensions: scm.extensions + [[$class: 'CloneOption', noTags: false, shallow: false]],
+                        userRemoteConfigs: scm.userRemoteConfigs
                     ])
 
-                      sh """
-                              git config --global --add safe.directory '*'
-                              git clean -qffdx
-                              .cmake/source-prepare.rb ws
-                              mkdir images
-                              """
+                    sh """
+                        git config --global --add safe.directory '*'
+                        git clean -qffdx
+                        .cmake/source-prepare.rb ws
+                        mkdir images
+                    """
 
-                              stash name: "src", includes: "ws.tar"
+                    stash name: "src", includes: "ws.tar"
                 }
             }
         }
 
-        stage('Build in parallel') {
+        stage('Build + Misc Parallel') {
             parallel {
-                stage("arm64") {
+                stage("Build and Analyze (arm64)") {
                     agent { kubernetes { yamlFile '.cmake/pod-build.yaml' } }
-                    steps {
-                        container('pod-mepa-build') {
-                            unstash name: "src"
+                    stages {
+                        stage("arm64") {
+                            steps {
+                                container('pod-mepa-build') {
+                                    unstash name: "src"
                                     sh "tar -xf ws.tar && rm ws.tar"
                                     sh "./.cmake/create_cmake_project_new.rb -vfnp arm64 arm64"
                                     stash name: "bin-arm64", includes: "arm64.tar"
+                                }
+                            }
+                        }
+
+                        stage("Static Analysis") {
+                            steps {
+                                container('pod-mepa-build') {
+                                    script {
+                                        // Run the script and get the exit status
+                                        def result = sh(script: "./.cmake/mepa_coverity.rb -t arm64 static_analysis_reports", returnStatus: true)
+
+                                        if (result == 0) {
+                                            echo "Coverity script completed successfully."
+                                            currentBuild.result = 'SUCCESS'
+                                        } else if (result == 1) {
+                                            echo "Coverity script found issues. Marking build as UNSTABLE."
+                                            currentBuild.result = 'UNSTABLE'
+                                        } else {
+                                            error "Coverity script failed with unexpected exit code: ${result}"
+                                        }
+                                        stash name: "ana-report", includes: "static_analysis_reports/**"
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-		stage("misc") {
+
+                stage("misc") {
                     stages {
-                        stage('Copyright') {
+                        stage("Copyright") {
                             steps {
                                 container('pod-mepa-base') {
-                                    warnError (message: "Copyright error") {
+                                    warnError(message: "Copyright error") {
                                         sh "./.cmake/copyright.rb"
                                     }
                                 }
                             }
                         }
 
-                        stage('License') {
+                        stage("License") {
                             steps {
                                 container('pod-mepa-base') {
-                                    warnError (message: "License error") {
-					sh "chmod +x -R ${env.top}"
+                                    warnError(message: "License error") {
+                                        sh "chmod +x -R ${env.top}"
                                         sh "./.cmake/build-licenses.rb"
                                     }
                                 }
                             }
                         }
 
-                        stage('Docs') {
+                        stage("Docs") {
                             steps {
                                 container('pod-mepa-base') {
-                                    warnError (message: "Docs error") {
+                                    warnError(message: "Docs error") {
                                         sh './.cmake/build-docs.rb'
                                     }
                                 }
@@ -93,25 +116,28 @@ pipeline {
                         }
                     }
                 }
-           }
-       }
-       stage("aggr-bin's") {
-                    steps {
-                        withCredentials([usernamePassword(credentialsId: 'Test', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
-                        container('pod-mepa-base') {
+            }
+        }
+
+        stage("aggr-bin's") {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'Test', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
+                    container('pod-mepa-base') {
                         unstash name: "bin-arm64"
+                        unstash name: "ana-report"
                         sh ".cmake/aggr-artifacts.rb"
                     }
                 }
             }
         }
     }
+
     post {
         success {
             echo "Pipeline Success! Project: ${env.JOB_NAME}, Build Number: ${env.BUILD_NUMBER}"
         }
-	unstable {
-		echo "Pipeline Unstable! Project: ${env.JOB_NAME}, Build Number: ${env.BUILD_NUMBER}"
+        unstable {
+            echo "Pipeline Unstable! Project: ${env.JOB_NAME}, Build Number: ${env.BUILD_NUMBER}"
         }
         aborted {
             echo "Pipeline Aborted! Project: ${env.JOB_NAME}, Build Number: ${env.BUILD_NUMBER}"
@@ -120,7 +146,7 @@ pipeline {
             echo "Pipeline Failure! Project: ${env.JOB_NAME}, Build Number: ${env.BUILD_NUMBER}"
         }
         always {
-            archiveArtifacts artifacts: 'images/*'
+            archiveArtifacts artifacts: 'images/**'
         }
     }
 }

@@ -35,11 +35,11 @@ mesa_rc mepa_spi_reg_read_write (void *chip,
                                  uint32_t            *const data);
 
 mesa_rc mepa_spi2_reg_read_write (void *chip,
-                                 mepa_port_no_t port_no,
-                                 mepa_bool_t           read,
-                                 uint8_t             dev,
-                                 uint16_t            reg_num,
-                                 uint32_t            *const data);
+                                  mepa_port_no_t port_no,
+                                  mepa_bool_t           read,
+                                  uint8_t             dev,
+                                  uint16_t            reg_num,
+                                  uint32_t            *const data);
 
 void *mem_alloc(struct mepa_callout_ctx *ctx, size_t size);
 
@@ -47,10 +47,10 @@ void mem_free(struct mepa_callout_ctx *ctx, void *ptr);
 
 
 mesa_rc mepa_phy_spi_read (struct mepa_callout_ctx *ctx,
-                            mepa_port_no_t port_no,
-                            uint8_t             dev,
-                            uint16_t            reg_num,
-                            uint32_t            *const data);
+                           mepa_port_no_t port_no,
+                           uint8_t             dev,
+                           uint16_t            reg_num,
+                           uint32_t            *const data);
 
 
 mesa_rc mepa_phy_spi_write (struct mepa_callout_ctx *ctx,
@@ -60,7 +60,7 @@ mesa_rc mepa_phy_spi_write (struct mepa_callout_ctx *ctx,
                             uint32_t            *const data);
 
 mesa_rc mepa_spi2_spi_write (struct mepa_callout_ctx *ctx,
-                            mepa_port_no_t port_no,
-                            uint8_t             dev,
-                            uint16_t            reg_num,
-                            uint32_t            *const data);
+                             mepa_port_no_t port_no,
+                             uint8_t             dev,
+                             uint16_t            reg_num,
+                             uint32_t            *const data);

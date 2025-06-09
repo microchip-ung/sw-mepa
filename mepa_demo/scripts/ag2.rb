@@ -136,6 +136,53 @@ $methods_blacklist = [
     "vtss_phy_init_conf_get",
     "vtss_phy_10g_get_user_data",
     "vtss_phy_10g_pkt_gen_conf",
+    "mepa_to_mesa_tc_opmode",
+    "lan80xx_ts_hard_reset_private",
+    "lan80xx_phy_ts_init_conf_get",
+    "lan80xx_phy_ts_init",
+    "lan80xx_ts_is_1588_supported",
+    "lan80xx_ts_get_1588_version",
+    "lan80xx_ts_csr_ptptime_get_priv",
+    "lan80xx_ts_csr_ptptime_set_priv",
+    "lan80xx_get_eng_flow_info",
+    "lan80xx_ts_egress_engine_conf_set",
+    "lan80xx_ts_ingress_engine_conf_set",
+    "lan80xx_ts_egress_engine_clear",
+    "lan80xx_ts_egress_engine_action_set",
+    "lan80xx_ts_ingress_engine_action_set",
+    "lan80xx_phy_ts_fifo_empty_priv",
+    "lan80xx_phy_ts_fifo_empty",
+    "lan80xx_phy_ts_fifo_get",
+    "lan80xx_phy_ts_fifo_read_install",
+    "lan80xx_ts_tx_clock_conf_get_priv",
+    "lan80xx_ts_rx_clock_conf_get_priv",
+    "lan80xx_ts_egress_engine_conf_get",
+    "lan80xx_ts_ingress_engine_conf_get",
+    "lan80xx_phy_rx_classifier_conf_get",
+    "lan80xx_phy_tx_classifier_conf_get",
+    "lan80xx_phy_ts_path_delay_set",
+    "lan80xx_phy_ts_delay_asymmetry_get",
+    "lan80xx_phy_ts_delay_asymmetry_set",
+    "lan80xx_phy_ts_path_delay_get",
+    "lan80xx_phy_ts_fifo_read_install_priv",
+    "lan80xx_phy_ts_pps_conf_set",
+    "lan80xx_phy_ts_clock_rateadj_get",
+    "lan80xx_phy_ts_clock_rateadj_set",
+    "lan80xx_phy_ts_mode_set",
+    "lan80xx_phy_ts_mode_get",
+    "lan80xx_phy_ts_pps_conf_get",
+    "lan80xx_phy_ts_stats_get",
+    "lan80xx_phy_ts_event_enable_set",
+    "lan80xx_phy_ts_event_enable_get",
+    "lan80xx_phy_ts_event_poll",
+    "lan80xx_phy_ts_egress_latency_get",
+    "lan80xx_phy_ts_egress_latency_set",
+    "lan80xx_phy_ts_ingress_latency_get",
+    "lan80xx_phy_ts_ingress_latency_set",
+    "lan80xx_ptp_reg_dump",
+    "lan80xx_linkup_delay",
+    "lan80xx_phy_ts_fifo_sig_set",
+    "lan80xx_phy_ts_ltc_ls_action_set",
 ]
 
 $methods_greylist = [
@@ -831,6 +878,7 @@ def handle_func_proto ast
     n = f[:normal][:name].to_s.strip
 
     $methods[n] = f
+    #puts "#{n} \n #{f}, "
 
 #    r = ast_type_to_str(f[:normal][:type])
 #    a = []
@@ -997,7 +1045,7 @@ $tl_implemented = []
 
 def skip_inst(a)
     str = a[:type_base]
-    skip = (str == "mesa_inst_t" or str == "meba_inst_t" or str == "vtss_inst_t")
+    skip = (str == "mesa_inst_t" or str == "meba_inst_t" or str == "vtss_inst_t" or str == "mepa_device_t")
 end
 
 $methods.each do |m, o|
@@ -1010,6 +1058,7 @@ $methods.each do |m, o|
             t = (cap ? "mesa_cap_t" : a[:type_resolved][:type_resolved][:type])
             $tl << t
         end
+        $tl << "phy25g_phy_state_t"
     #rescue => err
     #    puts "Failed #{m}"
     #    pp o
@@ -1030,8 +1079,18 @@ while $tl.size > 0
         $el << t if tt[:type_fam] == :type_enum
         next if tt[:type_fam] != :type_struct
         $sl << t
-
+        
+        tt[:members].delete_if do |m|
+            if m[:member_type] == 'lan80xx_phy_ts_fifo_read'
+                #puts "Removed member: #{m[:member_name]} #{m[:member_type]}/#{m[:type_resolved][:type]}"
+                true  # This removes the member from the array
+            else
+                false  # This keeps the member in the array
+            end
+        end
+        
         tt[:members].each do |m|
+            
             #puts "  #{m[:member_name]} #{m[:member_type]}/#{m[:type_resolved][:type]}"
             x = type_resolve_type m[:type_resolved][:type]
             if not x.nil?
@@ -1152,48 +1211,53 @@ def add_member_get_func m
     n = m[:member_name]
     t = (m[:member_type] == "mesa_bool_t" ? "mesa_bool_t" : m[:type_resolved][:type])
     str_parm = "&(parm->#{n})"
-    n = "\"#{n}\""
 
-    #$c_src.puts "#if 0"
-    #$c_src.puts m.pretty_inspect
-    #$c_src.puts "#endif"
+    if n != "ft_gpio_read" && n != "other_port_dev"
+        n = "\"#{n}\""
 
-    type_array = member_array(m)
-    if type_array.size == 0
-        $c_src.puts "    MESA_RC(json_rpc_get_name_#{t}(req, obj, #{n}, #{str_parm})); /* #{__LINE__} */"
-    else
-        str_arr = str_parm
-        str_obj = "obj_value"
-        str_ind = "    "
-        j = 0
-        $c_src.puts "#{str_ind}{"
-        str_ind += "    "
-        $c_src.puts "#{str_ind}json_object *obj_value;"
-        $c_src.puts "#{str_ind}MESA_RC(json_rpc_get_name_json_object(req, obj, #{n}, &obj_value)); /* #{__LINE__} */"
-        type_array.each do |i|
-            $c_src.puts "#{str_ind}for (int i#{j} = 0; i#{j} < #{i}; ) {"
+        #$c_src.puts "#if 0"
+        #$c_src.puts m.pretty_inspect
+        #$c_src.puts "#endif"
+
+        type_array = member_array(m)
+        if type_array.size == 0
+            if t
+            $c_src.puts "    MESA_RC(json_rpc_get_name_#{t}(req, obj, #{n}, #{str_parm})); /* #{__LINE__} */"
+            end
+        else
+            str_arr = str_parm
+            str_obj = "obj_value"
+            str_ind = "    "
+            j = 0
+            $c_src.puts "#{str_ind}{"
             str_ind += "    "
-            if i == type_array.last
-                str_parm = str_arr + "[i#{j}]"
-            else
-                str_parm = "obj#{j}"
-                $c_src.puts "#{str_ind}json_object *obj#{j};"
+            $c_src.puts "#{str_ind}json_object *obj_value;"
+            $c_src.puts "#{str_ind}MESA_RC(json_rpc_get_name_json_object(req, obj, #{n}, &obj_value)); /* #{__LINE__} */"
+            type_array.each do |i|
+                $c_src.puts "#{str_ind}for (int i#{j} = 0; i#{j} < #{i}; ) {"
+                str_ind += "    "
+                if i == type_array.last
+                    str_parm = str_arr + "[i#{j}]"
+                else
+                    str_parm = "obj#{j}"
+                    $c_src.puts "#{str_ind}json_object *obj#{j};"
+                end
+                str_arr += "[i#{j} - 1]"
+                if i == type_array.last
+                    $c_src.puts "#{str_ind}MESA_RC(json_rpc_get_idx_#{t}(req, #{str_obj}, &i#{j}, #{str_parm})); /* #{__LINE__} */"
+                else
+                    $c_src.puts "#{str_ind}MESA_RC(json_rpc_get_idx_json_object(req, #{str_obj}, &i#{j}, &#{str_parm})); /* #{__LINE__} */"
+                end
+                str_obj = "obj#{j}"
+                j += 1
             end
-            str_arr += "[i#{j} - 1]"
-            if i == type_array.last
-                $c_src.puts "#{str_ind}MESA_RC(json_rpc_get_idx_#{t}(req, #{str_obj}, &i#{j}, #{str_parm})); /* #{__LINE__} */"
-            else
-                $c_src.puts "#{str_ind}MESA_RC(json_rpc_get_idx_json_object(req, #{str_obj}, &i#{j}, &#{str_parm})); /* #{__LINE__} */"
+            type_array.each do |i|
+                (1..(j + 1)).each {$c_src.print "    "}
+                $c_src.puts "}"
+                j -= 1
             end
-            str_obj = "obj#{j}"
-            j += 1
+            $c_src.puts "    }"
         end
-        type_array.each do |i|
-            (1..(j + 1)).each {$c_src.print "    "}
-            $c_src.puts "}"
-            j -= 1
-        end
-        $c_src.puts "    }"
     end
 end
 
@@ -1201,39 +1265,44 @@ def add_member_add_func m
     n = m[:member_name]
     t = (m[:member_type] == "mesa_bool_t" ? "mesa_bool_t" : m[:type_resolved][:type])
     str_parm = "&(parm->#{n})"
-    n = "\"#{n}\""
-    type_array = member_array(m)
-    if type_array.size == 0
-        $c_src.puts "    MESA_RC(json_rpc_add_name_#{t}(req, *obj, #{n}, #{str_parm})); /* #{__LINE__} */"
-    else
-        str_arr = str_parm
-        str_ind = "    "
-        j = 0
-        n = "*obj, " + n
-        nt = "name_json_object"
-        type_array.each do |i|
-            $c_src.puts "#{str_ind}{"
-            str_ind += "    "
-            $c_src.puts "#{str_ind}json_object *obj#{j};"
-            $c_src.puts "#{str_ind}MESA_RC(json_rpc_array_new(req, &obj#{j})); /* #{__LINE__} */"
-            $c_src.puts "#{str_ind}MESA_RC(json_rpc_add_#{nt}(req, #{n}, obj#{j})); /* #{__LINE__} */"
-            $c_src.puts "#{str_ind}for (int i#{j} = 0; i#{j} < #{i}; i#{j}++) {"
-            str_ind += "    "
-            n = "obj#{j}"
-            nt = "json_array"
-            str_arr += "[i#{j}]"
-            if i == type_array.last
-                $c_src.puts "#{str_ind}MESA_RC(json_rpc_add_#{t}(req, obj#{j}, #{str_arr})); /* #{__LINE__} */"
+    if n != "ft_gpio_read" && n != "other_port_dev"
+        n = "\"#{n}\""
+        type_array = member_array(m)
+        if type_array.size == 0
+            if t
+            $c_src.puts "    MESA_RC(json_rpc_add_name_#{t}(req, *obj, #{n}, #{str_parm})); /* #{__LINE__} */"
             end
-            j += 1
-        end
-        type_array.each do |i|
-            n = (2 * j - 1)
-            (1..n).each {$c_src.print "    "}
-            $c_src.puts "    }"
-            (1..n).each {$c_src.print "    "}
-            $c_src.puts "}"
-            j -= 1
+        else
+            str_arr = str_parm
+            str_ind = "    "
+            j = 0
+            n = "*obj, " + n
+            nt = "name_json_object"
+            type_array.each do |i|
+                $c_src.puts "#{str_ind}{"
+                str_ind += "    "
+                $c_src.puts "#{str_ind}json_object *obj#{j};"
+                $c_src.puts "#{str_ind}MESA_RC(json_rpc_array_new(req, &obj#{j})); /* #{__LINE__} */"
+                $c_src.puts "#{str_ind}MESA_RC(json_rpc_add_#{nt}(req, #{n}, obj#{j})); /* #{__LINE__} */"
+                #$log.puts "Example " + n
+                $c_src.puts "#{str_ind}for (int i#{j} = 0; i#{j} < #{i}; i#{j}++) {"
+                str_ind += "    "
+                n = "obj#{j}"
+                nt = "json_array"
+                str_arr += "[i#{j}]"
+                if i == type_array.last
+                    $c_src.puts "#{str_ind}MESA_RC(json_rpc_add_#{t}(req, obj#{j}, #{str_arr})); /* #{__LINE__} */"
+                end
+                j += 1
+            end
+            type_array.each do |i|
+                n = (2 * j - 1)
+                (1..n).each {$c_src.print "    "}
+                $c_src.puts "    }"
+                (1..n).each {$c_src.print "    "}
+                $c_src.puts "}"
+                j -= 1
+            end
         end
     end
 end
@@ -1320,6 +1389,7 @@ end
 $methods.each do |m, o|
     begin
         next if $methods_greylist.include? m
+        next if $methods_blacklist.include? m
         $c_src.puts "static mesa_rc mesa_rpc_#{m}(json_rpc_req_t *req) /* #{__LINE__} */"
         $c_src.puts "{"
         aa = analyze_args o[:args]
@@ -1393,6 +1463,8 @@ $methods.each do |m, o|
                     $c_src.print "NULL"
                 elsif str == "meba_inst_t"
                     $c_src.print "meba_global_inst"
+                elsif str == "mepa_device_t"
+                    $c_src.print "meba_global_inst->phy_devices[port_no]"
                 else
                     $c_src.print "&" if a[:ptr] and !is_array
                     $c_src.print "#{a[:arg_name]}"
@@ -1448,6 +1520,7 @@ $c_src.puts "json_rpc_method_t json_rpc_table[] = {"
 $methods.each do |m, o|
     begin
         next if $methods_greylist.include? m
+        next if $methods_blacklist.include? m
         $c_src.puts "    { \"#{m}\", mesa_rpc_#{m} }, "
     rescue => err
         puts "Failed #{m}"

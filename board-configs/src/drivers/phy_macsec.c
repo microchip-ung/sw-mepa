@@ -32,7 +32,7 @@ mepa_rc meba_phy_macsec_init_set(meba_inst_t inst, mepa_port_no_t port_no, const
     return mepa_macsec_init_set(inst->phy_devices[port_no], macsec_init);
 }
 
-mepa_rc meba_phy_macsec_init_get(meba_inst_t inst,mepa_port_no_t port_no, mepa_macsec_init_t *const macsec_init)
+mepa_rc meba_phy_macsec_init_get(meba_inst_t inst, mepa_port_no_t port_no, mepa_macsec_init_t *const macsec_init)
 {
     mesa_rc rc = MESA_RC_ERROR;
 
@@ -801,6 +801,28 @@ mepa_rc meba_phy_macsec_event_seq_threshold_get(meba_inst_t inst, const mepa_por
     }
 
     return mepa_macsec_event_seq_threshold_get(inst->phy_devices[port_no], port_no, threshold);
+}
+
+mepa_rc meba_phy_macsec_event_xpn_seq_threshold_set(meba_inst_t inst, const mepa_port_no_t port_no, const uint64_t threshold)
+{
+    mesa_rc rc = MESA_RC_ERROR;
+
+    if ((rc = meba_dev_chk(inst, port_no)) != MESA_RC_OK) {
+        return rc;
+    }
+
+    return mepa_macsec_event_xpn_seq_threshold_set(inst->phy_devices[port_no], port_no, threshold);
+}
+
+mepa_rc meba_phy_macsec_event_xpn_seq_threshold_get(meba_inst_t inst, const mepa_port_no_t port_no, uint64_t *const threshold)
+{
+    mesa_rc rc = MESA_RC_ERROR;
+
+    if ((rc = meba_dev_chk(inst, port_no)) != MESA_RC_OK) {
+        return rc;
+    }
+
+    return mepa_macsec_event_xpn_seq_threshold_get(inst->phy_devices[port_no], port_no, threshold);
 }
 
 mepa_rc meba_phy_macsec_egr_intr_sa_get(meba_inst_t inst, const mepa_port_no_t port_no, mepa_macsec_port_t *const port, uint16_t *const an)

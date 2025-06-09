@@ -75,16 +75,20 @@ end
   next if /mepa_demo.docs.resources.jquery/ =~ f
   next if /mepa_demo.docs.resources.bootstrap/ =~ f
 
+  next if ".cmake/pod-base.yaml" == f
+  next if ".cmake/pod-build.yaml" == f
+
   next if /.cmake\/docker\/SimpleGridClient/ =~ f
   next if "mepa_demo/mepa_scripts/port_config_json.json" == f 
   next if "mepa_demo/mepa_scripts/loopback_config.json" == f
   next if "mepa_demo/mepa_scripts/synce_config.json" == f
-  next if [".vsd", ".svg", ".png", ".graphml", ".xls", ".txt", ".json", ".cer"].include? ext
+  next if [".vsd", ".svg", ".png", ".graphml", ".xls", ".txt", ".json", ".cer", ".jpg"].include? ext
   next if [".gitattributes", ".gitignore", "Gemfile.lock", "catch.hpp", "TODO"].include? base
 #adding for the new server
   next if ".cmake/deps-bsp.json" == f
   next if ".cmake/docker/Cisco_Umbrella_Root_CA.cer" == f
   next if ".cmake/docker/mchp-ca.cer" == f
+  next if /\/sha256\// =~ f
 
   begin
     check f

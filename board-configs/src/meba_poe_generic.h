@@ -69,9 +69,9 @@ mesa_rc meba_poe_generic_debug(
     mesa_port_no_t                  port_no,
     char                            *var,
     uint32_t                        str_len,
-    char                            *title ,
-    char                            *tx_str ,
-    char                            *rx_str ,
+    char                            *title,
+    char                            *tx_str,
+    char                            *rx_str,
     char                            *msg,
     int                             max_msg_len);
 

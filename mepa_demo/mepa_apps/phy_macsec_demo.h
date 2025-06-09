@@ -130,7 +130,7 @@ typedef struct {
     mepa_bool_t                 conf;                 /* Confidentiality Enable */
     mepa_bool_t                 statistics_get;       /* MACsec Statistics Get or Clear */
     mepa_bool_t                 hmac_counters;        /* HMAC counters or LMAC Counters */
-    mepa_bool_t                 rollover_event;       /* MACsec Rollover Event */ 
+    mepa_bool_t                 rollover_event;       /* MACsec Rollover Event */
     mepa_bool_t                 sequence_threshold_event; /* MACsec Sequence threshold Event */
     mepa_bool_t                 enable;               /* Event Enable or Disable */
     uint32_t                    value_list[MAX_VALUE_LIST];

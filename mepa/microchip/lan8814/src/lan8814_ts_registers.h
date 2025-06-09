@@ -67,12 +67,12 @@
 // PTP Common Interrupt Enable Register
 #define LAN8814_PTP_COMMON_INT_EN                              LAN8814_EXT_PAGE_4,516
 
-// PTP LTC Set Seconds 
+// PTP LTC Set Seconds
 #define LAN8814_PTP_LTC_SET_SEC_HI                             LAN8814_EXT_PAGE_4, 517
 #define LAN8814_PTP_LTC_SET_SEC_MID                            LAN8814_EXT_PAGE_4, 518
 #define LAN8814_PTP_LTC_SET_SEC_LO                             LAN8814_EXT_PAGE_4, 519
 
-// PTP LTC Set Nanoseconds 
+// PTP LTC Set Nanoseconds
 #define LAN8814_PTP_LTC_SET_NS_HI                              LAN8814_EXT_PAGE_4, 520
 #define LAN8814_PTP_LTC_SET_NS_LO                              LAN8814_EXT_PAGE_4, 521
 
@@ -359,7 +359,7 @@
 #define LAN8814_LLC_TYPE_ID                                LAN8814_EXT_PAGE_5, 543
 
 
-//PTP RX and TX Latency values for 10Mbps/100Mbps/1000Mbps 
+//PTP RX and TX Latency values for 10Mbps/100Mbps/1000Mbps
 #define LAN8814_PTP_RX_LATENCY_10                          LAN8814_EXT_PAGE_5, 544
 #define LAN8814_PTP_TX_LATENCY_10                          LAN8814_EXT_PAGE_5, 545
 #define LAN8814_PTP_RX_LATENCY_100                         LAN8814_EXT_PAGE_5, 546

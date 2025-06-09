@@ -76,20 +76,24 @@ mesa_rc spi_read(spi_user_t     user,
         return MESA_RC_ERROR;
     }
 
+	/*
+	 * Padding happens at the end, so rx data will be at proper offset
+	 * No need for adding padding offset to extract data
+	 */
     uint32_t rxword =
-            (rx[3 + spi_padding] << 24) |
-            (rx[4 + spi_padding] << 16) |
-            (rx[5 + spi_padding] << 8) |
-            (rx[6 + spi_padding] << 0);
+            (rx[3] << 24) |
+            (rx[4] << 16) |
+            (rx[5] << 8) |
+            (rx[6] << 0);
 
     *value = rxword;
 
-    T_D("RX: %02x %02x %02x-%02x %02x %02x %02x",
+    T_D("RX: %02x %02x %02x-%02x %02x %02x %02x\n",
         tx[0], tx[1], tx[2],
-        rx[3 + spi_padding],
-        rx[4 + spi_padding],
-        rx[5 + spi_padding],
-        rx[6 + spi_padding]);
+        rx[3],
+        rx[4],
+        rx[5],
+        rx[6]);
 
     return MESA_RC_OK;
 }

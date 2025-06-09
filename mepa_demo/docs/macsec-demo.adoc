@@ -167,6 +167,10 @@ identified by unique `port_id` value.
 Each MACsec Processed packet will have Sectag attached to the packet,this application supports configuring
 those Sectag Paramters this command `secy_create_upd` will ask sectag related inputs from User one by one.
 
+NOTE: In Case of 8-Byte Sectag(Explicit SCI), the `mac-addr` argument of command `secy_create_upd` should be same
+to that of Source MAC Address of the packet forwarding in this virtual Port, if not packet decryption will fail
+
+
 ----
 # mepa-cmd secy_create_upd create 13 port-id 4 mac-addr 00-00-00-00-00-01
 
@@ -961,12 +965,12 @@ There are few steps to be followed to configure PHY for MACsec Encryption.The Be
 mandatory commands and these commands need to be called in same order mentioned below to configure PHY for MACsec
 Encryption.
 
-`Step 1` : macsec enable  -- Enables MACsec Block
-`Step 2` : secy_create_upd -- Create Secure Entity (SecY)
-`Step 3` : match_conf -- Provide Pattern Matching Parameters
-`Step 4` : pattern_conf -- Configures Direction and Pattern Matching Rule for SecY
-`Step 5` : tx_sc_create -- Create Transmit Secure Channel for SecY
-`Step 6` : tx_sa_create -- Create Transmit Secure Association for Tx SC
+`Step 1` : macsec enable  -- Enables MACsec Block +
+`Step 2` : secy_create_upd -- Create Secure Entity (SecY) +
+`Step 3` : match_conf -- Provide Pattern Matching Parameters +
+`Step 4` : pattern_conf -- Configures Direction and Pattern Matching Rule for SecY +
+`Step 5` : tx_sc_create -- Create Transmit Secure Channel for SecY +
+`Step 6` : tx_sa_create -- Create Transmit Secure Association for Tx SC +
 
 Following example is for Encrypting only IPv4 Ethernet Packet with Ethertype Pattern Matching rule configured (0x800)
 
@@ -1113,12 +1117,12 @@ Following example is for Encrypting only IPv4 Ethernet Packet with Ethertype Pat
 The Below mentioned MACsec Commands are mandatory commands and these commands need to be called in same order
 mentioned below to configure PHY for MACsec Decryption.
 
-`Step 1` : macsec enable  -- Enables MACsec Block
-`Step 2` : secy_create_upd -- Create Secure Entity (SecY)
-`Step 3` : match_conf -- Provide Pattern Matching Parameters
-`Step 4` : pattern_conf -- Configures Direction and Pattern Matching Rule for SecY
-`Step 5` : rx_sc_create -- Create Receive Secure Channel for SecY
-`Step 6` : rx_sa_create -- Create Receive Secure Association for Tx SC
+`Step 1` : macsec enable  -- Enables MACsec Block +
+`Step 2` : secy_create_upd -- Create Secure Entity (SecY) +
+`Step 3` : match_conf -- Provide Pattern Matching Parameters +
+`Step 4` : pattern_conf -- Configures Direction and Pattern Matching Rule for SecY +
+`Step 5` : rx_sc_create -- Create Receive Secure Channel for SecY +
+`Step 6` : rx_sa_create -- Create Receive Secure Association for Tx SC +
 
 Following example is for Decrypting only MACsec Packet with Ethertype Pattern Matching rule configured (0x88E5)
 

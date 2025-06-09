@@ -167,18 +167,18 @@ mepa_rc meba_selftest_start(meba_inst_t inst, mepa_port_no_t port_no,
 
 // Read Self-Test Checking counters
 mepa_rc meba_selftest_read(meba_inst_t inst, mepa_port_no_t port_no,
-                            mepa_selftest_info_t *const inf);
+                           mepa_selftest_info_t *const inf);
 // Delete the phy instance
 mepa_rc meba_phy_delete(meba_inst_t inst, mepa_port_no_t port_no);
 
 // To Set PRBS
-mepa_rc meba_prbs_set(meba_inst_t inst, mepa_port_no_t port_no, mepa_phy_prbs_type_t type, mepa_phy_prbs_direction_t direction, mepa_phy_prbs_generator_conf_t *const conf);
+mepa_rc meba_prbs_set(meba_inst_t inst, mepa_port_no_t port_no, mepa_phy_prbs_type_t type, mepa_phy_prbs_direction_t direction, const mepa_phy_prbs_generator_conf_t *const conf);
 
 // To Get PRBS
 mepa_rc meba_prbs_get(meba_inst_t inst, mepa_port_no_t port_no, mepa_phy_prbs_type_t type, mepa_phy_prbs_direction_t direction, mepa_phy_prbs_generator_conf_t *const conf);
 
 // To inject an error to PRBS
-mepa_rc meba_prbs_monitor_set(meba_inst_t inst, mepa_port_no_t port_no, mepa_phy_prbs_monitor_conf_t *const value);
+mepa_rc meba_prbs_monitor_set(meba_inst_t inst, mepa_port_no_t port_no, const mepa_phy_prbs_monitor_conf_t *const value);
 
 //To get error status of PRBS
 mepa_rc meba_prbs_monitor_get(meba_inst_t inst, mepa_port_no_t port_no, mepa_phy_prbs_monitor_conf_t *const value);
@@ -194,6 +194,8 @@ mepa_rc meba_warmrestart_conf_set(meba_inst_t inst, mepa_port_no_t port_no, cons
 
 //To sync QSGMII interface
 mepa_rc meba_phy_qsgmii_sync(meba_inst_t inst, const mepa_port_no_t port_no);
+
+mepa_rc meba_chip_temp_get(meba_inst_t inst, mepa_port_no_t port_no, int16_t *const temp);
 
 #include <microchip/ethernet/hdr_end.h>
 #endif //_MICROCHIP_ETHERNET_BOARD_PHY_DRIVER_H

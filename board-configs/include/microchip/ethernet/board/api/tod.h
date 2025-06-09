@@ -18,12 +18,12 @@
 // pps_save_delay [OUT] The delay from PPS going high to the time being saved
 //                      into the save register
 typedef mesa_rc (*meba_tod_phy_ts_clk_info_t)(
-        struct meba_inst        *inst,
-        mepa_port_no_t          port,
-        mepa_ts_clock_freq_t    *freq,
-        mepa_ts_clock_src_t     *src,
-        mepa_timeinterval_t     *pps_load_delay,
-        mepa_timeinterval_t     *pps_save_delay);
+    struct meba_inst        *inst,
+    mepa_port_no_t          port,
+    mepa_ts_clock_freq_t    *freq,
+    mepa_ts_clock_src_t     *src,
+    mepa_timeinterval_t     *pps_load_delay,
+    mepa_timeinterval_t     *pps_save_delay);
 
 
 #define MEBA_LIST_OF_API_TOD_CALLS  \

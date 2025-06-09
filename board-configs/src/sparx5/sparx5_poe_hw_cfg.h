@@ -83,7 +83,7 @@
 
 //-- BT individual masks --//
 
-// 0x00	Ignore higher priority
+// 0x00 Ignore higher priority
 // '0' The allocation logic before classification sums the delivering power ports with
 //     lower priority and adds the result to the available power. After classification, the
 //     disconnection function executes and may disconnect lower priority ports to free
@@ -93,7 +93,7 @@
 #define SPARX5_INDV_MASK_BT_IGNORE_HIGHER_PRIORITY_DEFAULT     0
 
 
-// 0x10	support high res detection
+// 0x10 support high res detection
 // '0' Resistor detection range at normal range, according to the IEEE 802.3bt.
 // '1' Open the upper range to 55 KOhm at 2-pair logical port only.
 //     Notes:
@@ -102,19 +102,19 @@
 #define SPARX5_INDV_MASK_BT_SUPPORT_HIGH_RES_DETECTION_DEFAULT     0
 
 
-// 0x1B	I2C restart enable
+// 0x1B I2C restart enable
 // '0' Do not initialize the I2C module in case of inactivity.
 // '1' Initializes the I2C module system after 10 seconds of inactivity.
 #define SPARX5_INDV_MASK_BT_I2C_RESTART_ENABLE_DEFAULT     1
 
 
-// 0x1F	PSE powering PSE checking
+// 0x1F PSE powering PSE checking
 // 0 = PSE powering PSE condition does not deny powering new valid ports.
 // 1 = In case PSE powering PSE condition occurs, no additional ports are poweredup, until this problem is resolved.
 #define SPARX5_INDV_MASK_BT_PSE_POWERING_PSE_CHECKING_DEFAULT     1
 
 
-// 0x20	Led stream type
+// 0x20 Led stream type
 // 0 LED stream is disabled.
 // 1 LED stream supports unicolor BT.
 // 2 LED stream supports Bicolor BT.
@@ -132,7 +132,7 @@
 #define SPARX5_INDV_MASK_BT_LED_STREAM_TYPE_DEFAULT     2
 
 
-// 0x2C	Layer2 power allocation limit
+// 0x2C Layer2 power allocation limit
 // 0 = Power allocation limit up to requested class (non-BT compliant).
 // 1 = Power allocation limit up to minimum between the requested class and the operation mode (BT compliant).
 #define SPARX5_INDV_MASK_BT_LAYER2_POWER_ALLOCATION_LIMIT_DEFAULT     1
@@ -144,7 +144,7 @@
 #define SPARX5_INDV_MASK_BT_PORT_LED_BLINKS_AT_INVALID_SIGNATURE_OR_CONNECTION_CHECK_ERROR_DEFAULT     0
 
 
-// 0x4F	Adding half priority for LLDP ports
+// 0x4F Adding half priority for LLDP ports
 // 0 = Port at LLDP does not have additional half priority.
 // 1 = Port at LLDP has additional half priority compared to non LLDP port at the same priority settings.
 #define SPARX5_INDV_MASK_BT_SUPPORT_ADDING_LLDP_HALF_PRIORITY_DEFAULT     1
@@ -266,8 +266,8 @@
                        MEBA_POE_PORT_CAP_TYPE_3 | \
                        MEBA_POE_PORT_CAP_TYPE_4 | \
                        MEBA_POE_PORT_CAP_4PAIR  | \
-                       MEBA_POE_PORT_CAP_FORCE_ON 
-                       
+                       MEBA_POE_PORT_CAP_FORCE_ON
+
 // PDS408G PREBT AT capability
 #define PD69200_PREBT_AT_CAP MEBA_POE_PORT_CAP_POE    | \
                              MEBA_POE_PORT_CAP_TYPE_1 | \
@@ -280,66 +280,64 @@
 //Note: 'PREBT- Max PWR' column is not applicable for PoE BT. set PoE BT max power by modifying the 'PORT_MAX_POWER_DEFAULT' parameter.
 //      this parameters is the port power limit when using poe PREBT mode.
 
-meba_poe_port_properties_t sparx5_pd69200_4pairs_port_map_1[] =
-{
+meba_poe_port_properties_t sparx5_pd69200_4pairs_port_map_1[] = {
 //  PoE         | PREBT-  | App-Log | PoE-Log | PoE Pair-A   | PoE Pair-B
-//  Capability  | MAX PWR | Port-ID | Port-ID | Phys Port-ID | Phys Port-ID 
+//  Capability  | MAX PWR | Port-ID | Port-ID | Phys Port-ID | Phys Port-ID
 //-------------------------------------------------------------------------
-  { PD69200_CAP , 24000   , 0       , 0       , 0            , 24        },
-  { PD69200_CAP , 24000   , 1       , 1       , 1            , 25        },
-  { PD69200_CAP , 24000   , 2       , 2       , 2            , 26        },
-  { PD69200_CAP , 24000   , 3       , 3       , 3            , 27        },
-  { PD69200_CAP , 24000   , 4       , 4       , 4            , 28        },
-  { PD69200_CAP , 24000   , 5       , 5       , 5            , 29        },
-  { PD69200_CAP , 24000   , 6       , 6       , 6            , 30        },
-  { PD69200_CAP , 24000   , 7       , 7       , 7            , 31        },
-  { PD69200_CAP , 24000   , 8       , 8       , 8            , 32        },
-  { PD69200_CAP , 24000   , 9       , 9       , 9            , 33        },
-  { PD69200_CAP , 24000   , 10      , 10      , 10           , 34        },
-  { PD69200_CAP , 24000   , 11      , 11      , 11           , 35        },
-  { PD69200_CAP , 24000   , 12      , 12      , 12           , 36        },
-  { PD69200_CAP , 24000   , 13      , 13      , 13           , 37        },
-  { PD69200_CAP , 24000   , 14      , 14      , 14           , 38        },
-  { PD69200_CAP , 24000   , 15      , 15      , 15           , 39        },
-  { PD69200_CAP , 24000   , 16      , 16      , 16           , 40        },
-  { PD69200_CAP , 24000   , 17      , 17      , 17           , 41        },
-  { PD69200_CAP , 24000   , 18      , 18      , 18           , 42        },
-  { PD69200_CAP , 24000   , 19      , 19      , 19           , 43        },
-  { PD69200_CAP , 24000   , 20      , 20      , 20           , 44        },
-  { PD69200_CAP , 24000   , 21      , 21      , 21           , 45        },
-  { PD69200_CAP , 24000   , 22      , 22      , 22           , 46        },
-  { PD69200_CAP , 24000   , 23      , 23      , 23           , 47        },
+    { PD69200_CAP, 24000, 0, 0, 0, 24        },
+    { PD69200_CAP, 24000, 1, 1, 1, 25        },
+    { PD69200_CAP, 24000, 2, 2, 2, 26        },
+    { PD69200_CAP, 24000, 3, 3, 3, 27        },
+    { PD69200_CAP, 24000, 4, 4, 4, 28        },
+    { PD69200_CAP, 24000, 5, 5, 5, 29        },
+    { PD69200_CAP, 24000, 6, 6, 6, 30        },
+    { PD69200_CAP, 24000, 7, 7, 7, 31        },
+    { PD69200_CAP, 24000, 8, 8, 8, 32        },
+    { PD69200_CAP, 24000, 9, 9, 9, 33        },
+    { PD69200_CAP, 24000, 10, 10, 10, 34        },
+    { PD69200_CAP, 24000, 11, 11, 11, 35        },
+    { PD69200_CAP, 24000, 12, 12, 12, 36        },
+    { PD69200_CAP, 24000, 13, 13, 13, 37        },
+    { PD69200_CAP, 24000, 14, 14, 14, 38        },
+    { PD69200_CAP, 24000, 15, 15, 15, 39        },
+    { PD69200_CAP, 24000, 16, 16, 16, 40        },
+    { PD69200_CAP, 24000, 17, 17, 17, 41        },
+    { PD69200_CAP, 24000, 18, 18, 18, 42        },
+    { PD69200_CAP, 24000, 19, 19, 19, 43        },
+    { PD69200_CAP, 24000, 20, 20, 20, 44        },
+    { PD69200_CAP, 24000, 21, 21, 21, 45        },
+    { PD69200_CAP, 24000, 22, 22, 22, 46        },
+    { PD69200_CAP, 24000, 23, 23, 23, 47        },
 };
 
-meba_poe_port_properties_t sparx5_pd69200_4pairs_port_map_2[] =
-{
+meba_poe_port_properties_t sparx5_pd69200_4pairs_port_map_2[] = {
 //  PoE         | PREBT-  | App-Log | PoE-Log | PoE Pair-A   | PoE Pair-B
-//  Capability  | MAX PWR | Port-ID | Port-ID | Phys Port-ID | Phys Port-ID 
+//  Capability  | MAX PWR | Port-ID | Port-ID | Phys Port-ID | Phys Port-ID
 //--------------------------------------------------------------------------
-  { PD69200_CAP , 24000   , 24      , 0       , 0            , 24         },
-  { PD69200_CAP , 24000   , 25      , 1       , 1            , 25         },
-  { PD69200_CAP , 24000   , 26      , 2       , 2            , 26         },
-  { PD69200_CAP , 24000   , 27      , 3       , 3            , 27         },
-  { PD69200_CAP , 24000   , 28      , 4       , 4            , 28         },
-  { PD69200_CAP , 24000   , 29      , 5       , 5            , 29         },
-  { PD69200_CAP , 24000   , 30      , 6       , 6            , 30         },
-  { PD69200_CAP , 24000   , 31      , 7       , 7            , 31         },
-  { PD69200_CAP , 24000   , 32      , 8       , 8            , 32         },
-  { PD69200_CAP , 24000   , 33      , 9       , 9            , 33         },
-  { PD69200_CAP , 24000   , 34      , 10      , 10           , 34         },
-  { PD69200_CAP , 24000   , 35      , 11      , 11           , 35         },
-  { PD69200_CAP , 24000   , 36      , 12      , 12           , 36         },
-  { PD69200_CAP , 24000   , 37      , 13      , 13           , 37         },
-  { PD69200_CAP , 24000   , 38      , 14      , 14           , 38         },
-  { PD69200_CAP , 24000   , 39      , 15      , 15           , 39         },
-  { PD69200_CAP , 24000   , 40      , 16      , 16           , 40         },
-  { PD69200_CAP , 24000   , 41      , 17      , 17           , 41         },
-  { PD69200_CAP , 24000   , 42      , 18      , 18           , 42         },
-  { PD69200_CAP , 24000   , 43      , 19      , 19           , 43         },
-  { PD69200_CAP , 24000   , 44      , 20      , 20           , 44         },
-  { PD69200_CAP , 24000   , 45      , 21      , 21           , 45         },
-  { PD69200_CAP , 24000   , 46      , 22      , 22           , 46         },
-  { PD69200_CAP , 24000   , 47      , 23      , 23           , 47         },
+    { PD69200_CAP, 24000, 24, 0, 0, 24         },
+    { PD69200_CAP, 24000, 25, 1, 1, 25         },
+    { PD69200_CAP, 24000, 26, 2, 2, 26         },
+    { PD69200_CAP, 24000, 27, 3, 3, 27         },
+    { PD69200_CAP, 24000, 28, 4, 4, 28         },
+    { PD69200_CAP, 24000, 29, 5, 5, 29         },
+    { PD69200_CAP, 24000, 30, 6, 6, 30         },
+    { PD69200_CAP, 24000, 31, 7, 7, 31         },
+    { PD69200_CAP, 24000, 32, 8, 8, 32         },
+    { PD69200_CAP, 24000, 33, 9, 9, 33         },
+    { PD69200_CAP, 24000, 34, 10, 10, 34         },
+    { PD69200_CAP, 24000, 35, 11, 11, 35         },
+    { PD69200_CAP, 24000, 36, 12, 12, 36         },
+    { PD69200_CAP, 24000, 37, 13, 13, 37         },
+    { PD69200_CAP, 24000, 38, 14, 14, 38         },
+    { PD69200_CAP, 24000, 39, 15, 15, 39         },
+    { PD69200_CAP, 24000, 40, 16, 16, 40         },
+    { PD69200_CAP, 24000, 41, 17, 17, 41         },
+    { PD69200_CAP, 24000, 42, 18, 18, 42         },
+    { PD69200_CAP, 24000, 43, 19, 19, 43         },
+    { PD69200_CAP, 24000, 44, 20, 20, 44         },
+    { PD69200_CAP, 24000, 45, 21, 21, 45         },
+    { PD69200_CAP, 24000, 46, 22, 22, 46         },
+    { PD69200_CAP, 24000, 47, 23, 23, 47         },
 };
 
 //------------------- cap and port map Customizations ends here --------------------//

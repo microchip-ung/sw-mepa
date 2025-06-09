@@ -15,5 +15,28 @@
  "10g_loopback": {
 	"lb_type": "VTSS_LB_H2",
 	"enable": 1
+   },
+  "25g_loopback": {
+	"mepa_loopback": {
+		"far_end_ena": 0,
+		"near_end_ena": 1,
+		"connector_ena": 0,
+		"mac_serdes_input_ena": 0,
+		"mac_serdes_facility_ena": 0,
+		"mac_serdes_equip_ena": 0,
+		"media_serdes_input_ena": 0,
+		"media_serdes_facility_ena": 0,
+		"media_serdes_equip_ena": 0,
+		"qsgmii_pcs_tbi_ena": 0,
+		"qsgmii_pcs_gmii_ena": 0,
+		"qsgmii_serdes_ena": 0
+	},
+	"chipspecific_loopback": {
+		"h3p_lp_ena": 0,
+		"l3p_lp_ena": 0,
+		"h3m_lp_ena": 0,
+		"l3m_lp_ena": 0,
+		"h7_lp_ena": 0
+	}
    }
 }

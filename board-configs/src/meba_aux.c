@@ -54,12 +54,12 @@ mesa_rc meba_synce_spi_if_spi_transfer(meba_inst_t inst, uint32_t buflen, const 
 
 mesa_rc meba_synce_write(meba_inst_t inst, uint8_t addr, uint32_t size, const uint8_t *data)
 {
-    uint8_t tx_data[size+1];
+    uint8_t tx_data[size + 1];
     tx_data[0] = addr & 0x7F; /* Clear first bit to indicate write */
-    memcpy(tx_data+1, data, size);
+    memcpy(tx_data + 1, data, size);
     if (inst->synce_spi_if_fd > 0) {
-        uint8_t rx_data[size+1];
-        return meba_synce_spi_if_spi_transfer(inst, size+1, tx_data, rx_data);
+        uint8_t rx_data[size + 1];
+        return meba_synce_spi_if_spi_transfer(inst, size + 1, tx_data, rx_data);
     }
 
     if (inst->synce_i2c_if_fd > 0) {
@@ -71,20 +71,20 @@ mesa_rc meba_synce_write(meba_inst_t inst, uint8_t addr, uint32_t size, const ui
         return VTSS_RC_OK;
     }
     return VTSS_RC_ERROR;
- 
+
 }
 
 mesa_rc meba_synce_read(meba_inst_t inst, uint8_t addr, uint32_t size, uint8_t *data)
 {
     if (inst->synce_spi_if_fd > 0) {
-        uint8_t tx_data[size+1];
-        uint8_t rx_data[size+1];
+        uint8_t tx_data[size + 1];
+        uint8_t rx_data[size + 1];
         tx_data[0] = addr | 0x80; // set read bit
-        mesa_rc rc = meba_synce_spi_if_spi_transfer(inst, size+1, tx_data, rx_data);
+        mesa_rc rc = meba_synce_spi_if_spi_transfer(inst, size + 1, tx_data, rx_data);
         if (VTSS_RC_OK != rc) {
             return rc;
         }
-        memcpy(data, rx_data+1, size);
+        memcpy(data, rx_data + 1, size);
         return VTSS_RC_OK;
     }
 
@@ -101,9 +101,9 @@ mesa_rc meba_synce_read(meba_inst_t inst, uint8_t addr, uint32_t size, uint8_t *
         }
         return VTSS_RC_OK;
     }
-    
+
     return VTSS_RC_ERROR;
- 
+
 }
 
 static meba_synce_clock_hw_id_t known_dpll_type;
@@ -114,7 +114,7 @@ mesa_rc meba_synce_spi_if_do_dpll_type_detection(meba_inst_t inst, const char *d
     mesa_rc rc = MESA_RC_OK;
     char synce_spi_file[32];
     int file;
-    
+
     uint8_t partnum[3];
     inst->synce_spi_if_fd = -1;
     inst->synce_i2c_if_fd = -1;
@@ -324,10 +324,10 @@ static mesa_rc meba_synce_spi_if_do_read_dpll_fw_ver(meba_inst_t inst, meba_sync
         }
         *detected_dpll_ver |= rx_data[0];
         return rc;
-     } else {
+    } else {
         T_I(inst, "Fetch of SW version not supported on this DPLL");
         return MESA_RC_ERROR;
-     }
+    }
 }
 
 // fetch FW version of DPLL

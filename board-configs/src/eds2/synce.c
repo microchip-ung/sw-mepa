@@ -39,9 +39,9 @@
 #define dpll_port_1             MESA_SYNCE_DEV_DPLL(            500,      MESA_SYNCE_DEV_INPUT | 1)
 #define dpll_port_4             MESA_SYNCE_DEV_DPLL(            500,      MESA_SYNCE_DEV_INPUT | 4)
 
-/* When a port on phy device 100 is used for clk1, we want the signal to be routed to clk1_out on 
+/* When a port on phy device 100 is used for clk1, we want the signal to be routed to clk1_out on
    device 100 and from clk1_in to clk1_out on device 200. That restriction is not reflected in the above
-   graph. It also allows the signal to be routed to clk2_out on device 100 and then from clk2_in to 
+   graph. It also allows the signal to be routed to clk2_out on device 100 and then from clk2_in to
    clk1_out on device 200. The mux setup is therefore not using the following graph, but is being
    hard coded in the application */
 
@@ -143,8 +143,8 @@ static mesa_rc meba_synce_mux_set(meba_inst_t  inst,
         return MESA_RC_ERROR;
     }
     if ((dev_id == 200) && input != 0
-                        && input != 1
-                        && ((input < (MESA_SYNCE_DEV_INPUT | 4)) || (input > (MESA_SYNCE_DEV_INPUT | 7)))) {
+        && input != 1
+        && ((input < (MESA_SYNCE_DEV_INPUT | 4)) || (input > (MESA_SYNCE_DEV_INPUT | 7)))) {
         // 0 - clk1_in
         // 1 - clk2_in
         // MESA_SYNCE_DEV_INPUT | (4-7) - Front port 5-8

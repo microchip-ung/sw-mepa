@@ -62,6 +62,7 @@ typedef struct cli_cmd_t {
 
 void mscc_appl_cli_cmd_reg(cli_cmd_t *cmd);
 void mscc_appl_macsec_cli_cmd_reg(cli_cmd_t *cmd);
+void mscc_appl_ts_cli_cmd_reg(cli_cmd_t *cmd);
 
 #define CLI_PARM_FLAG_NONE   0x00000000 /* No flags */
 #define CLI_PARM_FLAG_NO_TXT 0x00000001 /* Suppress identification text */
@@ -99,6 +100,9 @@ int cli_parse_values(const char *buf, uint32_t *arr, uint32_t *val_cnt, uint32_t
 char *cli_port_list_txt(mesa_port_list_t *port_list, char *buf);
 mesa_bool_t cli_port_list_member(mesa_port_list_t *port_list, mesa_port_no_t iport);
 int cli_printf(const char *fmt, ...);
+
+int cli_parm_hex_u32(cli_req_t *req, uint32_t *val, uint32_t min, uint32_t max);
+int cli_parse_mac_address(cli_req_t *req, uint32_t mac[]);
 
 #ifdef __cplusplus
 }
