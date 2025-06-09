@@ -650,7 +650,11 @@ static mepa_rc mscc_1g_conf_set(mepa_device_t *dev, const mepa_conf_t *config)
             phy_config.force_ams_sel = MEPA_PHY_MEDIA_FORCE_AMS_SEL_NORMAL;
         }
 
-        (void)vtss_phy_conf_1g_set(data->vtss_instance, data->port_no, &cfg_neg);
+        rc = vtss_phy_conf_1g_set(data->vtss_instance, data->port_no, &cfg_neg);
+        if (rc != MEPA_RC_OK) {
+            T_E(data, MEPA_TRACE_GRP_GEN, "Failed to confiured speed\n");
+            return MEPA_RC_ERROR;
+        }   
         phy_config.forced.speed = config->speed;
         phy_config.forced.fdx = config->fdx;
 

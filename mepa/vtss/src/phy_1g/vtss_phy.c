@@ -16175,7 +16175,7 @@ vtss_rc vtss_phy_epg_gen_kat_frame( const vtss_inst_t        inst,
     if ((rc = vtss_inst_port_no_check(inst, &vtss_state, port_no)) == VTSS_RC_OK) {
         if ((rc = vtss_phy_epg_gen_kat_frame_private (vtss_state, port_no, match)) != VTSS_RC_OK) {
             /* Ensure we return to the Std Page if Error */
-            vtss_phy_page_std(vtss_state, port_no);
+            rc = vtss_phy_page_std(vtss_state, port_no);
         }
     }
     VTSS_EXIT();

@@ -6666,7 +6666,11 @@ static int __usxgmii_anegsts_get(struct gpy211_device *phy,
 
 		if (status->aneg_complete) {
 			FIELD_REPLACE(_data, 0, XPCS_VR_MII_AN_INTR_STS_CL37_ANCMPLT_INTR);
-			PHY_XPCS_HWWR(phy, aneg_intr_off[idx], _data);
+			ret = PHY_XPCS_HWWR(phy, aneg_intr_off[idx], _data);
+            if (ret < 0) {
+                LOG_CRIT("ERROR: XPCS read fails\n");
+                return ret;
+            }
 		}
 	}
 
