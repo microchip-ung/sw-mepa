@@ -3303,9 +3303,6 @@ static AQ_Retcode AQ_API_EraseBySectors
 	postData = NULL;
   }
 
-  if (preData != NULL) {
-    free(preData);
-  }
   if (postData != NULL) {
     free(postData);
   }
