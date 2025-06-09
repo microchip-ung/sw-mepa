@@ -2360,12 +2360,6 @@ int gpy2xx_ads_cfg(struct gpy211_device *phy, struct gpy211_ads_ctrl *ads)
 		return -EINVAL;
 	}
 
-	/* Validate ADS Timer (to Reset the Downshift process) */
-	if (ads->nrg_rst_cnt > ADS_NRG_RST_CNT_MAX) {
-		LOG_WARN("WARN: Invalid input of TIMER value (0-255) to reset downshift process.\n");
-		return -EINVAL;
-	}
-
 	phy->lock(phy->lock_data);
 	/* Read NBT_DS_CTRL  */
 	ret = PHY_READ_MMD(phy,  MDIO_MMD_VEND1, VSPEC1_NBT_DS_CTRL);
@@ -3859,8 +3853,7 @@ static int __gpy211_sgmii_opmode(struct gpy211_device *phy,
 		if (ctrl) {
 			LOG_CRIT("ERROR: VSPEC1_SGMII_CTRL Reset is still in RST state\n");
 			return -EIO;
-		} else
-			return 0;
+        }
 
 	default:
 		return -EINVAL;
@@ -4925,10 +4918,11 @@ int gpy2xx_macsec_enable(struct gpy211_device *phy,
 
 	/* ret = gpy2xx_msec_init_egr_dev(phy); */
 
-	if (ret < 0) {
+	/* if (ret < 0) {
 		LOG_CRIT("ERROR: MACsec egress dev init fails\n");
 		goto END;
 	}
+    */
 
 END:
 	phy->unlock(phy->lock_data);

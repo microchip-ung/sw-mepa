@@ -4343,9 +4343,7 @@ static BOOL vtss_phy_chk_serdes_init_mac_mode_private(vtss_state_t              
             // Reg19G    1      0
             // Check to see if it's enabled
             if ((sys_rst == 0x1) && (ena_lane == 0x1) && (pll_fsm_ena == 0x1)) {
-                if ((if_mode == 0x3) && (qrate == 0) && (hrate == 0)) {
-                    micro_patch_mac_mode = VTSS_PORT_INTERFACE_QSGMII;
-                } else if ((if_mode == 0x1) && (qrate == 1) && (hrate == 0)) {
+                if ((if_mode == 0x1) && (qrate == 1) && (hrate == 0)) {
                     micro_patch_mac_mode = VTSS_PORT_INTERFACE_SGMII;
                 }
             }
@@ -4750,7 +4748,10 @@ static vtss_rc vtss_phy_tesla_serdes_sd6g_1g_prbs_conf_private(vtss_state_t *vts
             // Modify bits 286-284  TEST_MODE=OFF
             VTSS_RC(patch_array_set_value(vtss_state, port_no, VTSS_TESLA_SERDES6G_DIG_CFG_TEST_MODE_6G + 2, VTSS_TESLA_SERDES6G_DIG_CFG_TEST_MODE_6G, VTSS_TESLA_SERDES_TEST_MODE_OFF));
         }
-    } else if (mcb_bus == 0 && slave_num > 0) {  // VTSS_PORT_INTERFACE_SGMII MACRO
+    }
+
+#if 0
+    if (mcb_bus == 0 && slave_num > 0) {  // VTSS_PORT_INTERFACE_SGMII MACRO
         // Modify bits 193-192  PRBS_SEL=PRBS7
         VTSS_RC(patch_array_set_value(vtss_state, port_no, VTSS_TESLA_SERDES1G_DIG_CFG_PRBS_SEL_1G + 1, VTSS_TESLA_SERDES1G_DIG_CFG_PRBS_SEL_1G, VTSS_TESLA_SERDES_PRBS_7));
 
@@ -4777,6 +4778,7 @@ static vtss_rc vtss_phy_tesla_serdes_sd6g_1g_prbs_conf_private(vtss_state_t *vts
             VTSS_I("port_no: %d, MAC = SGMII: Setting 1G MAC SerDes, mcb_bus: %d, slave: %d,  Cmd: 0x%x", port_no, mcb_bus, slave_num, micro_cmd);
         }
     }
+#endif
 
     // Step 3: Write the MCB Array back out to take effect
     VTSS_RC(vtss_phy_page_gpio(vtss_state, port_no));       // Switch back to micro/GPIO register-page
@@ -16078,6 +16080,18 @@ static vtss_rc vtss_phy_epg_gen_kat_frame_private(vtss_state_t *vtss_state, cons
     /*  0xC040 = EPG Enable, Run, 125 Byte Frames, IPG=96nsec, Dst=0001, Src=0000, Fixed Payload Pattern, Good FCS */
     /*  0x8040 = EPG Enable, Stop, 125 Byte Frames, IPG=96nsec, Dst=0001, Src=0000, Fixed Payload Pattern, Good FCS */
     /*  0xE840 = EPG Enable, Run, 64 Byte Frames, IPG=96nsec, Dst=0001, Src=0000, Fixed Payload Pattern, Good FCS */
+    if (pkt_sz == 64) {
+        VTSS_I("Configure EPG to send 300 x 64-byte packets, IPG=96ns (UDP) - Pattern = 0x013F - Not Using 8051 \n");
+        reg29e = 0x8840;  // Configure, but don't Run 64 byte
+    } else if (pkt_sz == 125) {
+        VTSS_I("Configure EPG to send 125-byte packets, IPG=96ns (UDP) - Pattern = 0x013F  \n");
+        reg29e = 0x8040;  // Configure, but don't Run 125 byte
+    } else {
+        VTSS_I("Configure EPG to send 300 x 125-byte packets, IPG=96ns (UDP) - Pattern = 0x013F - Not Using 8051 \n");
+        reg29e = 0x8040;  // Configure, but don't Run 125 byte
+    }
+
+#if 0
    if (pkt_sz == 64) {
         VTSS_I("Configure EPG to send 300 x 64-byte packets, IPG=96ns (UDP) - Pattern = 0x013F - Not Using 8051 \n");
         reg29e = 0x8840;  // Configure, but don't Run 64 byte
@@ -16094,6 +16108,7 @@ static vtss_rc vtss_phy_epg_gen_kat_frame_private(vtss_state_t *vtss_state, cons
         VTSS_I("Configure EPG to send 300 x 125-byte packets, IPG=96ns (UDP) - Pattern = 0x013F - Not Using 8051 \n");
         reg29e = 0x8040;  // Configure, but don't Run 125 byte
     }
+#endif
 
     /*  Set the DA and SA based upon the Match Mode for the EPG */
     reg29e |= (VTSS_PHY_EPG_DST_ADDR << 6) | (VTSS_PHY_EPG_SRC_ADDR << 2);

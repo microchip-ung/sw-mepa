@@ -596,7 +596,7 @@ static mepa_rc mscc_1g_conf_set(mepa_device_t *dev, const mepa_conf_t *config)
     phy_data_t *data = (phy_data_t *)dev->data;
     vtss_phy_conf_t phy_config = {};
     vtss_phy_conf_1g_t cfg_neg = {};
-
+    mepa_rc rc = MEPA_RC_OK;
     if (vtss_phy_conf_get(data->vtss_instance, data->port_no, &phy_config) == MESA_RC_OK) {
         if (config->admin.enable) {
             if (config->speed == MESA_SPEED_AUTO ||
