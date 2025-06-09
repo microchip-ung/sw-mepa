@@ -335,7 +335,7 @@ static mepa_rc lan8814_framepreempt_set_(mepa_device_t *dev, mepa_bool_t const e
     mepa_device_t *base_dev = data->base_dev;
     phy_data_t *base_data = base_dev ? ((phy_data_t *)(base_dev->data)) : NULL;
 
-    if (!data || !base_dev || !base_data) {
+    if (!base_data) {
         return MEPA_RC_OK;
     }
 
