@@ -11893,7 +11893,7 @@ AQ_Retcode AQ_API_GetTDRCableDiagsResults
 
   if (txPair == 0) return AQ_RET_CABLEDIAG_STARTED_PAIR_B;
   if (txPair == 1) return AQ_RET_CABLEDIAG_STARTED_PAIR_C;
-  else return AQ_RET_CABLEDIAG_STARTED_PAIR_D;
+  return AQ_RET_CABLEDIAG_STARTED_PAIR_D;
 }
 
 /*@}*/
@@ -12090,7 +12090,7 @@ AQ_Retcode AQ_API_GetNoisePSDCableDiagsResults
 
   if (txPair == 0) return AQ_RET_CABLEDIAG_STARTED_PAIR_B;
   if (txPair == 1) return AQ_RET_CABLEDIAG_STARTED_PAIR_C;
-  else return AQ_RET_CABLEDIAG_STARTED_PAIR_D;
+  return AQ_RET_CABLEDIAG_STARTED_PAIR_D;
 }
 
 /*@}*/

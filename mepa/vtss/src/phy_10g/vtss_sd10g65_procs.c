@@ -2021,7 +2021,7 @@ vtss_rc vtss_calc_sd10g65_setup_df2f(const vtss_sd10g65_setup_df2f_args_t config
                             }
                         }
 
-                        if (num_words > 14) {
+                        if (num_words >= 16) {
                             VTSS_E("Out of Bound Memory access for variable pattern");
                             return VTSS_RC_ERROR;
                         }
@@ -2086,7 +2086,7 @@ vtss_rc vtss_calc_sd10g65_setup_df2f(const vtss_sd10g65_setup_df2f_args_t config
                             }
                         }
                     }
-                    if (num_words > 14) {
+                    if (num_words >= 16) {
                         VTSS_E("Out of Bound Memory access for variable pattern");
                         return VTSS_RC_ERROR;
                     }
