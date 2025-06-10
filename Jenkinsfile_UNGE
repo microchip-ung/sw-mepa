@@ -44,7 +44,7 @@ pipeline {
 
         stage('Build + Misc Parallel') {
             parallel {
-                stage("Build and Analyze (arm64)") {
+                stage("Build and Analyze") {
                     agent { kubernetes { yamlFile '.cmake/pod-build.yaml' } }
                     stages {
                         stage("arm64") {
@@ -63,6 +63,7 @@ pipeline {
                                 container('pod-mepa-build') {
                                     script {
                                         // Run the script and get the exit status
+                                        // Running coverity only for arm64 compiler, as we are running coverity for MEPA lib which gets covered for all MEPA libraries
                                         def result = sh(script: "./.cmake/mepa_coverity.rb -t arm64 static_analysis_reports", returnStatus: true)
 
                                         if (result == 0) {
@@ -78,6 +79,18 @@ pipeline {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                stage("arm") {
+                    agent { kubernetes { yamlFile '.cmake/pod-build.yaml' } }
+                    steps {
+                        container('pod-mepa-build') {
+                            unstash name: "src"
+                                    sh "tar -xf ws.tar && rm ws.tar"
+                                    sh "./.cmake/create_cmake_project_new.rb -vfnp arm arm"
+                                    stash name: "bin-arm", includes: "arm.tar"
                         }
                     }
                 }
@@ -124,6 +137,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'Test', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
                     container('pod-mepa-base') {
                         unstash name: "bin-arm64"
+                        unstash name: "bin-arm"
                         unstash name: "ana-report"
                         sh ".cmake/aggr-artifacts.rb"
                     }

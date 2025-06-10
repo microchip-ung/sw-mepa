@@ -115,11 +115,14 @@ end
 sys "cp -r ws #{out_name}"
 sys "mkdir #{out_name}/bin"
 sys "tar -C #{out_name}/bin -f arm64.tar -x"
+sys "tar -C #{out_name}/bin -f arm.tar -x"
 run "tar -czvf #{out_name}.tar.gz #{out_name}"
 
 if File.exist? "./images"
   sys "cp #{out_name}/bin/arm64/mepa_demo/*.itb images/."
   sys "cp #{out_name}/bin/arm64/mepa_demo/*.ext4.gz images/."
+  sys "cp #{out_name}/bin/arm/mepa_demo/*.itb images/."
+  sys "cp #{out_name}/bin/arm/mepa_demo/*.ext4.gz images/."
 end
 
 run "rm -rf #{out_name}"
