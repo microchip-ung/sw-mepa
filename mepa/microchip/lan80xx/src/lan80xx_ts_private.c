@@ -1636,19 +1636,19 @@ mepa_rc lan80xx_phy_ts_init(const mepa_device_t *dev,
 
 mepa_rc lan80xx_get_eng_flow_info(u16 in_flow, phy25g_ts_engine_t *eng_id, u16 *eng_flow)
 {
-    if (in_flow < TS_FLOWS_PER_ENG * (LAN80XX_PHY_TS_PTP_ENGINE_ID_0 + 1)) {
+    if (in_flow < LAN80XX_TS_FLOWS_PER_ENG * (LAN80XX_PHY_TS_PTP_ENGINE_ID_0 + 1)) {
         *eng_id = LAN80XX_PHY_TS_PTP_ENGINE_ID_0;
-    } else if (in_flow >= (TS_FLOWS_PER_ENG * LAN80XX_PHY_TS_PTP_ENGINE_ID_1) &&
-               in_flow <  (TS_FLOWS_PER_ENG * LAN80XX_PHY_TS_OAM_ENGINE_ID_2A)) {
+    } else if (in_flow >= (LAN80XX_TS_FLOWS_PER_ENG * LAN80XX_PHY_TS_PTP_ENGINE_ID_1) &&
+               in_flow <  (LAN80XX_TS_FLOWS_PER_ENG * LAN80XX_PHY_TS_OAM_ENGINE_ID_2A)) {
         *eng_id = LAN80XX_PHY_TS_PTP_ENGINE_ID_1;
-    } else if (in_flow >= (TS_FLOWS_PER_ENG * LAN80XX_PHY_TS_OAM_ENGINE_ID_2A) &&
-               in_flow <  (TS_FLOWS_PER_ENG * (LAN80XX_PHY_TS_OAM_ENGINE_ID_2A + 1))) {
+    } else if (in_flow >= (LAN80XX_TS_FLOWS_PER_ENG * LAN80XX_PHY_TS_OAM_ENGINE_ID_2A) &&
+               in_flow <  (LAN80XX_TS_FLOWS_PER_ENG * (LAN80XX_PHY_TS_OAM_ENGINE_ID_2A + 1))) {
         *eng_id = LAN80XX_PHY_TS_OAM_ENGINE_ID_2A;
     } else {
         *eng_id = LAN80XX_PHY_TS_ENGINE_ID_INVALID;
         return MEPA_RC_ERROR;
     }
-    *eng_flow = in_flow % TS_FLOWS_PER_ENG;
+    *eng_flow = in_flow % LAN80XX_TS_FLOWS_PER_ENG;
     return MEPA_RC_OK;
 }
 
