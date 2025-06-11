@@ -129,7 +129,6 @@ macro(APP_TARGET)
         set(${A_NAME} ON CACHE BOOL "" FORCE)
     endif()
 
-
     add_executable(${A_NAME} main.c)
     target_link_libraries(${A_NAME}
                 mepa_demo_lib
@@ -261,14 +260,13 @@ macro(IMG_TARGET)
     endif()
 endmacro()
 
-APP_TARGET(NAME app_vsc7558TSN         MESA vsc7558TSN         MEBA meba_sparx5        APP_TARGET_DEFINES -DMEPA_HAS_LAN80XX -DMEPA_HAS_VTSS -DMEPA_DEMO_EDSx)
-APP_TARGET(NAME app_vsc7558MSEC        MESA vsc7558MSEC        MEBA meba_sparx5_macsec APP_TARGET_DEFINES -DMEPA_HAS_LAN80XX -DMEPA_HAS_VTSS -DMEPA_DEMO_EDSx)
-APP_TARGET(NAME app_lan966x            MESA lan966x            MEBA meba_eds2          APP_TARGET_DEFINES -DMEPA_DEMO_EDS2)
-
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+    APP_TARGET(NAME app_vsc7558TSN         MESA vsc7558TSN         MEBA meba_sparx5        APP_TARGET_DEFINES -DMEPA_HAS_LAN80XX -DMEPA_HAS_VTSS -DMEPA_DEMO_EDSx)
+    APP_TARGET(NAME app_vsc7558MSEC        MESA vsc7558MSEC        MEBA meba_sparx5_macsec APP_TARGET_DEFINES -DMEPA_HAS_LAN80XX -DMEPA_HAS_VTSS -DMEPA_DEMO_EDSx)
     IMG_TARGET(NAME arm64_vsc7558TSN         TYPE ext4     APP app_vsc7558TSN      MACHINE fireant)
     IMG_TARGET(NAME arm64_vsc7558MSEC        TYPE ext4     APP app_vsc7558MSEC     MACHINE fireant)
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7l")
+    APP_TARGET(NAME app_lan966x            MESA lan966x            MEBA meba_eds2          APP_TARGET_DEFINES -DMEPA_DEMO_EDS2)
     IMG_TARGET(NAME armv7_lan966x         TYPE ext4   APP app_lan966x         MACHINE lan966x)
 endif()
 
