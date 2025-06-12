@@ -27,6 +27,23 @@
 /* Malibu 10G SKU */
 #define MEBA_10GPHY_8258  0x8258
 
+/* Viper PHY Part Numbers */
+#define MEBA_1GPHY_8582   8582
+#define MEBA_1GPHY_8584   8584
+#define MEBA_1GPHY_8575   8575
+#define MEBA_1GPHY_8564   8564
+#define MEBA_1GPHY_8562   8562
+#define MEBA_1GPHY_8586   8586
+
+/* Tesla PHY Part Numbers */
+#define MEBA_1GPHY_8574   8574
+#define MEBA_1GPHY_8504   8504
+#define MEBA_1GPHY_8572   8572
+#define MEBA_1GPHY_8552   8552
+
+/* LAN8814 PHY Part Number */
+#define MEBA_1GPHY_8814   8814
+
 #define HOST_INTR_B (6)
 #define MEBA_GLOBAL_REG_DEV_ID      0x1E
 #define MEBA_DEVICE_ID_REG_ADDR     0x0
@@ -34,6 +51,7 @@
 
 typedef enum {
     PHY_TYPE_NONE,
+    PHY1G_MAX_1G_SPEED,
     PHY10G_MAX_10G_SPEED,
     PHY25G_MAX_25G_SPEED,
     PHY25G_MAX_10G_SPEED,
@@ -105,6 +123,19 @@ uint8_t gpio_callback(void)
 static void phy_detect_family(mepa_phy_info_t phy_info, phy_type_t *phy)
 {
     switch (phy_info.part_number) {
+    case MEBA_1GPHY_8584:
+    case MEBA_1GPHY_8582:
+    case MEBA_1GPHY_8575:
+    case MEBA_1GPHY_8564:
+    case MEBA_1GPHY_8562:
+    case MEBA_1GPHY_8586:
+    case MEBA_1GPHY_8574:
+    case MEBA_1GPHY_8504:
+    case MEBA_1GPHY_8572:
+    case MEBA_1GPHY_8552:
+    case MEBA_1GPHY_8814:
+        *phy = PHY1G_MAX_1G_SPEED;
+        break;
     case MEBA_25GPHY_8044:
     case MEBA_25GPHY_8043:
     case MEBA_25GPHY_8042:
@@ -134,7 +165,6 @@ static void meba_phy_config(meba_inst_t inst, const vtss_inst_t vtss_instance, m
     mepa_reset_param_t phy_reset = {};
     phy_type_t   phy_type = PHY_TYPE_NONE;
     /* Pre Reset Configuration */
-    phy_reset.media_intf = MESA_PHY_MEDIA_IF_FI_10G_LAN;
     phy_reset.reset_point = MEPA_RESET_POINT_PRE;
     meba_phy_reset(inst, port_no, &phy_reset);
 
@@ -146,6 +176,13 @@ static void meba_phy_config(meba_inst_t inst, const vtss_inst_t vtss_instance, m
 #ifdef MEPA_DEMO_EDSx
         lan80xx_MB_INTR_register_callback(inst->phy_devices[port_no], gpio_callback);
 #endif
+    }
+
+    /*Handle media interface based on PHY type identified*/
+    if (phy_type == PHY1G_MAX_1G_SPEED) {
+        phy_reset.media_intf = MESA_PHY_MEDIA_IF_CU;
+    } else if (phy_type == PHY10G_MAX_10G_SPEED) {
+        phy_reset.media_intf = MESA_PHY_MEDIA_IF_FI_10G_LAN;
     }
 
     /* Default Reset Point */
@@ -260,7 +297,7 @@ void phy_25g_slot1_scan(meba_inst_t inst, mepa_port_no_t port_no, meba_port_entr
      * To demostrate LAN80XX Agregate interrupt, the ALERT signal from MCP9902 device is masked by writing address 0x3 with value 0x80
      * I2C slave address of MCP9902 is 0x4C
      */
-    if(lan80xx_phy) {
+    if (lan80xx_phy) {
         data = 0x80;
         inst->api.meba_sfp_i2c_xfer(inst, port_no, TRUE, 0x4C, 0x3, &data, 1, FALSE);
     }
@@ -326,7 +363,7 @@ void phy_25g_slot2_scan(meba_inst_t inst, mepa_port_no_t port_no, meba_port_entr
      * To demostrate LAN80XX Agregate interrupt, the ALERT signal from MCP9902 device is masked by writing address 0x3 with value 0x80
      * I2C slave address of MCP9902 is 0x4C
      */
-    if(lan80xx_phy) {
+    if (lan80xx_phy) {
         data = 0x80;
         inst->api.meba_sfp_i2c_xfer(inst, port_no, TRUE, 0x4C, 0x3, &data, 1, FALSE);
     }
