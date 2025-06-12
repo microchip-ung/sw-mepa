@@ -485,8 +485,6 @@ configuring H3M, L3M, H3P, L3P and H7 loopbacks, so to support these loopback Ch
 
     * `lan80xx_phy_loopback_conf_set()` -- Chip Specific API used to Configure H3M,L3M,H3P,L3P and H7 Loopbacks.
 
-image::lan80xx_loopbacks.jpg[align="center"]
-
 The API configuration settings are listed in the following table:
 [%autowidth.stretch, options="header"]
 |===

@@ -35,9 +35,6 @@ Following are the list of the Crossconnect related APIs that LAN80XX PHY Support
 
     * `lan80xx_xconnect_anylinetoanyhost()` - Enable Cross connect and configure Cross connect for any hostports to any line ports.
 
-image::cross_connect_anylinetoanyhost.jpg[align="center"]
-	
-
 The API configuration settings are listed in the following table:
 
 [cols="1,1", options="header"]
@@ -52,8 +49,6 @@ The API configuration settings are listed in the following table:
     * `lan80xx_xconnect_hostfailover_Protection()` - Enable Host Protection and configure Host Protection connection pairs either
 1:1 or 1+1 protection mode for the ports.
 
-image::cross_connect_host_protection.jpg[align="center"]
-	
 
 The API configuration settings are listed in the following table:
 
@@ -135,13 +130,9 @@ and standby connection.
 In System role without MAC change, same HOST MAC will be used in both default active and standby connection even after
 working protected switch failover.
 
-image::cross_connect_without_mac_change.jpg[align="center"]
-
 ==== With MAC change
 System role with MAC change, different HOST MAC will be used by default active and standby connection 
 after working protected switch failover.
-
-image::cross_connect_with_mac_change.jpg[align="center"]
 
 ==== Host protection Failover
 Host protection SW Failover can be injected by setting corresponding failover bits.
