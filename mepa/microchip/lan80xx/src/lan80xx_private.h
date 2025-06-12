@@ -59,6 +59,14 @@
 #define LAN80XX_GPIO_37                         (37U)
 #define LAN80XX_GPIO_38                         (38U)
 #define LAN80XX_GPIO_39                         (39U)
+#define LAN80XX_GPIO_2                          (2U)
+#define LAN80XX_GPIO_3                          (3U)
+#define LAN80XX_GPIO_10                         (10U)
+#define LAN80XX_GPIO_11                         (11U)
+#define LAN80XX_GPIO_18                         (18U)
+#define LAN80XX_GPIO_19                         (19U)
+#define LAN80XX_GPIO_26                         (26U)
+#define LAN80XX_GPIO_27                         (27U)
 
 
 /* MAC block Config values */

@@ -4004,6 +4004,33 @@ mepa_rc lan80xx_phy_tx_rx_equalization_status_get_priv(const mepa_device_t      
     return MEPA_RC_OK;
 }
 
+static mepa_rc lan80xx_gpio_alt_fn_channel_map(mepa_device_t         *dev,
+                                               const uint8_t         gpio_num)
+{
+    mepa_rc rc = MEPA_RC_OK;
+    phy25g_phy_state_t  *data = (phy25g_phy_state_t *)dev->data;
+    uint8_t channel = 0U;
+
+    if (gpio_num <= LAN80XX_GPIO_31) {
+        channel = (uint8_t)(gpio_num / 8U);
+    } else if (gpio_num == LAN80XX_GPIO_36) {
+        channel = 0U;
+    } else if (gpio_num == LAN80XX_GPIO_37) {
+        channel = 1U;
+    } else if (gpio_num == LAN80XX_GPIO_38) {
+        channel = 2U;
+    } else if (gpio_num == LAN80XX_GPIO_39) {
+        channel = 3U;
+    } else {
+        return rc;
+    }
+
+    if (data->channel_id != channel) {
+        rc = MEPA_RC_ERROR;
+    }
+    return rc;
+} 
+
 
 mepa_rc lan80xx_gpio_mode_set_priv(mepa_device_t                 *dev,
                                    const mepa_port_no_t            port_no,
@@ -4029,6 +4056,12 @@ mepa_rc lan80xx_gpio_mode_set_priv(mepa_device_t                 *dev,
             T_E(MEPA_TRACE_GRP_GEN, "Alt function is not supported by GPIO# %d", gpio_conf->gpio_no);
             return MEPA_RC_ERROR;
         }
+
+        if (lan80xx_gpio_alt_fn_channel_map(dev, gpio_conf->gpio_no) != MEPA_RC_OK) {
+            T_E(MEPA_TRACE_GRP_GEN, "\n Mismatch in Port number and Alt function of GPIO Pin selected");
+            return MEPA_RC_ERROR;
+        }
+
         switch (data->port_state.speed) {
         case SPEED_1G:
             led_rate = 1;
@@ -4048,42 +4081,39 @@ mepa_rc lan80xx_gpio_mode_set_priv(mepa_device_t                 *dev,
         LAN80XX_CSR_WRM(base_data->port_no, LAN80XX_GPIO_CTRL_GPIO_OUT_INV_CFGX_SLOT(is_zero_slt), 0, LAN80XX_BIT(t_gpio_no));
 
         /* Enables the Alternate function */
-        LAN80XX_CSR_WRM(base_data->port_no, LAN80XX_GPIO_CTRL_GPIO_FUN_SELX_SLOT(is_zero_slt), 0, LAN80XX_BIT(t_gpio_no));
+        LAN80XX_CSR_WRM(base_data->port_no, LAN80XX_GPIO_CTRL_GPIO_FUN_SELX_SLOT(is_zero_slt), 0U, LAN80XX_BIT(t_gpio_no));
+
         switch (gpio_conf->gpio_no) {
         case LAN80XX_GPIO_34: /* Aggregate interrupt 0/1 */
-        case LAN80XX_GPIO_35: {
-            intr_b = (gpio_conf->gpio_no == LAN80XX_GPIO_35) ? 1 : 0;
-            LAN80XX_CSR_WRM(base_data->port_no, LAN80XX_GPIO_CTRL_INTR_SRC_EN(intr_b), 0, LAN80XX_MASK_THIRD_BYTE);
+        case LAN80XX_GPIO_35:
+            intr_b = (gpio_conf->gpio_no == LAN80XX_GPIO_35) ? 1U : 0U;
+            LAN80XX_CSR_WRM(base_data->port_no, LAN80XX_GPIO_CTRL_INTR_SRC_EN(intr_b), 0U, LAN80XX_MASK_THIRD_BYTE);
             break;
-        }
         case LAN80XX_GPIO_7:
-        case LAN80XX_GPIO_36: { /* Port 0 LED */
-            LAN80XX_CSR_WR(dev, port_no, LAN80XX_LINE_SLICE_LED_CONTROL,
-                           ((gpio_conf->led_num == MEPA_LED1) ? LAN80XX_M_LINE_SLICE_LED_CONTROL_LED_ENABLE : 0) |
-                           LAN80XX_F_LINE_SLICE_LED_CONTROL_BLINK_TIME_SET(led_rate));
-            break;
-        }
+        case LAN80XX_GPIO_36:
         case LAN80XX_GPIO_15:
-        case LAN80XX_GPIO_37: { /* Port 1 LED */
-            LAN80XX_CSR_WR(dev, port_no, LAN80XX_LINE_SLICE_LED_CONTROL,
-                           ((gpio_conf->led_num == MEPA_LED1) ? LAN80XX_M_LINE_SLICE_LED_CONTROL_LED_ENABLE : 0) |
-                           LAN80XX_F_LINE_SLICE_LED_CONTROL_BLINK_TIME_SET(led_rate));
-            break;
-        }
+        case LAN80XX_GPIO_37:
         case LAN80XX_GPIO_23:
-        case LAN80XX_GPIO_38: { /* Port 2 LED */
-            LAN80XX_CSR_WR(dev, port_no, LAN80XX_LINE_SLICE_LED_CONTROL,
-                           ((gpio_conf->led_num == MEPA_LED1) ? LAN80XX_M_LINE_SLICE_LED_CONTROL_LED_ENABLE : 0) |
-                           LAN80XX_F_LINE_SLICE_LED_CONTROL_BLINK_TIME_SET(led_rate));
-            break;
-        }
+        case LAN80XX_GPIO_38:
         case LAN80XX_GPIO_31:
-        case LAN80XX_GPIO_39: { /* Port 3 LED */
+        case LAN80XX_GPIO_39:
+            /* Port LED Configuration */
             LAN80XX_CSR_WR(dev, port_no, LAN80XX_LINE_SLICE_LED_CONTROL,
-                           ((gpio_conf->led_num == MEPA_LED1) ? LAN80XX_M_LINE_SLICE_LED_CONTROL_LED_ENABLE : 0) |
+                           ((gpio_conf->led_num == MEPA_LED1) ? LAN80XX_M_LINE_SLICE_LED_CONTROL_LED_ENABLE : 0U) |
                            LAN80XX_F_LINE_SLICE_LED_CONTROL_BLINK_TIME_SET(led_rate));
             break;
-        }
+        case LAN80XX_GPIO_2:
+        case LAN80XX_GPIO_3:
+        case LAN80XX_GPIO_10:
+        case LAN80XX_GPIO_11:
+        case LAN80XX_GPIO_18:
+        case LAN80XX_GPIO_19:
+        case LAN80XX_GPIO_26:
+        case LAN80XX_GPIO_27:
+            /* Reset TWI Host */
+            LAN80XX_CSR_WRM(port_no, LAN80XX_LINE_SLICE_MISC_BLOCKS_RESET, LAN80XX_M_LINE_SLICE_MISC_BLOCKS_RESET_TWI_HOST_RST, LAN80XX_M_LINE_SLICE_MISC_BLOCKS_RESET_TWI_HOST_RST);
+            LAN80XX_CSR_WRM(port_no, LAN80XX_LINE_SLICE_MISC_BLOCKS_RESET, 0U, LAN80XX_M_LINE_SLICE_MISC_BLOCKS_RESET_TWI_HOST_RST);
+            break;
         }
     } else if (gpio_conf->mode == MEPA_GPIO_MODE_OUT) {
         /* Configure Pin as GPIO Pin */
