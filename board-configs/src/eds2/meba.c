@@ -309,22 +309,38 @@ static void eds2_port_table_fill(meba_inst_t inst, uint32_t *const port_cnt, con
     return ;
 }
 
-static mesa_rc eds2_port_reorder(meba_inst_t inst, const uint32_t port_cnt, port_map_t *const eds2_port_table)
+static void eds2_port_reorder(const eds2_phy_options_t options, const uint32_t port_cnt, port_map_t *const eds2_port_table)
 {
-    // Reorder the ports before PORT MAP
-    if (inst->props.mux_mode == MESA_PORT_MUX_MODE_0 || inst->props.mux_mode == MESA_PORT_MUX_MODE_1) {
-        port_map_t temp[4];
-        for (int i = 0; i < port_cnt; i++) {
-            if (eds2_port_table[i].mac_if == MESA_PORT_INTERFACE_QSGMII) {
-                for (int j = 0, k = i; j < 4; j++, k++) {
-                    temp[(j + 2) % 4] = eds2_port_table[k];
-                }
-                memcpy(&eds2_port_table[i], temp, 4 * sizeof(port_map_t));
-                i = i + 3;
-            }
-        }
+    port_map_t temp[4];
+    int port_start = 0;
+    int port_end = port_cnt;
+
+    if (!((options == SLOT1_LAN8814_SLOT2_LAN8814) || (options == SLOT1_LAN89x1_SLOT2_LAN8814) || (options == SLOT1_LAN8814_SLOT2_VSC8574))) {
+        return;
     }
-    return MESA_RC_OK;
+
+    switch (options) {
+    case SLOT1_LAN8814_SLOT2_LAN8814:
+        break;
+    case SLOT1_LAN89x1_SLOT2_LAN8814:
+        port_start = 4;
+        break;
+    case SLOT1_LAN8814_SLOT2_VSC8574:
+        port_end = port_cnt - 4;
+        break;
+    default:
+        break;
+    }
+
+    for (int i = port_start; i < port_end; i++) {
+        for (int j = 0, k = i; j < 4; j++, k++) {
+            temp[(j + 2) % 4] = eds2_port_table[k];
+        }
+        memcpy(&eds2_port_table[i], temp, 4 * sizeof(port_map_t));
+        i = i + 3;
+    }
+
+    return;
 }
 
 static mesa_rc eds2_ptp_rs422_conf_get(meba_inst_t inst,
@@ -882,7 +898,7 @@ meba_inst_t meba_initialize(size_t callouts_size,
     T_D(inst, "board type=%d, mux_mode %d", board->type, mux_mode);
 
     eds2_port_table_fill(inst, &board->port_cnt, mux_mode, eds2_port_table);
-    eds2_port_reorder(inst, board->port_cnt, eds2_port_table);
+    eds2_port_reorder((eds2_phy_options_t)mux_mode, board->port_cnt, eds2_port_table);
     eds2_init_port_table(inst, board->port_cnt, eds2_port_table);
     inst->props.board_type = board->type;
 
