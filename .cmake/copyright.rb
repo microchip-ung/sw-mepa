@@ -88,7 +88,6 @@ end
   next if ".cmake/deps-bsp.json" == f
   next if ".cmake/docker/Cisco_Umbrella_Root_CA.cer" == f
   next if ".cmake/docker/mchp-ca.cer" == f
-  next if /\/sha256\// =~ f
 
   begin
     check f
