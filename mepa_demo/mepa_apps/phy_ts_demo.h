@@ -48,6 +48,8 @@
 #define KEYWORD_WFL_PERIOD      "wfl"
 #define KEYWORD_DELTA_ADJ       "adj"
 
+#define KEYWORD_EPPS_DET_CFG    "det_cfg"
+
 
 typedef struct {
     mepa_bool_t     clk_src_parsed;         /* ts_init_conf - Clock source parsed */
@@ -79,6 +81,7 @@ typedef struct {
     mepa_bool_t     wfh_parsed;
     mepa_bool_t     wfl_parsed;
     mepa_bool_t     delta_adj_parsed;
+    mepa_bool_t     epps_det_cfg_parsed;
 } ts_keyword_parsed;
 
 
@@ -110,7 +113,6 @@ typedef struct {
     uint8_t      pin_select;
     mepa_bool_t  pin_inv_pol;
     uint8_t      pin_sync_mode;
-    uint8_t      lsc_select;
     mepa_bool_t tod_load;
     mepa_bool_t tod_save;
     mepa_bool_t ns_enable;
@@ -118,5 +120,6 @@ typedef struct {
     uint32_t    pps_interval;
     uint32_t    wfh_period;
     uint32_t    wfl_period;
+    uint8_t     epps_det_cfg;
 } ts_configuration;
 

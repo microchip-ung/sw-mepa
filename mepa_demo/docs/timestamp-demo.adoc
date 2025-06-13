@@ -17,7 +17,7 @@ Timestamp(TS) Demo Application is used to configure the TS Block of PHYs.
 == Procedure to Start/Exit TS Demo Application
 
 To Run TS Demo Application the 'mepa-demo' application needs to be running.
-Reffer Section link:#mepa_demo/docs/getting-started[Getting-Started] to know about the procedure 
+Refer Section link:#mepa_demo/docs/getting-started[Getting-Started] to know about the procedure 
 to run 'mepa-demo' Application.
 
 Once 'mepa-demo' application is started the TS Demo Application can be started with the command
@@ -47,7 +47,8 @@ To List the all available Commands in the TS Demo Application run the below ment
 #mepa-cmd ?
  Commands           Arguments                                                                        Description
 ==================================================================================================================================
-exit_ts             |                                                                                 | Exit from Time Stamping Application
+
+ exit_ts             |                                                                                 | Exit from Time Stamping Application
  ts_init_conf        |  <port_list> clk_src <clk_src> tx_fifo <tx_fifo> tc_op <tc_op>                  | Initialize TS Block
                      |  dly_10b <dly_10b> tx_af <tx_af> mch <mch>                                      |
  tx_class_conf       |  <port_list> flow_idx <flow_idx> entype <entype>                                | Configures Egress Port Classifier
@@ -58,23 +59,25 @@ exit_ts             |                                                           
  ts_disable          |  <port_list>                                                                    | Disables TS Block
  ts_ltc_get          |  <port_no>                                                                      | Get Local Time Counter
  ts_ltc_set          |  <port_no> time <sh:sl:ns:ps>                                                   | Set Local Time Counter
- ts_pps_incfg        |  <port_no> clk_sel <clk_sel> pin_sel <pin_sel>                                  | Configure LSC pin for LS controller Input
+ ts_pps_incfg        |  <port_no> clk_sel <clk_sel> pin_sel <pin_sel>                                  | Configure LS controller Input pps mode
                      |  pol <pol> sync_mode <sync_mode> ls_ctrl_sel <ls_ctrl_sel>                      |
- ts_pps_outcfg       |  <port_no> clk_sel <clk_sel> pin_sel <pin_sel>                                  | Configure LSC pin for LS controller Output
+ ts_pps_outcfg       |  <port_no> clk_sel <clk_sel> pin_sel <pin_sel>                                  | Configure LS controller Output pps mode
                      |  pol <pol> sync_mode <sync_mode> ns_en <ns_en> pps_wid <pps_wid> pps_in <pps_in>|
- ts_sertod_incfg     |  <port_no> pin_sel <pin_sel> pol <pol>                                          | Configure Serial ToD Input
+ ts_sertod_incfg     |  <port_no> pin_sel <pin_sel> pol <pol>                                          | Configure LS controller Input Serial ToD
                      |  sync_mode <sync_mode> ls_ctrl_sel <ls_ctrl_sel> [load|save]                    |
- ts_sertod_outcfg    |  <port_no> pin_sel <pin_sel> pol <pol>                                          | Configure Serial ToD Output
+ ts_sertod_outcfg    |  <port_no> pin_sel <pin_sel> pol <pol>                                          | Configure LS controller output Serial ToD
                      |  sync_mode <sync_mode> wfh <wfh> wfl <wfl>                                      |
- ts_delta_adj        |  <port_no> adj <ns:sns> ls_ctrl_sel <ls_ctrl_sel>                               | Configure delta
- ts_ltc_ls           |  <port_no> pin_action <pin_action> ls_ctrl_sel <ls_ctrl_sel>                    | Local Time Counter
+ ts_delta_adj        |  <port_no> adj <ns:sns> ls_ctrl_sel <ls_ctrl_sel>                               | Configure LTC ToD adjustment in ns, sns
+ ts_epps_conf        |  <port_no> clk_sel <clk_sel> sync_mode <sync_mode>                              | Configure LS Controller Input EPPS mode
+                     |  ls_ctrl_sel <ls_ctrl_sel> det_cfg <det_cfg>                                    |
+ ts_ltc_ls           |  <port_no> pin_action <pin_action>                                              | Select LTC Operation mode
+ ts_lsc_sel          |  <port_no> ls_ctrl_sel <ls_ctrl_sel>                                            | LSC Unit Select
  ts_fifo_get         |  <port_no> sig_mask <sig_mask>                                                  | Get FIFO TS Entry
  ts_delay_set        |  <port_no> timing_mode <timing_mode> delay <delay>                              | Set Time Interval/latency in ns
  ts_delay_get        |  <port_no> timing_mode <timing_mode>                                            | Get Time Interval/latency in ns
  ts_port_state       |                                                                                 | Provides TS State of all Ports
  ts_conf_get         |  <port_no> conf_sel <conf_sel>                                                  | Get TS Configurations
  ts_port_stati       |  <port_no>                                                                      | Get TS Port Statistics
- ts_reset            |  <port_no>                                                                      | Perform TS Block Hard Reset
 ----
 
 === TS Block Initialization
@@ -92,9 +95,9 @@ Before accessing the TS block, it is mandatory to initialize the TS. This can be
     - 1 - Timestamps are pushed out on the SPI interface
 
 * tc_op <tc_op> - TC operating mode
-    - 0 - Mode A 
-    - 1 - Mode B - Sub local time at ingress and add at egress from CF
-    - 2 - Mode C - Sub local time at ingress and add at egress from CF and use 48 bits in CF
+    - 0 - Mode A  
+    - 1 - Mode B - Subtract local time at ingress and add at egress from CF
+    - 2 - Mode C - Subtract local time at ingress and add at egress from CF and use 48 bits in CF
 
 * dly_10b <dly_10b> - Delay req/response
     - 0 - Disable
@@ -108,8 +111,10 @@ Before accessing the TS block, it is mandatory to initialize the TS. This can be
 
  ...... TS Block Configured on Port : 1......
 ----
+Note: Base port needs to be initialized before using the other ports.
 
 === TS Block Egress Port Configuration
+==== Egress Port Classifier Configuration
 The command below are used to configure Egress port Classifier.
 ----
 #mepa-cmd tx_class_conf <port_list> flow_idx <flow_idx> entype <entype>
@@ -146,7 +151,7 @@ User
 
  ...... TS Tx classifier Configuration on Port : 1......
 ----
-
+==== Egress Port Clock Configuration
 The command below are used to configure Egress port Clock.
 
 ----
@@ -166,6 +171,7 @@ The command below are used to configure Egress port Clock.
 ----
 
 === TS Block Ingress Port Configuration
+==== Ingress Port Classifier Configuration
 The command below are used to configure Ingress port Classifier.
 ----
 #mepa-cmd rx_class_conf <port_list> flow_idx <flow_idx> entype <entype>
@@ -202,7 +208,7 @@ User
 
  ...... TS Rx classifier Configuration on Port : 1......
 ----
-
+==== Ingress Port Clock Configuration
 The command below are used to configure Ingress port Clock.
 
 ----
@@ -237,13 +243,27 @@ Following command is used to Enable/Disable TS block.
 
 === TS Block Local Time Counter
 The local time counter keeps the local time for the device and the time is monitored and synchronized to
-an external reference by the CPU. 
+an external reference by the CPU.
 
-==== PPS 
-PPS(Pulse Per Second) is used to provide a precise timing reference by generating pulse at the start of 
+==== Load Save Controller Unit Select
+The LTC module supports four LSC (Load Save Controller) Units and this needs to selected before configuring action 
+(load/save/delta/ToD get/set).
+Following command is used to select LSC Unit.
+
+* mepa-cmd ts_lsc_sel <port_no> ls_ctrl_sel <ls_ctrl_sel>
+
+----
+# mepa-cmd ts_lsc_sel 2 ls_ctrl_sel 0
+
+ ...... TS LSC Unit 0 Selected on Port : 1......
+----
+
+==== Pulse Per Second (PPS)
+PPS is used to provide a precise timing reference by generating pulse at the start of 
 each second, which can be used to align clocks in different systems. 
 
-The command below is used to configure LSC pin as Input.
+===== PPS Input
+The command below is used to configure LSC pin as Input PPS Mode.
 
 ----
  #mepa-cmd ts_pps_incfg <port_no> clk_sel <clk_sel> pin_sel <pin_sel> pol <pol> sync_mode <sync_mode> ls_ctrl_sel <ls_ctrl_sel>
@@ -251,7 +271,7 @@ The command below is used to configure LSC pin as Input.
 
 * clk_sel <clk_sel> - Selects which PTP1588_LSC pin to use for synchronization
 0-3: PTP1588_LSC_PIN[x]
-4: No clock is used in operation
+4: No clock is used in operation (Asynchronous PPS)
 5: L/S reference clock
 6: L/S reference clock div2
 7: L/S reference clock div4
@@ -261,7 +281,7 @@ The command below is used to configure LSC pin as Input.
     0: PTP1588_LSC[0]
     1: PTP1588_LSC[1]
     2: PTP1588_LSC[2]
-    3: PTP1588_LSC_3_P/N
+    3: PTP1588_LSC_3_P/N - Only Input Supported.
 * pol <pol> - Polarity of the PTP pins.
     0: Active high
     1: Active low
@@ -274,14 +294,17 @@ The command below is used to configure LSC pin as Input.
 
  ...... TS PPS Input Configured for Port : 1......
 ----
+Note: LSC Pin should be uniquely configured for clk_sel and pin_sel and between external interface load/store
+Input/Output modes.
 
+===== PPS Output
 The command below is used to configure LSC pin as Output.
 ----
  #mepa-cmd ts_pps_outcfg <port_no> clk_sel <clk_sel> pin_sel <pin_sel> pol <pol> sync_mode <sync_mode> ns_en <ns_en> pps_wid <pps_wid> pps_in <pps_in>
 ----
 * clk_sel <clk_sel> - Selects which PTP1588_LSC pin to use for synchronization
 0-3: PTP1588_LSC_PIN[x]
-4: No clock is used in operation
+4: No clock is used in operation (Asynchronous PPS)
 5: L/S reference clock
 6: L/S reference clock div2
 7: L/S reference clock div4
@@ -291,15 +314,15 @@ The command below is used to configure LSC pin as Output.
     0: PTP1588_LSC[0]
     1: PTP1588_LSC[1]
     2: PTP1588_LSC[2]
-    3: PTP1588_LSC_3_P/N
+    3: PTP1588_LSC_3_P/N - Only Input Supported.
 * pol <pol> - Polarity of the PTP pins.
     0: Active high
     1: Active low
 * sync_mode <sync_mode> - Sync Mode
     0 - Immediate, 1 - One Shot, 2 - Continuous
-* ns_en <ns_en> - Nanoseconds bitenble
-* pps_wid <pps_wid> - PPS Pulse Width
-* pps_in <pps_in> - PPS Pulse Interval
+* ns_en <ns_en> - Nanoseconds bit enable
+* pps_wid <pps_wid> - PPS Pulse Width in ns
+* pps_in <pps_in> - PPS Pulse Interval in ns
 
 ----
  # mepa-cmd ts_pps_outcfg 2 clk_sel 4 pin_sel 1 pol 1 sync_mode 1 ns_en 1 pps_wid
@@ -311,6 +334,7 @@ The command below is used to configure LSC pin as Output.
 ==== Serial ToD
 Serial ToD refers to the transmission of Time of Day (ToD) information over a serial interface.
 
+===== Serial ToD Input
 The command below is used to configure Serial ToD as Input.
 ----
  #mepa-cmd ts_sertod_incfg <port_no> pin_sel <pin_sel> pol <pol> sync_mode <sync_mode> ls_ctrl_sel <ls_ctrl_sel> [load|save]
@@ -319,7 +343,7 @@ The command below is used to configure Serial ToD as Input.
     0: PTP1588_LSC[0]
     1: PTP1588_LSC[1]
     2: PTP1588_LSC[2]
-    3: PTP1588_LSC_3_P/N
+    3: PTP1588_LSC_3_P/N - Only Input Supported.
 * pol <pol> - Polarity of the PTP pins.
     0: Active high
     1: Active low
@@ -333,6 +357,8 @@ The command below is used to configure Serial ToD as Input.
 
  ...... TS Serial ToD Input Configured for Port : 1......
 ----
+
+===== Serial ToD Output
 The command below is used to configure Serial ToD as Output.
 ----
  #mepa-cmd ts_sertod_outcfg <port_no> pin_sel <pin_sel> pol <pol> sync_mode <sync_mode> wfh <wfh> wfl <wfl>
@@ -341,21 +367,21 @@ The command below is used to configure Serial ToD as Output.
     0: PTP1588_LSC[0]
     1: PTP1588_LSC[1]
     2: PTP1588_LSC[2]
-    3: PTP1588_LSC_3_P/N
+    3: PTP1588_LSC_3_P/N - Only Input Supported.
 * pol <pol> - Polarity of the PTP pins.
     0: Active high
     1: Active low
 * sync_mode <sync_mode> - Sync Mode
     0 - Immediate, 1 - One Shot, 2 - Continuous
-* wfh <wfh> - Waveform High Period
-* wfl <wfl> - Waveform Low Period
+* wfh <wfh> - Waveform High Period in ns
+* wfl <wfl> - Waveform Low Period in ns
 ----
  #mepa-cmd ts_sertod_outcfg 2 pin_sel 2 pol 0 sync_mode 0 wfh 2 wfl 1
 
  ...... TS Serial ToD Output Configured for Port : 1......
 ----
 ==== Delta Adjustment
-Delta is used to fine-tune the ToD to ensure that the time information is as accurate as possible and
+Delta adjutemnt is used to fine-tune the ToD in ns/sns granularity and
 this adjustment can be done using following command
 
 ----
@@ -370,23 +396,61 @@ this adjustment can be done using following command
 
  ...... TS LTC Delta Adjust Configured for Port : 1......
 ----
-==== PTP Action 
+
+==== ePPS Configuration
+The configuration for ePPS (Embedded Pulse Per Second) can be accomplished using the following command.
+----
+#mepa-cmd ts_epps_conf <port_no> clk_sel <clk_sel> sync_mode <sync_mode> ls_ctrl_sel <ls_ctrl_sel> det_cfg <det_cfg>
+----
+* clk_sel <clk_sel> - Selects which PTP1588_LSC pin to use for synchronization
+0-3: PTP1588_LSC_PIN[x]
+4: No clock is used in operation
+5: L/S reference clock
+6: L/S reference clock div2
+7: L/S reference clock div4
+8: L/R reference clock div5
+9: L/R reference clock div8
+* sync_mode <sync_mode> - Sync Mode
+    0 - Immediate, 1 - One Shot, 2 - Continuous
+* ls_ctrl_sel <ls_ctrl_sel>
+    0 - LS0, 1 - LS1, 2 - LS2, 3 - LS3
+* det_cfg <det_cfg> - ePPS  event cycle detection adjustment
+
+----
+# mepa-cmd ts_epps 2 clk_sel 4 sync_mode 0 ls_ctrl_sel 0 det_cfg 10
+
+ ...... TS EPPS Configured for Port : 1......
+----
+
+==== LTC ToD Set
+By Default LTC will increment from default ToD zero. The following command is used to set LTC ToD and 
+counter will start from this reference.
+
+    * mepa-cmd ts_ltc_set <port_no> time <sh:sl:ns:ps>
+
+----
+    # mepa-cmd ts_ltc_set 2 time 0:1:337078563:169
+
+    ...... TS LTC Set on Port : 1......
+----
+ 
+==== LTC Operation
 The command "ts_ltc_ls" will trigger the start of selected operation. All other setups have to be 
 completed before executing this command.
 ----
-#mepa-cmd ts_ltc_ls <port_no> pin_action <pin_action> ls_ctrl_sel <ls_ctrl_sel>
+#mepa-cmd ts_ltc_ls <port_no> pin_action <pin_action>
 ----
 * pin_action <pin_action> 
-    0 - Load, 1 - Save, 2 - Clear, 3 - Delta, 4 - Waveform, 5 - Time of Day
-* ls_ctrl_sel <ls_ctrl_sel>
-    0 - LS0, 1 - LS1, 2 - LS2, 3 - LS3
+    0 - Load, 1 - Save, 2 - Delta, 3 - Waveform, 4 - Time of Day
+
 ----
- #mepa-cmd ts_ltc_ls 2 pin_action 0 ls_ctrl_sel 0
+ #mepa-cmd ts_ltc_ls 2 pin_action 0 
 
  ...... TS LTC Action Load performed on Port : 1......
 ----
-==== LTC Value
-The following command is used to get LTC value.
+
+==== LTC ToD Get
+The following command is used to get LTC current ToD.
 
     * mepa-cmd ts_ltc_get <port_no>
 
@@ -400,25 +464,15 @@ The following command is used to get LTC value.
     picoseconds: 76
 ----
 
-The following command is used to get LTC value.
-
-    * mepa-cmd ts_ltc_set <port_no> time <sh:sl:ns:ps>
-
-----
-    # mepa-cmd ts_ltc_set 2 time 0:1:337078563:169
-
-    ...... TS LTC Set on Port : 1......
-----
-
 === TS Time Interval/latency
-The following command is used to set Time Interval/latency.
+The following command is used to set Time Interval/latency in ns/sns.
 ----
 # mepa-cmd ts_delay_set <port_no> timing_mode <timing_mode> delay <delay>
 ----
 * timing_mode <timing_mode>
     0 - Delay Asymmetry, 1 - Path Delay, 2 - Egress Latency, 3 - Ingress Latency
 * delay <delay> 
-    Time Interval in ns
+    Time Interval in ns/sns
 ----
 # mepa-cmd ts_delay_set 2 timing_mode 1 delay 2.5
 
@@ -440,7 +494,7 @@ The following command is used to get Time Interval/latency.
 ----
 
 === TS FIFO
-To get Timestamp entries for modes like BC2STEP Egress the command 'ts_fifo_get' is used.
+The command 'ts_fifo_get' is used to obtain timestamp entries for modes such as BC2STEP and TC2STEP for Egress Path.
 ----
  #mepa-cmd ts_fifo_get <port_no> sig_mask <sig_mask>
 ----
@@ -539,7 +593,7 @@ To Check whether the TS is enabled or disabled on the Port the command 'ts_port_
  20        --
 ----
 
-=== TS Block Configuration
+=== TS Block Configuration Get
 To Check TS block configurations 'ts_conf_get' is used.
 ----
  #mepa-cmd ts_conf_get <port_no> conf_sel <conf_sel>
@@ -598,14 +652,4 @@ The following command is used get TS Statistics for selected port.
  Timestamp FIFO Drop Count: 0
 ----
 
-=== TS Reset
-The following command is used to hard reset TSU for selected port.
-
-    * mepa-cmd ts_reset <port_no>
-
-----
-# mepa-cmd ts_reset 2
-
- ...... TS Reset on Port : 1......
-----
 

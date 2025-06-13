@@ -292,6 +292,8 @@ static int cli_cmd_parse_keyword(cli_req_t *req)
         ts_keyword.wfl_parsed = 1;
     } else if (!strncasecmp(req->cmd, KEYWORD_DELTA_ADJ, strlen(req->cmd))) {
         ts_keyword.delta_adj_parsed = 1;
+    } else if (!strncasecmp(req->cmd, KEYWORD_EPPS_DET_CFG, strlen(req->cmd))) {
+        ts_keyword.epps_det_cfg_parsed = 1;
     }
 
     return 0;
@@ -320,6 +322,9 @@ static int cli_cmd_parse_u8_param(cli_req_t *req)
     } else if (ts_keyword.action_parsed == 1) {
         cli_parm_u8(req, &value, 0, MASK_8BIT);
         mreq->action = value;
+        if (mreq->action >= 2) {
+            mreq->action  = value + 1;
+        }
         ts_keyword.action_parsed = 0;
     } else if (ts_keyword.ls_ctrl_sel_parsed == 1) {
         cli_parm_u8(req, &value, 0, MASK_8BIT);
@@ -340,7 +345,11 @@ static int cli_cmd_parse_u8_param(cli_req_t *req)
             mreq->pin_sync_mode = 3;
         }
         ts_keyword.sync_mode_parsed = 0;
-    }
+    } else if (ts_keyword.epps_det_cfg_parsed == 1) {
+        cli_parm_u8(req, &value, 0, MASK_8BIT);
+        mreq->epps_det_cfg = value;
+        ts_keyword.epps_det_cfg_parsed = 0;
+    } 
     return 0;
 }
 static int cli_cmd_parse_u16_param(cli_req_t *req)
@@ -1004,6 +1013,13 @@ static void cli_cmd_ts_tx_class_conf(cli_req_t *req)
 
         flow_index = mreq->flow_index;
         ts_classifier.pkt_encap_type = mreq->encap_type;
+
+        if ((mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_IP_PTP) || \
+            (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_PTP) || \
+            (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_IP_PTP)) {
+            lan80xx_mpls_config_set(meba_ts_instance->phy_devices[iport], iport, 0, flow_index, 0,&mpls_flow);
+        }
+        
         if (MEPA_RC_OK == mepa_ts_tx_classifier_conf_set(meba_ts_instance->phy_devices[iport], flow_index, &ts_classifier)) {
             cli_printf("\n ...... TS Tx classifier Configuration on Port : %d......\n", iport);
         } else {
@@ -1084,18 +1100,25 @@ static void cli_cmd_ts_rx_class_conf(cli_req_t *req)
     mepa_port_no_t  port_no;
     mepa_ts_classifier_t ts_classifier;
     ts_configuration *mreq = req->module_req;
+
+    phy25g_ts_mpls_flow_conf_t mpls_flow;
     uint16_t flow_index = 0;
 
     // Initialize the structure
     memset(&ts_classifier, 0, sizeof(ts_classifier));
+    memset(&mpls_flow, 0, sizeof(mpls_flow));
 
     // Update default Values
     update_ts_classifier(&ts_classifier);
 
-
-    cli_printf("\n TS Encapsulation CONFIGURATION ........................ \n");
     if (mreq->encap_type) {
         update_ts_classifier_encap(&ts_classifier, mreq->encap_type);
+
+        if ((mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_IP_PTP) || \
+            (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_PTP) || \
+            (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_IP_PTP)) {
+            update_ts_mpls_flow(&mpls_flow);
+        }
     }
     for (int iport = 0; iport < MAX_PRTS; iport++) {
         port_no = iport2uport(iport);
@@ -1109,6 +1132,13 @@ static void cli_cmd_ts_rx_class_conf(cli_req_t *req)
 
         flow_index = mreq->flow_index;
         ts_classifier.pkt_encap_type = mreq->encap_type;
+
+        if ((mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_IP_PTP) || \
+            (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_PTP) || \
+            (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_IP_PTP)) {
+            lan80xx_mpls_config_set(meba_ts_instance->phy_devices[iport], iport, 1, flow_index, 0,&mpls_flow);
+        }
+
         if (MEPA_RC_OK == mepa_ts_rx_classifier_conf_set(meba_ts_instance->phy_devices[iport], flow_index, &ts_classifier)) {
             cli_printf("\n ...... TS Rx classifier Configuration on Port : %d......\n", iport);
         } else {
@@ -1156,15 +1186,11 @@ static void cli_cmd_ts_ltc_ls(cli_req_t *req)
 {
     ts_configuration *mreq = req->module_req;
 
-    lan80xx_phy_ts_load_store_contoller_set(meba_ts_instance->phy_devices[req->port_no], req->port_no, mreq->ls_ctrl_sel);
-
     if (MEPA_RC_OK == mepa_ts_ltc_ls_en(meba_ts_instance->phy_devices[req->port_no], mreq->action)) {
         if (mreq->action == 0) {
             cli_printf("\n ...... TS LTC Action Load performed on Port : %d......\n", req->port_no);
         } else if (mreq->action == 1) {
             cli_printf("\n ...... TS LTC Action Save performed on Port : %d......\n", req->port_no);
-        } else if (mreq->action == 2) {
-            cli_printf("\n ...... TS LTC Action Clear performed on Port : %d......\n", req->port_no);
         } else if (mreq->action == 3) {
             cli_printf("\n ...... TS LTC Action Delta performed on Port : %d......\n", req->port_no);
         } else if (mreq->action == 4) {
@@ -1174,6 +1200,18 @@ static void cli_cmd_ts_ltc_ls(cli_req_t *req)
         }
     }
     return;
+}
+
+static void cli_cmd_ts_ls_ctrl_sel(cli_req_t *req)
+{
+    ts_configuration *mreq = req->module_req;
+
+    if (MEPA_RC_OK == lan80xx_phy_ts_load_store_contoller_set(meba_ts_instance->phy_devices[req->port_no], req->port_no, mreq->ls_ctrl_sel)){
+        cli_printf("\n ...... TS LSC Unit %d Selected on Port : %d......\n", mreq->ls_ctrl_sel, req->port_no);
+    } else {
+        T_E("\n Error in selecting TS LSC Unit %d for Port : %d \n", mreq->ls_ctrl_sel, req->port_no);
+        return;
+    }
 }
 
 static void cli_cmd_ts_pps_incfg(cli_req_t *req)
@@ -1274,6 +1312,25 @@ static void cli_cmd_ts_delta_adj(cli_req_t *req)
         cli_printf("\n ...... TS LTC Delta Adjust Configured for Port : %d......\n", req->port_no);
     } else {
         T_E("\n Error in configuring TS LTC Delta for Port : %d \n", req->port_no);
+        return;
+    }
+
+}
+
+static void cli_cmd_ts_epps_config(cli_req_t *req)
+{
+    ts_configuration *mreq = req->module_req;
+    phy25g_ts_epps_conf_t epps_conf;
+
+    epps_conf.clk_select = mreq->clk_select;
+    epps_conf.pin_sync_mode = mreq->pin_sync_mode;
+    epps_conf.epps_event_detect_adjust = mreq->epps_det_cfg;
+    epps_conf.lsc_select = mreq->ls_ctrl_sel;
+
+    if (MEPA_RC_OK == lan80xx_phy_ts_epps_conf_set(meba_ts_instance->phy_devices[req->port_no], req->port_no, &epps_conf)) {
+        cli_printf("\n ...... TS EPPS Configured for Port : %d......\n", req->port_no);
+    } else {
+        T_E("\n Error in configuring TS EPPS for Port : %d \n", req->port_no);
         return;
     }
 
@@ -1579,16 +1636,19 @@ static void cli_cmd_ts_cmds()
     cli_printf("\n %-20s| %-80s| %s", "ts_disable", " <port_list>", "Disables TS Block");
     cli_printf("\n %-20s| %-80s| %s", "ts_ltc_get", " <port_no>", "Get Local Time Counter");
     cli_printf("\n %-20s| %-80s| %s", "ts_ltc_set", " <port_no> time <sh:sl:ns:ps>", "Set Local Time Counter");
-    cli_printf("\n %-20s| %-80s| %s", "ts_pps_incfg", " <port_no> clk_sel <clk_sel> pin_sel <pin_sel>", "Configure LSC pin for LS controller Input");
+    cli_printf("\n %-20s| %-80s| %s", "ts_pps_incfg", " <port_no> clk_sel <clk_sel> pin_sel <pin_sel>", "Configure LS controller Input pps mode");
     cli_printf("\n %-20s| %-80s| %s", "", " pol <pol> sync_mode <sync_mode> ls_ctrl_sel <ls_ctrl_sel>", "");
-    cli_printf("\n %-20s| %-80s| %s", "ts_pps_outcfg", " <port_no> clk_sel <clk_sel> pin_sel <pin_sel>", "Configure LSC pin for LS controller Output");
+    cli_printf("\n %-20s| %-80s| %s", "ts_pps_outcfg", " <port_no> clk_sel <clk_sel> pin_sel <pin_sel>", "Configure LS controller Output pps mode");
     cli_printf("\n %-20s| %-80s| %s", "", " pol <pol> sync_mode <sync_mode> ns_en <ns_en> pps_wid <pps_wid> pps_in <pps_in>", "");
-    cli_printf("\n %-20s| %-80s| %s", "ts_sertod_incfg", " <port_no> pin_sel <pin_sel> pol <pol>", "Configure Serial ToD Input");
+    cli_printf("\n %-20s| %-80s| %s", "ts_sertod_incfg", " <port_no> pin_sel <pin_sel> pol <pol>", "Configure LS controller Input Serial ToD");
     cli_printf("\n %-20s| %-80s| %s", "", " sync_mode <sync_mode> ls_ctrl_sel <ls_ctrl_sel> [load|save]", "");
-    cli_printf("\n %-20s| %-80s| %s", "ts_sertod_outcfg", " <port_no> pin_sel <pin_sel> pol <pol>", "Configure Serial ToD Output");
+    cli_printf("\n %-20s| %-80s| %s", "ts_sertod_outcfg", " <port_no> pin_sel <pin_sel> pol <pol>", "Configure LS controller output Serial ToD");
     cli_printf("\n %-20s| %-80s| %s", "", " sync_mode <sync_mode> wfh <wfh> wfl <wfl>", "");
-    cli_printf("\n %-20s| %-80s| %s", "ts_delta_adj", " <port_no> adj <ns:sns> ls_ctrl_sel <ls_ctrl_sel>", "Configure delta");
-    cli_printf("\n %-20s| %-80s| %s", "ts_ltc_ls", " <port_no> pin_action <pin_action> ls_ctrl_sel <ls_ctrl_sel>", "Local Time Counter");
+    cli_printf("\n %-20s| %-80s| %s", "ts_delta_adj", " <port_no> adj <ns:sns> ls_ctrl_sel <ls_ctrl_sel>", "Configure LTC ToD adjustment in ns, sns");
+    cli_printf("\n %-20s| %-80s| %s", "ts_epps_conf", " <port_no> clk_sel <clk_sel> sync_mode <sync_mode>", "Configure LS Controller Input EPPS mode");
+    cli_printf("\n %-20s| %-80s| %s", "", " ls_ctrl_sel <ls_ctrl_sel> det_cfg <det_cfg>", "");
+    cli_printf("\n %-20s| %-80s| %s", "ts_ltc_ls", " <port_no> pin_action <pin_action>", "Select LTC Operation mode");
+    cli_printf("\n %-20s| %-80s| %s", "ts_lsc_sel", " <port_no> ls_ctrl_sel <ls_ctrl_sel>", "LSC Unit Select");
     cli_printf("\n %-20s| %-80s| %s", "ts_fifo_get", " <port_no> sig_mask <sig_mask>", "Get FIFO TS Entry");
     cli_printf("\n %-20s| %-80s| %s", "ts_delay_set", " <port_no> timing_mode <timing_mode> delay <delay>", "Set Time Interval/latency in ns");
     cli_printf("\n %-20s| %-80s| %s", "ts_delay_get", " <port_no> timing_mode <timing_mode>", "Get Time Interval/latency in ns");
@@ -1597,7 +1657,7 @@ static void cli_cmd_ts_cmds()
     cli_printf("\n %-20s| %-80s| %s", "ts_port_state", "", "Provides TS State of all Ports");
     cli_printf("\n %-20s| %-80s| %s", "ts_conf_get", " <port_no> conf_sel <conf_sel>", "Get TS Configurations");
     cli_printf("\n %-20s| %-80s| %s", "ts_port_stati", " <port_no>", "Get TS Port Statistics");
-    cli_printf("\n %-20s| %-80s| %s", "ts_reset", " <port_no>", "Perform TS Block Hard Reset");
+    //cli_printf("\n %-20s| %-80s| %s", "ts_reset", " <port_no>", "Perform TS Block Hard Reset");
     cli_printf("\n\n");
     return;
 }
@@ -1675,9 +1735,15 @@ static cli_cmd_t cli_cmd_ts_table[] = {
     },
 
     {
-        "ts_ltc_ls <port_no> pin_action <pin_action> ls_ctrl_sel <ls_ctrl_sel>",
+        "ts_ltc_ls <port_no> pin_action <pin_action>",
         "Configure Local Time Counter",
         cli_cmd_ts_ltc_ls,
+    },
+
+    {
+        "ts_lsc_sel <port_no> ls_ctrl_sel <ls_ctrl_sel>",
+        "Select LSC Unit",
+        cli_cmd_ts_ls_ctrl_sel,
     },
 
     {
@@ -1708,6 +1774,12 @@ static cli_cmd_t cli_cmd_ts_table[] = {
         "ts_delta_adj <port_no> adj <ns:sns> ls_ctrl_sel <ls_ctrl_sel>",
         "Configure Delta",
         cli_cmd_ts_delta_adj,
+    },
+
+    {
+        "ts_epps_conf <port_no> clk_sel <clk_sel> sync_mode <sync_mode> ls_ctrl_sel <ls_ctrl_sel> det_cfg <det_cfg>",
+        "Configure EPPS",
+        cli_cmd_ts_epps_config,
     },
 
     {
@@ -1928,7 +2000,7 @@ static cli_parm_t cli_parm_table[] = {
     },
     {
         "<pin_action>",
-        "0 - Load, 1 - Save, 2 - Clear, 3 - Delta, 4 - Waveform, 5 - Time of Day",
+        "0 - Load, 1 - Save, 2 - Delta, 3 - Waveform, 4 - Time of Day",
         CLI_PARM_FLAG_NONE,
         cli_cmd_parse_u8_param,
     },
@@ -2075,6 +2147,18 @@ static cli_parm_t cli_parm_table[] = {
         "<conf_sel>",
         "0 - Init Config, 1 - Tx Classifier Config, 2 - Tx Clock Config, \n \
         3 - Rx Classifier Config, 4 - Rx Clock Config\n",
+        CLI_PARM_FLAG_NONE,
+        cli_cmd_parse_u8_param,
+    },
+    {
+        "det_cfg",
+        "",
+        CLI_PARM_FLAG_NO_TXT,
+        cli_cmd_parse_keyword,
+    },
+    {
+        "<det_cfg>",
+        "ePPS event cycle detection adjustment",
         CLI_PARM_FLAG_NONE,
         cli_cmd_parse_u8_param,
     },
