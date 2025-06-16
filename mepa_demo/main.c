@@ -37,7 +37,7 @@
 #define EDSX_SLOT1_START_PORT_CNT_9 0
 #define EDSX_SLOT2_START_PORT_CNT_9 4
 
-char *MEPA_RELEASE_VERSION = "v2025.06.06";
+char *MEPA_RELEASE_VERSION = "v2025.06";
 
 // Local data
 static int MUTEX_LOCKING = 1; /* Making this zero will not assign Mutex callouts */
