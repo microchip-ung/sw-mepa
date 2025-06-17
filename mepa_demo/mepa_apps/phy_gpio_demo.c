@@ -194,6 +194,30 @@ static int phy_gpio_no_for_alternate_function(phy_family_t family, int alt_fun, 
     return 0;
 }
 
+static mepa_rc lan80xx_gpio_fn_channel_map(mepa_device_t         *dev,
+                                           const uint8_t         gpio_num)
+{
+    mepa_rc rc = MEPA_RC_OK;
+    uint8_t channel = 0U;
+    mepa_conf_t conf = {0};
+
+    if (gpio_num <= GPIO_NUMBER_31) {
+        channel = (uint8_t)(gpio_num / 8U);
+    } else {
+        return rc;
+    }
+
+    if ((rc = mepa_conf_get(dev, &conf)) != MESA_RC_OK) {
+        T_E("\n mepa_conf_get failed \n");
+		rc = MEPA_RC_ERROR;
+    }
+
+    if (channel != (conf.conf_25g.channel_id - 1)) {
+        rc = MEPA_RC_ERROR;
+    }
+    return rc;
+}
+
 static void cli_cmd_gpio_conf(cli_req_t *req)
 {
     mepa_rc rc;
@@ -799,6 +823,12 @@ static void cli_cmd_gpio_conf(cli_req_t *req)
         if (gpio_num > LAN80XX_MAX_GPIO_NO) {
             T_E("Maximum supported GPIO are [0 - 40]\n");
             return;
+        }
+
+        /* Check for Channel Number of the PHY and GPIO Pin selected, this is done as per the LAN80XX EVB Board design */
+        if (lan80xx_gpio_fn_channel_map(meba_gpio_lp_instance->phy_devices[req->port_no], gpio_num) != MEPA_RC_OK) {
+            cli_printf("\n Mismatch in Port number and GPIO Pin selected \n");
+	        return;
         }
         gpio_conf.gpio_no = gpio_num;
         if (gpio_conf.mode == MEPA_GPIO_MODE_ALT) {

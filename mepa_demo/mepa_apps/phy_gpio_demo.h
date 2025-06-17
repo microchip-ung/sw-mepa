@@ -15,6 +15,8 @@
 #define MALIBU10G_MACSEC_EVENT    5
 #define MALIBU10G_PTP_EVENT       6
 
+#define GPIO_NUMBER_31            (31U)
+
 typedef struct {
     uint8_t      gpio_number;
     mepa_bool_t  intr_a;
