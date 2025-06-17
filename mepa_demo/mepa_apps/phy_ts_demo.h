@@ -49,7 +49,7 @@
 #define KEYWORD_DELTA_ADJ       "adj"
 
 #define KEYWORD_EPPS_DET_CFG    "det_cfg"
-
+#define KEYWORD_SIG_MASK        "sig_mask"
 
 typedef struct {
     mepa_bool_t     clk_src_parsed;         /* ts_init_conf - Clock source parsed */

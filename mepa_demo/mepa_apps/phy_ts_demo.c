@@ -294,6 +294,8 @@ static int cli_cmd_parse_keyword(cli_req_t *req)
         ts_keyword.delta_adj_parsed = 1;
     } else if (!strncasecmp(req->cmd, KEYWORD_EPPS_DET_CFG, strlen(req->cmd))) {
         ts_keyword.epps_det_cfg_parsed = 1;
+    } else if (!strncasecmp(req->cmd, KEYWORD_SIG_MASK, strlen(req->cmd))) {
+        ts_keyword.sig_mask_parsed = 1;
     }
 
     return 0;
@@ -349,7 +351,7 @@ static int cli_cmd_parse_u8_param(cli_req_t *req)
         cli_parm_u8(req, &value, 0, MASK_8BIT);
         mreq->epps_det_cfg = value;
         ts_keyword.epps_det_cfg_parsed = 0;
-    } 
+    }
     return 0;
 }
 static int cli_cmd_parse_u16_param(cli_req_t *req)
@@ -1017,9 +1019,9 @@ static void cli_cmd_ts_tx_class_conf(cli_req_t *req)
         if ((mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_IP_PTP) || \
             (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_PTP) || \
             (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_IP_PTP)) {
-            lan80xx_mpls_config_set(meba_ts_instance->phy_devices[iport], iport, 0, flow_index, 0,&mpls_flow);
+            lan80xx_mpls_config_set(meba_ts_instance->phy_devices[iport], iport, 0, flow_index, 0, &mpls_flow);
         }
-        
+
         if (MEPA_RC_OK == mepa_ts_tx_classifier_conf_set(meba_ts_instance->phy_devices[iport], flow_index, &ts_classifier)) {
             cli_printf("\n ...... TS Tx classifier Configuration on Port : %d......\n", iport);
         } else {
@@ -1084,13 +1086,14 @@ static void cli_cmd_ts_tx_clock_conf(cli_req_t *req)
             cli_printf("\n ...... TS Tx Clock Configuration on Port : %d......\n", iport);
         } else {
             cli_printf("\n ...... TS Tx Clock Configuration Failed on Port : %d......\n", iport);
+            return;
         }
-        if (ts_clock.clk_mode  == MEPA_TS_PTP_CLOCK_MODE_BC2STEP) {
-            mepa_ts_fifo_read_install(meba_ts_instance->phy_devices[iport], NULL);
-
-            mepa_ts_event_set(meba_ts_instance->phy_devices[iport], 1, 0x3FFF);
-        }
-
+        /*
+         * MEPA-1155
+         * TS event must be enabled for all ports irrespective of the clock mode
+         */
+        mepa_ts_fifo_read_install(meba_ts_instance->phy_devices[iport], NULL);
+        mepa_ts_event_set(meba_ts_instance->phy_devices[iport], 1, 0xFFFF);
     }
     return;
 }
@@ -1136,7 +1139,7 @@ static void cli_cmd_ts_rx_class_conf(cli_req_t *req)
         if ((mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_IP_PTP) || \
             (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_PTP) || \
             (mreq->encap_type == MEPA_TS_ENCAP_ETH_MPLS_ETH_IP_PTP)) {
-            lan80xx_mpls_config_set(meba_ts_instance->phy_devices[iport], iport, 1, flow_index, 0,&mpls_flow);
+            lan80xx_mpls_config_set(meba_ts_instance->phy_devices[iport], iport, 1, flow_index, 0, &mpls_flow);
         }
 
         if (MEPA_RC_OK == mepa_ts_rx_classifier_conf_set(meba_ts_instance->phy_devices[iport], flow_index, &ts_classifier)) {
@@ -1206,7 +1209,7 @@ static void cli_cmd_ts_ls_ctrl_sel(cli_req_t *req)
 {
     ts_configuration *mreq = req->module_req;
 
-    if (MEPA_RC_OK == lan80xx_phy_ts_load_store_contoller_set(meba_ts_instance->phy_devices[req->port_no], req->port_no, mreq->ls_ctrl_sel)){
+    if (MEPA_RC_OK == lan80xx_phy_ts_load_store_contoller_set(meba_ts_instance->phy_devices[req->port_no], req->port_no, mreq->ls_ctrl_sel)) {
         cli_printf("\n ...... TS LSC Unit %d Selected on Port : %d......\n", mreq->ls_ctrl_sel, req->port_no);
     } else {
         T_E("\n Error in selecting TS LSC Unit %d for Port : %d \n", mreq->ls_ctrl_sel, req->port_no);
@@ -1377,14 +1380,24 @@ static void cli_cmd_ts_ltc_set(cli_req_t *req)
 static void cli_cmd_ts_fifo_get(cli_req_t *req)
 {
     ts_configuration *mreq = req->module_req;
-    mepa_ts_event_t status;
+    mepa_ts_event_t status = 0;
     mepa_fifo_ts_entry_t ts_list[20];
     uint32_t num_entries;
+    mepa_rc rc = MEPA_RC_ERROR;
 
-    mepa_ts_event_poll(meba_ts_instance->phy_devices[req->port_no], &status);
+    rc = mepa_ts_event_poll(meba_ts_instance->phy_devices[req->port_no], &status);
+    if (rc != MEPA_RC_OK) {
+        cli_printf("TS Event get failed\n");
+        return;
+    }
 
     if (status) {
-        lan80xx_phy_ts_fifo_sig_set(meba_ts_instance->phy_devices[req->port_no], req->port_no, mreq->sig_mask);
+        cli_printf("TS fifo sig mask (0x%x) set...\n", mreq->sig_mask);
+        rc = lan80xx_phy_ts_fifo_sig_set(meba_ts_instance->phy_devices[req->port_no], req->port_no, mreq->sig_mask);
+        if (rc != MEPA_RC_OK) {
+            cli_printf ("sign mask set failed\n");
+            return;
+        }
         if (MEPA_RC_OK == mepa_ts_fifo_get(meba_ts_instance->phy_devices[req->port_no], ts_list, 16, &num_entries)) {
             cli_printf("Number of entries: %u\n", num_entries);
             for (uint32_t i = 0; i < num_entries; ++i) {
@@ -1413,7 +1426,7 @@ static void cli_cmd_ts_fifo_get(cli_req_t *req)
         }
 
     } else {
-        cli_printf("\n No Event Occured");
+        cli_printf("No Event Occured\n");
     }
 }
 static void cli_cmd_ts_delay_set(cli_req_t *req)

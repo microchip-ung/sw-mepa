@@ -6016,13 +6016,8 @@ mepa_rc lan80xx_phy_ts_fifo_sig_set(mepa_device_t *dev,
         len += LAN80XX_PHY_TS_SIG_DEST_MAC_LEN;    /* Dest MAC = 6 Bytes */
     }
 
-    if (((sig_mask & LAN80XX_PHY_TS_FIFO_SIG_SRC_IP) || (sig_mask & LAN80XX_PHY_TS_FIFO_SIG_DEST_IP)) &&
-        (sig_mask & LAN80XX_PHY_TS_FIFO_SIG_DEST_MAC)) {
-        return MEPA_RC_ERROR;
-    }
-
     if (len > LAN80XX_PTP_SIGNATURE_LEN) {
-        T_D(MEPA_TRACE_GRP_TS, "Length greater than max signature allowed");
+        T_E(MEPA_TRACE_GRP_TS, "Length greater than max signature allowed");
         return MEPA_RC_ERROR;
     }
 
@@ -6038,7 +6033,7 @@ mepa_rc lan80xx_phy_ts_fifo_sig_set(mepa_device_t *dev,
             /* set the signature timestamp bytes based on the signature mask config */
 
             if ((rc = lan80xx_phy_ts_signature_set_priv(dev, port_no)) != MEPA_RC_OK) {
-                T_D(MEPA_TRACE_GRP_TS, "Signature set fail, port %u", port_no);
+                T_E(MEPA_TRACE_GRP_TS, "Signature set fail, port %u", port_no);
                 /* don't break, needs to unpause */
             }
             // LAN80XX_PHY_TS_SPI_UNPAUSE(port_no);
@@ -7600,6 +7595,7 @@ mepa_rc lan80xx_phy_ts_event_poll(mepa_device_t *dev, const mepa_port_no_t  port
     MEPA_ENTER(dev);
     do {
         if (data->phy_ts_port_conf.port_ts_init_done == FALSE) {
+            T_E(MEPA_TRACE_GRP_TS, "TS Init not done, no event poll possible\n");
             rc = MEPA_RC_ERROR;
             *status = 0;
             break;
