@@ -838,10 +838,15 @@ static void cli_cmd_gpio_conf(cli_req_t *req)
                 gpio_conf.led_num = MEPA_LED0;
             }
         }
-        cli_printf("\n");
-        cli_printf("\t Enter the GPIO in 1 - Push pull mode or 0 - Open drain mode : ");
-        scanf("%hhd", &pp_enable);
-        gpio_conf.pp_enable =  (pp_enable == 1) ? 1 : 0;
+
+        if (gpio_conf.mode != MEPA_GPIO_MODE_IN) {
+            cli_printf("\n");
+            cli_printf("\t Enter the GPIO in 1 - Push pull mode or 0 - Open drain mode : ");
+            scanf("%hhd", &pp_enable);
+            gpio_conf.pp_enable =  (pp_enable == 1) ? 1 : 0;
+        } else {
+            gpio_conf.pp_enable = 0;
+        }
         if (gpio_conf.mode == MEPA_GPIO_MODE_IN) {
             cli_printf("\n");
             cli_printf("\t Enter the GPIO interrupt [0 -  GPIO_INTR_NONE or 1 - GPIO_INTR0 or 2 - GPIO_INTR1 : ");
@@ -854,19 +859,16 @@ static void cli_cmd_gpio_conf(cli_req_t *req)
                 T_E("Invalid GPIO_INTR configured\n");
                 return;
             }
-            switch (gpio_conf.mode) {
-            case MEPA_GPIO_MODE_OUT:
-            case MEPA_GPIO_MODE_ALT:
-                if ((gpio_intr == MEPA_GPIO_INTR_1) || (gpio_intr == MEPA_GPIO_INTR_0)) {
-                    T_E("GPIO INTR 0-1 should be configured while in Input mode\n");
-                    return;
-                }
-                break;
-            default:
-                break;
-            }
             gpio_conf.gpio_intrpt = gpio_intr;
         }
+
+        /* mepa_gpio_mode_set()
+         * gpio_conf.mode =  Mode of GPIO Pin (Output/Input/Alternate)
+         * gpio_conf.gpio_no = Gpio Number
+         * gpio_conf.led_num = Used to enable LED Configuration for Link Up GPIO Pins
+         * gpio_conf.pp_enable = Push-Pull or Open Drain, valid only in case of GPIO Pin in Output Mode
+         * gpio_conf.gpio_intrpt = Used to route GPIO Input state change Interrupt
+         */
         if ((rc = mepa_gpio_mode_set(meba_gpio_lp_instance->phy_devices[req->port_no], &gpio_conf)) != MEPA_RC_OK) {
             T_E(" Error in configuring GPIO : %d\n", req->port_no);
             return;
