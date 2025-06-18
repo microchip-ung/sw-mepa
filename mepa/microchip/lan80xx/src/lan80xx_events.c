@@ -524,6 +524,9 @@ static mepa_rc lan80xx_1g_pcs_event_conf(mepa_device_t         *dev,
                         LAN80XX_F_LINE_PCS_CFG_PCS1G_STICKY_MASK_OUT_OF_SYNC_STICKY_INTR_EN(enable),
                         mask);
 
+
+        mask = ((intr == LAN80XX_LINE_PCS1G_LINK_DOWN_INTR) ? LAN80XX_M_LINE_PCS_CFG_PCS1G_STICKY_LINK_DOWN_STICKY : LAN80XX_M_LINE_PCS_CFG_PCS1G_STICKY_OUT_OF_SYNC_STICKY);
+
         /* Clear the Interrupt */
         LAN80XX_CSR_WRM(port_no, LAN80XX_LINE_PCS_CFG_PCS1G_STICKY, mask, mask);
 
@@ -542,6 +545,7 @@ static mepa_rc lan80xx_1g_pcs_event_conf(mepa_device_t         *dev,
                     LAN80XX_F_HOST_PCS_CFG_PCS1G_STICKY_MASK_OUT_OF_SYNC_STICKY_INTR_EN(enable),
                     mask);
 
+    mask = ((intr == LAN80XX_HOST_PCS1G_LINK_DOWN_INTR) ? LAN80XX_M_HOST_PCS_CFG_PCS1G_STICKY_LINK_DOWN_STICKY : LAN80XX_M_HOST_PCS_CFG_PCS1G_STICKY_OUT_OF_SYNC_STICKY);
     /* Clear the Interrupt */
     LAN80XX_CSR_WRM(port_no, LAN80XX_HOST_PCS_CFG_PCS1G_STICKY, mask, mask);
 
