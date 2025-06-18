@@ -10623,6 +10623,38 @@ static vtss_rc vtss_macsec_dbg_fcb_block_reg_dump_priv(vtss_state_t *vtss_state,
     CSR_RD_TST(port_no, "EEE_CTRL_STATUS_N_STICKY_REG       ", VTSS_IOREG(0x03, 1, 0xf01a), &value);
     CSR_RD_TST(port_no, "EEE_CTRL_STICKY_MASK_REG           ", VTSS_IOREG(0x03, 1, 0xf01b), &value);
 
+    CSR_RD_TST(port_no, "L_MAC_ENA_CFG                      ", VTSS_IOREG(0x03, 1, 0xf200), &value);
+    CSR_RD_TST(port_no, "L_MAC_MODE_CFG                     ", VTSS_IOREG(0x03, 1, 0xf201), &value);
+    CSR_RD_TST(port_no, "L_MAC_MAXLEN_CFG                   ", VTSS_IOREG(0x03, 1, 0xf202), &value);
+    CSR_RD_TST(port_no, "L_MAC_NUM_TAGS_CFG                 ", VTSS_IOREG(0x03, 1, 0xf203), &value);
+    CSR_RD_TST(port_no, "L_MAC_TAGS_CFG_0                   ", VTSS_IOREG(0x03, 1, 0xf204), &value);
+    CSR_RD_TST(port_no, "L_MAC_TAGS_CFG_1                   ", VTSS_IOREG(0x03, 1, 0xf205), &value);
+    CSR_RD_TST(port_no, "L_MAC_TAGS_CFG_2                   ", VTSS_IOREG(0x03, 1, 0xf206), &value);
+    CSR_RD_TST(port_no, "L_MAC_ADV_CHK_CFG                  ", VTSS_IOREG(0x03, 1, 0xf207), &value);
+    CSR_RD_TST(port_no, "L_MAC_LFS_CFG                      ", VTSS_IOREG(0x03, 1, 0xf208), &value);
+    CSR_RD_TST(port_no, "L_MAC_LB_CFG                       ", VTSS_IOREG(0x03, 1, 0xf209), &value);
+    CSR_RD_TST(port_no, "L_MAC_PKTINF_CFG                   ", VTSS_IOREG(0x03, 1, 0xf20a), &value);
+    CSR_RD_TST(port_no, "L_MAC_TX_FRAME_CTL                 ", VTSS_IOREG(0x03, 1, 0xf20b), &value);
+    CSR_RD_TST(port_no, "L_MAC_TX_FRAME_CTL2                ", VTSS_IOREG(0x03, 1, 0xf20c), &value);
+    CSR_RD_TST(port_no, "L_MAC_RX_FRAME_CTL                 ", VTSS_IOREG(0x03, 1, 0xf20d), &value);
+    CSR_RD_TST(port_no, "L_MAC_PAUSE_STATE                  ", VTSS_IOREG(0x03, 1, 0xf20e), &value);
+
+    CSR_RD_TST(port_no, "H_MAC_ENA_CFG                      ", VTSS_IOREG(0x03, 1, 0xf100), &value);
+    CSR_RD_TST(port_no, "H_MAC_MODE_CFG                     ", VTSS_IOREG(0x03, 1, 0xf101), &value);
+    CSR_RD_TST(port_no, "H_MAC_MAXLEN_CFG                   ", VTSS_IOREG(0x03, 1, 0xf102), &value);
+    CSR_RD_TST(port_no, "H_MAC_NUM_TAGS_CFG                 ", VTSS_IOREG(0x03, 1, 0xf103), &value);
+    CSR_RD_TST(port_no, "H_MAC_TAGS_CFG_0                   ", VTSS_IOREG(0x03, 1, 0xf104), &value);
+    CSR_RD_TST(port_no, "H_MAC_TAGS_CFG_1                   ", VTSS_IOREG(0x03, 1, 0xf105), &value);
+    CSR_RD_TST(port_no, "H_MAC_TAGS_CFG_2                   ", VTSS_IOREG(0x03, 1, 0xf106), &value);
+    CSR_RD_TST(port_no, "H_MAC_ADV_CHK_CFG                  ", VTSS_IOREG(0x03, 1, 0xf107), &value);
+    CSR_RD_TST(port_no, "H_MAC_LFS_CFG                      ", VTSS_IOREG(0x03, 1, 0xf108), &value);
+    CSR_RD_TST(port_no, "H_MAC_LB_CFG                       ", VTSS_IOREG(0x03, 1, 0xf109), &value);
+    CSR_RD_TST(port_no, "H_MAC_PKTINF_CFG                   ", VTSS_IOREG(0x03, 1, 0xf10a), &value);
+    CSR_RD_TST(port_no, "H_MAC_TX_FRAME_CTL                 ", VTSS_IOREG(0x03, 1, 0xf10b), &value);
+    CSR_RD_TST(port_no, "H_MAC_TX_FRAME_CTL2                ", VTSS_IOREG(0x03, 1, 0xf10c), &value);
+    CSR_RD_TST(port_no, "H_MAC_RX_FRAME_CTL                 ", VTSS_IOREG(0x03, 1, 0xf10d), &value);
+    CSR_RD_TST(port_no, "H_MAC_PAUSE_STATE                  ", VTSS_IOREG(0x03, 1, 0xf10e), &value);
+
     return VTSS_RC_OK;
 }
 
