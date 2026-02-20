@@ -5,6 +5,9 @@ cmake_minimum_required(VERSION 3.15)
 
 project(mepa_api)
 
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
 include(CMakeParseArguments)
 include(.cmake/common.cmake)
 
@@ -75,6 +78,52 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_compile_definitions(lm_utils PRIVATE -DLMU_OS_LINUX)
 endif ()
 
+# Detect wether the compiler either support __VA_OPT__ or the GNU extension for __VA_ARGS__
+include(CheckCSourceCompiles)
+include(CMakePushCheckState)
+
+check_c_source_compiles([[
+  #define FOO(...) __VA_OPT__(int) __VA_ARGS__
+  int main(void) {
+      int x = FOO() 4;
+      FOO(y = 2);
+      return x + y;
+  }
+]] HAS___VA_OPT__)
+
+if(HAS___VA_OPT__)
+    add_compile_definitions(LMU_PP_USE___VA_OPT__)
+else()
+    cmake_push_check_state(RESET)
+
+    try_compile(HAS__VA_ARG__GNU_EXT
+        SOURCE_FROM_CONTENT test_va_arg_gnu_ext.c [[
+            #include <assert.h>
+            #define SEQ() 2, 1, 0
+            #define ARGN(_1, _2, N, ...) N
+            #define COUNT_IMPL(_, ...) ARGN(__VA_ARGS__)
+            #define COUNT(...) COUNT_IMPL(0, ##__VA_ARGS__, SEQ())
+            int main(void) {
+            _Static_assert(0 == COUNT());
+            _Static_assert(1 == COUNT(foo));
+            _Static_assert(2 == COUNT(foo, bar));
+            return 0;
+            }
+        ]]
+        C_STANDARD 11
+        C_STANDARD_REQUIRED ON
+        C_EXTENSIONS ON
+        OUTPUT_VARIABLE OUTPUT
+    )
+
+    cmake_pop_check_state()
+
+    if(NOT HAS__VA_ARG__GNU_EXT)
+        message(FATAL_ERROR "${CMAKE_C_COMPILER} does not support __VA_ARG__ GNU extension.")
+    else()
+        set(CMAKE_C_EXTENSIONS ON)
+    endif()
+endif()
 
 if (${MESA_OPSYS_LINUX})
     add_definitions(-DLMU_BOOL_IS_UINT8)
