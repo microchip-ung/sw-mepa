@@ -22,15 +22,25 @@ endif()
 MEPA_DRV(LIB_NAME mepa_drv_lan80xx_ts
     DEFS ${lan80xx_ts_defs} ${sha256_defs}
     SRCS  ${src_lan80xx} ${src_sha256}
-    INCL_PUB ../../../sw-mesa/me/include ../../../me/include ../../include ../../vtss/include
-    INCL_PRI lan80xx ./src/regs ./include/microchip ./src)
-
+    INCL_PUB ${CMAKE_SOURCE_DIR}/sw-mesa/me/include
+             ${CMAKE_SOURCE_DIR}/me/include
+             ${MEPA_SOURCE_DIR}/include 
+             ${MEPA_SOURCE_DIR}/vtss/include
+    INCL_PRI ${CMAKE_CURRENT_SOURCE_DIR}/src/regs
+             ${CMAKE_CURRENT_SOURCE_DIR}/include/microchip
+             ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
 MEPA_DRV(LIB_NAME mepa_drv_lan80xx_ts_msec
     DEFS ${lan80xx_ts_msec_defs} ${sha256_defs}
     SRCS  ${src_lan80xx} ${src_sha256}
-    INCL_PUB ../../../sw-mesa/me/include ../../../me/include ../../include ../../vtss/include
-    INCL_PRI lan80xx ./src/regs ./include/microchip ./src)
+    INCL_PUB ${CMAKE_SOURCE_DIR}/sw-mesa/me/include
+             ${CMAKE_SOURCE_DIR}/me/include
+             ${MEPA_SOURCE_DIR}/include
+             ${MEPA_SOURCE_DIR}/vtss/include
+    INCL_PRI ${CMAKE_CURRENT_SOURCE_DIR}/src/regs
+             ${CMAKE_CURRENT_SOURCE_DIR}/include/microchip
+             ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 option(MEPA_lan80xx_ts "Add lan80xx support in libmeba" OFF)
 if (${MEPA_lan80xx_ts})

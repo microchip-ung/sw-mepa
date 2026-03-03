@@ -151,8 +151,9 @@ macro(APP_TARGET)
     else()
         set_target_properties(${A_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     endif()
-endmacro()
 
+    install_targets(TARGETS ${A_NAME})
+endmacro()
 
 
 macro(IMG_TARGET)

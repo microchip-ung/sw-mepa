@@ -8,10 +8,19 @@ macro(MEPA_DRV)
     cmake_parse_arguments(A "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     option(BUILD_${A_LIB_NAME} "Build the STATIC MEPA layer for ${A_LIB_NAME}" OFF)
-    mark_as_advanced(BUILD_${A_LIB_NAME})
+    mark_as_advanced(${A_LIB_NAME})
+
+    list(JOIN A_INCL_PUB $<SEMICOLON> public_includes)
+    list(JOIN A_INCL_PRI $<SEMICOLON> private_includes)
 
     add_library(${A_LIB_NAME} STATIC ${A_SRCS})
-    target_include_directories(${A_LIB_NAME} PUBLIC ${A_INCL_PUB} PRIVATE ${A_INCL_PRI})
+    target_include_directories(${A_LIB_NAME} 
+        PUBLIC 
+            $<BUILD_INTERFACE:${public_includes}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        PRIVATE
+            $<BUILD_INTERFACE:${private_includes}>
+    )
 
     if (${MEPA_OPSYS_VELOCITYSP})
         list(APPEND A_DEFS -DMEPA_OPSYS_VELOCITYSP=1)
@@ -89,9 +98,10 @@ macro(MEPA_LIB)
 
     target_compile_definitions(${lib_common} PRIVATE ${A_DEFS})
     target_include_directories(${lib_common}
-                               PUBLIC  ${MEPA_SOURCE_DIR}/../me/include
-                                       ${MEPA_SOURCE_DIR}/include
-                               PRIVATE ${MEPA_SOURCE_DIR}/common/src)
+                               PUBLIC 
+                                  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/me/include$<SEMICOLON>${MEPA_SOURCE_DIR}/include>
+                                  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+                               PRIVATE $<BUILD_INTERFACE:${MEPA_SOURCE_DIR}/common/src>)
 
     mepa_merge_static_libs(TARGET    ${A_LIB_NAME}
                            FILENAME  lib${A_LIB_NAME}.a

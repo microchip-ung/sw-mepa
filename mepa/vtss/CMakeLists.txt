@@ -1,6 +1,6 @@
 
 
-set(inc_mepa ../../me/include ../include)
+set(inc_mepa ${CMAKE_SOURCE_DIR}/me/include ${MEPA_SOURCE_DIR}/include)
 
 set(src_vtss src/vtss.c
              src/vtss_ts.c
@@ -32,7 +32,7 @@ set(src_vtss src/vtss.c
              src/ts/vtss_phy_ts_api.c
              src/ts/vtss_phy_ewis.c
              src/ts/vtss_phy_ts_util.c)
-set(inc_vtss include)
+set(inc_vtss ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 MEPA_DRV(LIB_NAME mepa_drv_vtss
          SRCS     ${src_vtss}

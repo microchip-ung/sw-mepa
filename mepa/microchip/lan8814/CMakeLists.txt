@@ -1,16 +1,19 @@
-
 MEPA_DRV(LIB_NAME mepa_drv_lan8814
          SRCS     src/lan8814.c
                   src/lan8814_ts.c
-         INCL_PUB ../../../me/include ../../include include
-         INCL_PRI lan8814)
+         INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
+                  ${MEPA_SOURCE_DIR}/include
+                  ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 MEPA_DRV(LIB_NAME mepa_drv_lan8814_light
          DEFS     -DMEPA_LAN8814_LIGHT=1
          SRCS     src/lan8814.c
                   src/lan8814_ts.c
-         INCL_PUB ../../../me/include ../../include include
-         INCL_PRI lan8814)
+         INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
+                  ${MEPA_SOURCE_DIR}/include
+                  ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 option(MEPA_lan8814 "Add LAN8814 support in libmeba" OFF)
 if (${MEPA_lan8814})

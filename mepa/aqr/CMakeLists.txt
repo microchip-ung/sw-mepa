@@ -4,13 +4,14 @@ MEPA_DRV(LIB_NAME mepa_drv_aqr
                   vtss_platform/AQ_PlatformRoutines.c
                   AQR_API_2.6.1/src/AQ_API.c
                   AQR_API_2.6.1/src/AQ_API_flash.c
-         INCL_PUB ../../me/include ../include
-         INCL_PRI AQR_API_2.6.1/include
-                  AQR_API_2.6.1/include/registerMap
-                  AQR_API_2.6.1/include/registerMap/APPIA
-                  AQR_API_2.6.1/include/registerMap/EUR
-                  AQR_API_2.6.1/include/registerMap/HHD
-                  aqr_phy_fw)
+         INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
+                  ${MEPA_SOURCE_DIR}/include
+         INCL_PRI ${CMAKE_CURRENT_SOURCE_DIR}/AQR_API_2.6.1/include
+                  ${CMAKE_CURRENT_SOURCE_DIR}/AQR_API_2.6.1/include/registerMap
+                  ${CMAKE_CURRENT_SOURCE_DIR}/AQR_API_2.6.1/include/registerMap/APPIA
+                  ${CMAKE_CURRENT_SOURCE_DIR}/AQR_API_2.6.1/include/registerMap/EUR
+                  ${CMAKE_CURRENT_SOURCE_DIR}/AQR_API_2.6.1/include/registerMap/HHD
+                  ${CMAKE_CURRENT_SOURCE_DIR}/aqr_phy_fw)
 
 option(MEPA_aqr "Add AQR family support in libmeba" OFF)
 if (${MEPA_aqr})

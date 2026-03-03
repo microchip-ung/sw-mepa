@@ -3,7 +3,10 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(mepa_api)
+project(mepa_api
+    VERSION 2025.12
+    LANGUAGES C ASM
+)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -158,19 +161,19 @@ endif ()
 #    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 #endif(CCACHE_FOUND)
 
-INCLUDE (CheckIncludeFiles)
-INCLUDE (CheckCSourceCompiles)
+include(CheckIncludeFiles)
+include(CheckCSourceCompiles)
 
 if (${MESA_OPSYS_LINUX})
-    CHECK_INCLUDE_FILES("endian.h" VTSS_HAS_ENDIAN_H)
-    IF(NOT VTSS_HAS_ENDIAN_H)
+    check_include_files("endian.h" VTSS_HAS_ENDIAN_H)
+    if(NOT VTSS_HAS_ENDIAN_H)
         message(FATAL_ERROR "endian.h was not found or did not compile. See CMakeFiles/CMakeError.log for more details.")
-    ENDIF()
+    endif()
 
-    CHECK_INCLUDE_FILES("asm/byteorder.h" VTSS_HAS_ASM_BYTEORDER_H)
-    IF(NOT VTSS_HAS_ASM_BYTEORDER_H)
+    check_include_files("asm/byteorder.h" VTSS_HAS_ASM_BYTEORDER_H)
+    if(NOT VTSS_HAS_ASM_BYTEORDER_H)
         message(FATAL_ERROR "asm/byteorder.h was not found or did not compile. See CMakeFiles/CMakeError.log for more details.")
-    ENDIF()
+    endif()
 endif ()
 
 file(GLOB_RECURSE API_UNI_SRC  RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "sw-mesa/base/*.c")
@@ -230,35 +233,35 @@ macro(MESA_CACHE)
     endif()
 endmacro(MESA_CACHE)
 
-FOREACH(f ${API_UNI_HDR})
+foreach(f ${API_UNI_HDR})
     # Add header to mesa processing
     MESA_CACHE("include/${f}")
-ENDFOREACH()
+endforeach()
 
-FOREACH(f ${API_MESA_HDR})
+foreach(f ${API_MESA_HDR})
     # Install all mesa headers
     configure_file("sw-mesa/mesa/include/${f}" "${CMAKE_CURRENT_BINARY_DIR}/include_common/${f}" COPYONLY)
     # Add header to mesa processing
     MESA_CACHE("mesa/include/${f}")
-ENDFOREACH()
+endforeach()
 
-FOREACH(f ${API_MEBA_HDR})
+foreach(f ${API_MEBA_HDR})
     configure_file("board-configs/include/${f}" "${CMAKE_CURRENT_BINARY_DIR}/include_common/${f}" COPYONLY)
-ENDFOREACH()
+endforeach()
 
-FOREACH(f ${API_MEPA_HDR})
+foreach(f ${API_MEPA_HDR})
     # Add all mepa headers
     configure_file("mepa/include/${f}" "${CMAKE_CURRENT_BINARY_DIR}/include_common/${f}" COPYONLY)
-ENDFOREACH()
+endforeach()
 
-FOREACH(f ${API_MEPA_VTSS_HDR})
+foreach(f ${API_MEPA_VTSS_HDR})
     configure_file("mepa/vtss/include/${f}" "${CMAKE_CURRENT_BINARY_DIR}/include_common/${f}" COPYONLY)
-ENDFOREACH()
+endforeach()
 
-FOREACH(f ${API_ME_HDR})
+foreach(f ${API_ME_HDR})
     # Add all me headers
     configure_file("sw-mesa/me/include/${f}" "${CMAKE_CURRENT_BINARY_DIR}/include_common/${f}" COPYONLY)
-ENDFOREACH()
+endforeach()
 
 # Target to drive the mesa-cache processing
 add_custom_target(mesa_cache DEPENDS ${API_MESA_CACHE_OUT})
@@ -352,7 +355,7 @@ macro(API_TARGET)
       target_compile_options(${A_LIB} PUBLIC ${DEFS}
                                       PRIVATE -Wno-logical-op)
 
-      if (${A_LIB})
+      if (${${A_LIB}})
           message(STATUS "Adding ${A_LIB} (${A_CHIP}) MESA=${has_mesa} Defines: [${DEFS}]")
           set_target_properties(${A_LIB} PROPERTIES EXCLUDE_FROM_ALL FALSE)
       else()
@@ -366,11 +369,14 @@ macro(API_TARGET)
       add_library(${A_LIB}_static STATIC ${API_UNI_SRC} ${API_MESA_SRC})
       target_link_libraries(${A_LIB}_static lm_utils)
   endif ()
+  set_target_properties(${A_LIB}_static  PROPERTIES OUTPUT_NAME "${A_LIB}")
 
-  target_compile_options(${A_LIB}_static PUBLIC ${DEFS}
-	                                 PRIVATE -Wno-format-security -Wno-sign-compare -Wno-type-limits -Wno-implicit-fallthrough -Wno-array-parameter -Wno-enum-conversion -Wno-logical-op)
+  target_compile_options(${A_LIB}_static
+      PUBLIC ${DEFS}
+	  PRIVATE -Wno-format-security -Wno-sign-compare -Wno-type-limits -Wno-implicit-fallthrough -Wno-array-parameter -Wno-enum-conversion -Wno-logical-op
+  )
   
-  if (${A_LIB}_static)
+  if (${${A_LIB}_static})
       message(STATUS "Adding ${A_LIB}_static (${A_CHIP}) MESA=${has_mesa} Defines: [${DEFS}]")
       set_target_properties(${A_LIB}_static PROPERTIES EXCLUDE_FROM_ALL FALSE)
   else()
@@ -413,4 +419,3 @@ if (${BUILD_MEPA_DEMO})
         add_subdirectory(mepa_demo)
     endif()
 endif()
-

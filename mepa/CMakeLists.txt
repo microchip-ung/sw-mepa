@@ -1,7 +1,9 @@
 # Copyright (c) 2004-2021 Microchip Technology Inc. and its subsidiaries.
 # SPDX-License-Identifier: MIT
 
-project(MEPA)
+project(MEPA
+    LANGUAGES C ASM
+)
 
 cmake_minimum_required(VERSION 3.15)
 include(.cmake/mepa-macros.cmake)

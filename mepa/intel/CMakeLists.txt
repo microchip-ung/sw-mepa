@@ -4,9 +4,11 @@ MEPA_DRV(LIB_NAME mepa_drv_intel
                   GPY_API_v2.7.1.1/src/api/phy/gpy211_chip.c
                   GPY_API_v2.7.1.1/src/api/phy/gpy211_phy.c
          DEFS     -DP31G_B0=1 -DSAFE_C_LIB=0
-         INCL_PUB ../../me/include ../include
-         INCL_PRI GPY_API_v2.7.1.1/src/os/linux
-                  GPY_API_v2.7.1.1/src/inc)
+         INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
+                  ${MEPA_SOURCE_DIR}/include
+         INCL_PRI ${CMAKE_CURRENT_SOURCE_DIR}/GPY_API_v2.7.1.1/src/os/linux
+                  ${CMAKE_CURRENT_SOURCE_DIR}/GPY_API_v2.7.1.1/src/inc
+)
 
 option(MEPA_gpy211 "Add GPY211 phy support in libmeba" OFF)
 if (${MEPA_gpy211})

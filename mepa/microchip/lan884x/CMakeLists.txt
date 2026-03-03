@@ -1,8 +1,9 @@
 
 MEPA_DRV(LIB_NAME mepa_drv_lan884x
          SRCS     src/lan884x.c
-         INCL_PUB ../../../me/include ../../include
-         INCL_PRI lan884x)
+         INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
+                  ${MEPA_SOURCE_DIR}/include
+)
 
 option(MEPA_lan884x "Add LAN884x support in libmeba" OFF)
 if (${MEPA_lan884x})

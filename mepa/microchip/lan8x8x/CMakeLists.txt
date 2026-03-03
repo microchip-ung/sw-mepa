@@ -6,10 +6,10 @@
 ##
 set(src_lan8x8x         ../common/src/phy_lib.c
                         src/lan8x8x.c)
-set(inc_mepa            ../../../me/include
-                        ../../include
-                        ../common/include)
-set(inc_lan8x8x         lan8x8x)
+set(inc_mepa            ${CMAKE_SOURCE_DIR}/me/include
+                        ${MEPA_SOURCE_DIR}/include
+                        $<PATH:NORMAL_PATH,${CMAKE_CURRENT_SOURCE_DIR}/../common/include>)
+set(inc_lan8x8x         ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 ##
 ## setup feature flags
