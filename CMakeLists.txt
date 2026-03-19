@@ -35,6 +35,7 @@ mark_as_advanced(BUILD_MEPA_DEMO MESA_PRE_AG BUILD_DOXYGEN)
 include(.cmake/doxygen.cmake)
 
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 add_subdirectory(mepa)
 
@@ -433,5 +434,31 @@ target_sources(mepa_headers
 )
 install(
     TARGETS mepa_headers
+    EXPORT mepaTargets
     FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mepa
+)
+
+configure_package_config_file(.cmake/mepaConfig.cmake.in
+    ${PROJECT_BINARY_DIR}/mepaConfig.cmake
+    NO_SET_AND_CHECK_MACRO
+    PATH_VARS CMAKE_INSTALL_PREFIX
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake"
+)
+write_basic_package_version_file("${PROJECT_BINARY_DIR}/mepaConfigVersion.cmake"
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(
+    EXPORT mepaTargets
+    FILE "mepaTargets.cmake"
+    NAMESPACE mepa::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/mepa"
+)
+
+install(
+    FILES
+        ${PROJECT_BINARY_DIR}/mepaConfig.cmake
+        ${PROJECT_BINARY_DIR}/mepaConfigVersion.cmake
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/cmake/mepa
 )
