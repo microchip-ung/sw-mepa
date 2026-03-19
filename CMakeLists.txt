@@ -79,6 +79,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif ()
 
 # Detect wether the compiler either support __VA_OPT__ or the GNU extension for __VA_ARGS__
+# (this test is skipped for Clang and GCC 13)
+if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang" AND
+   NOT (CMAKE_C_COMPILER_ID MATCHES "GNU" AND  CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 14))
+
 include(CheckCSourceCompiles)
 include(CMakePushCheckState)
 
@@ -123,6 +127,8 @@ else()
     else()
         set(CMAKE_C_EXTENSIONS ON)
     endif()
+endif()
+
 endif()
 
 if (${MESA_OPSYS_LINUX})
