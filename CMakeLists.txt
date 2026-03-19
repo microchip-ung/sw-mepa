@@ -34,6 +34,8 @@ mark_as_advanced(BUILD_MEPA_DEMO MESA_PRE_AG BUILD_DOXYGEN)
 
 include(.cmake/doxygen.cmake)
 
+include(GNUInstallDirs)
+
 add_subdirectory(mepa)
 
 include_directories(me/include)
@@ -392,6 +394,8 @@ macro(API_TARGET)
       COMMENT "Preprocessing options.h for ${A_LIB}"
   )
 
+  install_targets(TARGETS ${A_LIB} ${A_LIB}_static)
+
   list(APPEND LIST_OF_API_TARGETS ${A_LIB})
 endmacro(API_TARGET)
 
@@ -419,3 +423,15 @@ if (${BUILD_MEPA_DEMO})
         add_subdirectory(mepa_demo)
     endif()
 endif()
+
+add_library(mepa_headers INTERFACE)
+target_sources(mepa_headers
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS ${CMAKE_BINARY_DIR}
+        FILES ${CMAKE_BINARY_DIR}/include_common/
+)
+install(
+    TARGETS mepa_headers
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mepa
+)

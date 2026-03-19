@@ -41,41 +41,24 @@ macro(MEPA_DRV)
     else()
         set_target_properties(${A_LIB_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     endif()
+
+    install_targets(TARGETS ${A_LIB_NAME})
 endmacro()
 
 macro(mepa_merge_static_libs)
-    set(oneValueArgs   TARGET FILENAME)
+    set(oneValueArgs   TARGET)
     set(multiValueArgs LIBRARIES)
 
     cmake_parse_arguments(A "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${A_TARGET}.ar.in "CREATE ${A_FILENAME}\n" )
-    foreach(e ${A_LIBRARIES})
-        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${A_TARGET}.ar.in
-            "ADDLIB $<TARGET_FILE:${e}>\n")
+    add_library(${A_TARGET} STATIC)
+    foreach(dep ${A_LIBRARIES})
+        target_sources(${A_TARGET} PRIVATE $<TARGET_OBJECTS:${dep}>)
+        set_target_properties(${A_TARGET}
+            PROPERTIES
+                INCLUDE_DIRECTORIES $<TARGET_PROPERTY:${dep},INCLUDE_DIRECTORIES>
+                COMPILE_DEFINITIONS $<TARGET_PROPERTY:${dep},COMPILE_DEFINITIONS>
+        )
     endforeach()
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${A_TARGET}.ar.in "SAVE\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${A_TARGET}.ar.in "END\n")
-    file(GENERATE
-         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${A_TARGET}.ar
-         INPUT ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${A_TARGET}.ar.in)
-
-    add_custom_command(
-        COMMAND ${CMAKE_AR} -Ms < ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${A_TARGET}.ar
-        OUTPUT  ${A_FILENAME}
-        DEPENDS ${A_LIBRARIES}
-        COMMENT "Bundling ${A_TARGET}"
-        VERBATIM
-    )
-
-    add_custom_target(${A_TARGET}_target DEPENDS ${A_FILENAME})
-    add_dependencies(${A_TARGET}_target ${A_LIBRARIES})
-    add_library(${A_TARGET} STATIC IMPORTED GLOBAL)
-    add_dependencies(${A_TARGET} ${A_TARGET}_target)
-
-    set_target_properties(${A_TARGET} PROPERTIES
-        IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${A_FILENAME}
-    )
 endmacro(mepa_merge_static_libs)
 
 macro(MEPA_LIB)
@@ -104,7 +87,6 @@ macro(MEPA_LIB)
                                PRIVATE $<BUILD_INTERFACE:${MEPA_SOURCE_DIR}/common/src>)
 
     mepa_merge_static_libs(TARGET    ${A_LIB_NAME}
-                           FILENAME  lib${A_LIB_NAME}.a
                            LIBRARIES ${lib_common} ${A_DRVS})
 
     if (${BUILD_ALL})
@@ -117,10 +99,12 @@ macro(MEPA_LIB)
 
     if (${BUILD_${A_LIB_NAME}})
         message(STATUS "Build ${A_LIB_NAME} including ${A_DRVS}")
-        set_target_properties(${A_LIB_NAME}_target PROPERTIES EXCLUDE_FROM_ALL FALSE)
+        set_target_properties(${A_LIB_NAME} PROPERTIES EXCLUDE_FROM_ALL FALSE)
     else()
-        set_target_properties(${A_LIB_NAME}_target PROPERTIES EXCLUDE_FROM_ALL TRUE)
+        set_target_properties(${A_LIB_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     endif()
+
+    install_targets(TARGETS ${A_LIB_NAME})
 endmacro()
 
 

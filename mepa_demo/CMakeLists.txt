@@ -29,6 +29,10 @@ target_link_libraries(init PUBLIC "-static")
 # TODO, delete these once we do not need them any more
 add_executable(fa_board_fpga_init fa_board_fpga_init.c)
 
+install_targets(
+    TARGETS base64decode cli er spi_reg_read init fa_board_fpga_init
+)
+
 include_directories(../board-configs/include)
 include_directories(../mepa/vtss/include)
 include_directories(../mepa/vtss/src)
