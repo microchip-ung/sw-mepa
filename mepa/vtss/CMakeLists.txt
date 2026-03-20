@@ -35,35 +35,36 @@ set(src_vtss src/vtss.c
 set(inc_vtss ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 MEPA_DRV(LIB_NAME mepa_drv_vtss
+         DEFS     MEPA_HAS_VTSS
          SRCS     ${src_vtss}
          INCL_PUB ${inc_mepa}
          INCL_PRI ${inc_vtss})
 
 MEPA_DRV(LIB_NAME mepa_drv_vtss_10g_only
-         DEFS     -DVTSS_OPT_PHY_1G=0 -DVTSS_OPT_PHY_10G=1
+         DEFS     MEPA_HAS_VTSS -DVTSS_OPT_PHY_1G=0 -DVTSS_OPT_PHY_10G=1
          SRCS     ${src_vtss}
          INCL_PUB ${inc_mepa}
          INCL_PRI ${inc_vtss})
 
 MEPA_DRV(LIB_NAME mepa_drv_vtss_ts
-         DEFS     -DVTSS_OPT_PHY_TIMESTAMP=1
+         DEFS     MEPA_HAS_VTSS -DVTSS_OPT_PHY_TIMESTAMP=1
          SRCS     ${src_vtss}
          INCL_PUB ${inc_mepa}
          INCL_PRI ${inc_vtss})
 
 MEPA_DRV(LIB_NAME mepa_drv_vtss_10g_ts
-         DEFS     -DVTSS_OPT_PHY_10G=1 -DVTSS_OPT_PHY_TIMESTAMP=1
+         DEFS     MEPA_HAS_VTSS -DVTSS_OPT_PHY_10G=1 -DVTSS_OPT_PHY_TIMESTAMP=1
          SRCS     ${src_vtss}
          INCL_PUB ${inc_mepa}
          INCL_PRI ${inc_vtss})
 
 MEPA_DRV(LIB_NAME mepa_drv_vtss_10g_macsec_ts
-         DEFS     -DVTSS_OPT_PHY_10G=1 -DVTSS_OPT_PHY_MACSEC=1 -DVTSS_OPT_PHY_TIMESTAMP=1
+         DEFS     MEPA_HAS_VTSS -DVTSS_OPT_PHY_10G=1 -DVTSS_OPT_PHY_MACSEC=1 -DVTSS_OPT_PHY_TIMESTAMP=1
          SRCS     ${src_vtss}
          INCL_PUB ${inc_mepa}
          INCL_PRI ${inc_vtss})
 
-set(mepa_vtss_custom_defs)
+set(mepa_vtss_custom_defs MEPA_HAS_VTSS)
 
 option(MEPA_vtss_opt_1g      "Compile vtss family with 1G support" OFF)
 if (${MEPA_vtss_opt_1g})

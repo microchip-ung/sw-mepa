@@ -15,7 +15,7 @@ MEPA_DRV(LIB_NAME mepa_drv_lan887x
          SRCS     ../common/src/phy_lib.c
                   src/lan887x.c
                   src/lan887x_tc10.c
-		 DEFS	  ${MEPA_lan887x_custom_defs}
+		 DEFS	  MEPA_HAS_LAN887x ${MEPA_lan887x_custom_defs}
          INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
                   ${MEPA_SOURCE_DIR}/include
                   ${MEPA_SOURCE_DIR}/common/include

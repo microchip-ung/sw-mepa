@@ -20,7 +20,7 @@ if (${MEPA_lan80xx_DFU_PROFILING})
 endif()
 
 MEPA_DRV(LIB_NAME mepa_drv_lan80xx_ts
-    DEFS ${lan80xx_ts_defs} ${sha256_defs}
+    DEFS MEPA_HAS_LAN80XX ${lan80xx_ts_defs} ${sha256_defs}
     SRCS  ${src_lan80xx} ${src_sha256}
     INCL_PUB ${CMAKE_SOURCE_DIR}/sw-mesa/me/include
              ${CMAKE_SOURCE_DIR}/me/include
@@ -32,7 +32,7 @@ MEPA_DRV(LIB_NAME mepa_drv_lan80xx_ts
 )
 
 MEPA_DRV(LIB_NAME mepa_drv_lan80xx_ts_msec
-    DEFS ${lan80xx_ts_msec_defs} ${sha256_defs}
+    DEFS MEPA_HAS_LAN80XX ${lan80xx_ts_msec_defs} ${sha256_defs}
     SRCS  ${src_lan80xx} ${src_sha256}
     INCL_PUB ${CMAKE_SOURCE_DIR}/sw-mesa/me/include
              ${CMAKE_SOURCE_DIR}/me/include

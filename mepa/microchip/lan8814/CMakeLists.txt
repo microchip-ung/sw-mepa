@@ -1,4 +1,5 @@
 MEPA_DRV(LIB_NAME mepa_drv_lan8814
+         DEFS     MEPA_HAS_LAN8814
          SRCS     src/lan8814.c
                   src/lan8814_ts.c
          INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
@@ -7,7 +8,7 @@ MEPA_DRV(LIB_NAME mepa_drv_lan8814
 )
 
 MEPA_DRV(LIB_NAME mepa_drv_lan8814_light
-         DEFS     -DMEPA_LAN8814_LIGHT=1
+         DEFS     MEPA_HAS_LAN8814 -DMEPA_LAN8814_LIGHT=1
          SRCS     src/lan8814.c
                   src/lan8814_ts.c
          INCL_PUB ${CMAKE_SOURCE_DIR}/me/include

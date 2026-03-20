@@ -78,7 +78,7 @@ macro(MEPA_LIB)
     if (${MEPA_OPSYS_VELOCITYSP})
         list(APPEND A_DEFS -DMEPA_OPSYS_VELOCITYSP=1)
     endif()
-
+    target_link_libraries(${lib_common} PRIVATE ${A_DRVS})
     target_compile_definitions(${lib_common} PRIVATE ${A_DEFS})
     target_include_directories(${lib_common}
                                PUBLIC 

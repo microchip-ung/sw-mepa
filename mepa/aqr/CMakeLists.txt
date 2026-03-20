@@ -1,4 +1,5 @@
 MEPA_DRV(LIB_NAME mepa_drv_aqr
+         DEFS     MEPA_HAS_AQR
          SRCS     phy_driver.c
                   vtss_platform/AQ_PhyInterface.c
                   vtss_platform/AQ_PlatformRoutines.c

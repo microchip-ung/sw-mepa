@@ -3,7 +3,7 @@ MEPA_DRV(LIB_NAME mepa_drv_intel
          SRCS     phy_driver.c
                   GPY_API_v2.7.1.1/src/api/phy/gpy211_chip.c
                   GPY_API_v2.7.1.1/src/api/phy/gpy211_phy.c
-         DEFS     -DP31G_B0=1 -DSAFE_C_LIB=0
+         DEFS     MEPA_HAS_GPY2211 -DP31G_B0=1 -DSAFE_C_LIB=0
          INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
                   ${MEPA_SOURCE_DIR}/include
          INCL_PRI ${CMAKE_CURRENT_SOURCE_DIR}/GPY_API_v2.7.1.1/src/os/linux

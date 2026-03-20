@@ -13,7 +13,7 @@ endif()
 
 MEPA_DRV(LIB_NAME mepa_drv_lan867x
          SRCS     src/lan867x.c src/lan867x_private.c src/lan867x_t1s.c
-		 DEFS	  ${MEPA_LAN867X_ADD_DEFS}
+		 DEFS	  MEPA_HAS_LAN867X ${MEPA_LAN867X_ADD_DEFS}
          INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
                   ${MEPA_SOURCE_DIR}/include
          INCL_PRI ${CMAKE_CURRENT_SOURCE_DIR}/src)

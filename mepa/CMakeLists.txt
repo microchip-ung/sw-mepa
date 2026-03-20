@@ -43,85 +43,66 @@ MEPA_LIB(LIB_NAME mepa
 ## and other higher layer of applications                                    ##
 ###############################################################################
 MEPA_LIB(LIB_NAME mepa_caracal ADVANCED
-         DEFS     -DMEPA_HAS_VTSS
          DRVS     mepa_drv_vtss)
 
 MEPA_LIB(LIB_NAME mepa_caracal_macsec ADVANCED
-         DEFS     -DMEPA_HAS_VTSS
          DRVS     mepa_drv_vtss_10g_macsec_ts)
 
 MEPA_LIB(LIB_NAME mepa_jr2 ADVANCED
-         DEFS     -DMEPA_HAS_VTSS       -DMEPA_HAS_AQR  -DMEPA_HAS_GPY2211
-         DRVS     mepa_drv_vtss_10g_ts         mepa_drv_aqr    mepa_drv_intel)
+         DRVS     mepa_drv_vtss_10g_ts mepa_drv_aqr mepa_drv_intel)
 
 MEPA_LIB(LIB_NAME mepa_jr2_macsec ADVANCED
-         DEFS     -DMEPA_HAS_VTSS       -DMEPA_HAS_AQR  -DMEPA_HAS_GPY2211
-         DRVS     mepa_drv_vtss_10g_macsec_ts  mepa_drv_aqr    mepa_drv_intel)
+         DRVS     mepa_drv_vtss_10g_macsec_ts mepa_drv_aqr mepa_drv_intel)
 
 MEPA_LIB(LIB_NAME mepa_jr2_bringup ADVANCED
-         DEFS     -DMEPA_HAS_VTSS
          DRVS     mepa_drv_vtss_10g_ts)
 
 MEPA_LIB(LIB_NAME mepa_servalt ADVANCED
-         DEFS     -DMEPA_HAS_VTSS
          DRVS     mepa_drv_vtss_10g_ts)
 
 MEPA_LIB(LIB_NAME mepa_servalt_macsec ADVANCED
-         DEFS     -DMEPA_HAS_VTSS
          DRVS     mepa_drv_vtss_10g_macsec_ts)
 
 MEPA_LIB(LIB_NAME mepa_ocelot ADVANCED
-         DEFS     -DMEPA_HAS_VTSS  -DMEPA_HAS_LAN8814
-         DRVS     mepa_drv_vtss_ts            mepa_drv_lan8814)
+         DRVS     mepa_drv_vtss_ts mepa_drv_lan8814)
 
 MEPA_LIB(LIB_NAME mepa_ocelot_macsec ADVANCED
-         DEFS     -DMEPA_HAS_VTSS  -DMEPA_HAS_LAN8814
          DRVS     mepa_drv_vtss_10g_macsec_ts mepa_drv_lan8814)
 
 MEPA_LIB(LIB_NAME mepa_ocelot_pcb121 ADVANCED
-         DEFS     -DMEPA_HAS_VTSS
          DRVS     mepa_drv_vtss_ts)
 
 MEPA_LIB(LIB_NAME mepa_sparx5 ADVANCED
-         DEFS     -DMEPA_HAS_VTSS       -DMEPA_HAS_AQR  -DMEPA_HAS_GPY2211  -DMEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x
-         DRVS     mepa_drv_vtss_10g_ts        mepa_drv_aqr    mepa_drv_intel      mepa_drv_lan8814    mepa_drv_lan884x)
+         DRVS     mepa_drv_vtss_10g_ts mepa_drv_aqr mepa_drv_intel mepa_drv_lan8814 mepa_drv_lan884x)
 
 MEPA_LIB(LIB_NAME mepa_sparx5_macsec ADVANCED
-         DEFS     -DMEPA_HAS_VTSS       -DMEPA_HAS_AQR  -DMEPA_HAS_GPY2211  -DMEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x
-         DRVS     mepa_drv_vtss_10g_macsec_ts mepa_drv_aqr    mepa_drv_intel      mepa_drv_lan8814    mepa_drv_lan884x)
+         DRVS     mepa_drv_vtss_10g_macsec_ts mepa_drv_aqr mepa_drv_intel mepa_drv_lan8814)
 
 MEPA_LIB(LIB_NAME mepa_sparx5_bringup ADVANCED
-         DEFS     -DMEPA_HAS_VTSS
          DRVS     mepa_drv_vtss_10g_ts)
 
 MEPA_LIB(LIB_NAME mepa_edsx ADVANCED
-         DEFS     -DMEPA_HAS_VTSS              -DMEPA_HAS_AQR      -DMEPA_HAS_GPY2211   -DMEPA_HAS_LAN8814       -DMEPA_HAS_LAN80XX
-         DRVS     mepa_drv_vtss_10g_macsec_ts   mepa_drv_aqr       mepa_drv_intel        mepa_drv_lan8814         mepa_drv_lan80xx_ts_msec)
+         DRVS     mepa_drv_vtss_10g_macsec_ts mepa_drv_aqr mepa_drv_intel mepa_drv_lan8814 mepa_drv_lan80xx_ts_msec)
 
 MEPA_LIB(LIB_NAME mepa_lan966x ADVANCED
-         DEFS     -DMEPA_HAS_VTSS  -DMEPA_HAS_KSZ9031  -D MEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x
-         DRVS     mepa_drv_vtss               mepa_drv_ksz9031    mepa_drv_lan8814   mepa_drv_lan884x)
-
-MEPA_LIB(LIB_NAME mepa_lan966x_macsec ADVANCED
-         DEFS     -DMEPA_HAS_VTSS  -DMEPA_HAS_KSZ9031  -D MEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x
-         DRVS     mepa_drv_vtss_10g_macsec_ts mepa_drv_ksz9031    mepa_drv_lan8814   mepa_drv_lan884x)
+         DRVS     mepa_drv_vtss mepa_drv_ksz9031 mepa_drv_lan8814 mepa_drv_lan884x)
 
 MEPA_LIB(LIB_NAME mepa_eds2 ADVANCED
-         DEFS     -DMEPA_HAS_VTSS  -DMEPA_HAS_KSZ9031  -D MEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x
-         DRVS     mepa_drv_vtss_ts    mepa_drv_ksz9031    mepa_drv_lan8814   mepa_drv_lan884x)
+         DRVS     mepa_drv_vtss_ts mepa_drv_ksz9031 mepa_drv_lan8814 mepa_drv_lan884x)
 
 MEPA_LIB(LIB_NAME mepa_velocitysp_lan966x ADVANCED
-         DEFS     -DMEPA_HAS_LAN8814
          DRVS     mepa_drv_lan8814)
 
 MEPA_LIB(LIB_NAME mepa_velocitysp_lan969x ADVANCED
-         DEFS     -DMEPA_HAS_LAN8814 -DMEPA_HAS_LAN884x -DMEPA_HAS_LAN8X8X
          DRVS     mepa_drv_lan8814_light mepa_drv_lan884x mepa_drv_lan8x8x)
 
 MEPA_LIB(LIB_NAME mepa_velocitysp_lan969x_auto ADVANCED
-         DEFS     -DMEPA_HAS_LAN887X -DMEPA_HAS_LAN884x -DMEPA_HAS_LAN867X -DMEPA_HAS_LAN8X8X
          DRVS     mepa_drv_lan887x mepa_drv_lan884x mepa_drv_lan867x mepa_drv_lan8x8x)
 
 MEPA_LIB(LIB_NAME mepa_p64h ADVANCED
-         DEFS     -DMEPA_HAS_VTSS       -DMEPA_HAS_DUMMY_PHY
-         DRVS     mepa_drv_vtss_10g_ts  mepa_drv_dummy_phy)
+         DRVS     mepa_drv_vtss_10g_ts mepa_drv_dummy_phy)
+
+install(
+    DIRECTORY common
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mepa
+)

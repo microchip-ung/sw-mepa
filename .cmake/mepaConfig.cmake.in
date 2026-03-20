@@ -3,3 +3,32 @@
 include ( "${CMAKE_CURRENT_LIST_DIR}/mepaTargets.cmake" )
 
 check_required_components(mepa)
+
+function(MEPA_LIB)
+    set(options        EXCLUDE_FROM_ALL)
+    set(oneValueArgs   NAME)
+    set(multiValueArgs DRVS)
+
+    cmake_parse_arguments(_args "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    list(REMOVE_DUPLICATES _args_DRVS)
+
+    set(_MEPA_COMMON_DIR $<PATH:NORMAL_PATH,$<PATH:APPEND,$<TARGET_FILE_DIR:mepa::mepa>,..,..,include,mepa,common>>)
+    add_library(${_args_NAME} 
+        STATIC
+        $<$<BOOL:${_args_EXCLUDE_FROM_ALL}>:EXCLUDE_FROM_ALL>
+    )
+    target_sources(${_args_NAME}
+        PRIVATE
+            ${_MEPA_COMMON_DIR}/src/phy.c
+    )
+    target_include_directories(${_args_NAME}
+        PRIVATE
+            $<BUILD_INTERFACE:${_MEPA_COMMON_DIR}/include>
+    )
+    target_link_libraries(${_args_NAME}
+        PUBLIC
+            mepa::mepa_headers
+            ${_args_DRVS}
+    )
+endfunction()

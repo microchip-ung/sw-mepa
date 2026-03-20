@@ -1,5 +1,6 @@
 
 MEPA_DRV(LIB_NAME mepa_drv_dummy_phy
+         DEFS     MEPA_HAS_DUMMY_PHY
          SRCS     src/dummy_phy.c
          INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
                   ${MEPA_SOURCE_DIR}/include

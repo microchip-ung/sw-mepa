@@ -1,5 +1,6 @@
 
 MEPA_DRV(LIB_NAME mepa_drv_lan884x
+         DEFS     MEPA_HAS_LAN884x
          SRCS     src/lan884x.c
          INCL_PUB ${CMAKE_SOURCE_DIR}/me/include
                   ${MEPA_SOURCE_DIR}/include
