@@ -171,7 +171,7 @@ typedef mepa_rc (*mepa_spi_write_t)(struct mepa_callout_ctx          *ctx,
  *   MEPA_RC_NOT_IMPLEMENTED when not supported.\n
  *   MEPA_RC_OK on success.
  **/
-typedef mepa_rc (*mepa_spi_write_64bit_t)(struct mepa_callout_ctx        ctx,
+typedef mepa_rc (*mepa_spi_write_64bit_t)(struct mepa_callout_ctx        *ctx,
                                           mepa_port_no_t                 port_no,
                                           const uint8_t                  mmd,
                                           const uint16_t                 addr,
