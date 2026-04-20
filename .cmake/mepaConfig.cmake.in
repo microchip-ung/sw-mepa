@@ -13,7 +13,7 @@ function(MEPA_LIB)
 
     list(REMOVE_DUPLICATES _args_DRVS)
 
-    set(_MEPA_COMMON_DIR $<PATH:NORMAL_PATH,$<PATH:APPEND,$<TARGET_FILE_DIR:mepa::mepa>,..,..,include,mepa,common>>)
+    set(_MEPA_COMMON_DIR $<PATH:NORMAL_PATH,$<PATH:APPEND,$<TARGET_FILE_DIR:mepa::mepa>,..,..,share,mepa,common>>)
     add_library(${_args_NAME} 
         STATIC
         $<$<BOOL:${_args_EXCLUDE_FROM_ALL}>:EXCLUDE_FROM_ALL>
@@ -23,7 +23,7 @@ function(MEPA_LIB)
             ${_MEPA_COMMON_DIR}/src/phy.c
     )
     target_include_directories(${_args_NAME}
-        PRIVATE
+        PUBLIC
             $<BUILD_INTERFACE:${_MEPA_COMMON_DIR}/include>
     )
     target_link_libraries(${_args_NAME}
