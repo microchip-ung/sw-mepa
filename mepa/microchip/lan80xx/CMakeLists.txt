@@ -54,3 +54,20 @@ if (${MEPA_lan80xx_ts_msec})
     set(mepa_defs ${mepa_defs} -DMEPA_HAS_LAN80XX CACHE INTERNAL "")
 endif()
 
+add_library(mepa_lan80xx_headers INTERFACE)
+target_sources(mepa_lan80xx_headers
+    PUBLIC
+        FILE_SET HEADERS
+            TYPE HEADERS
+            BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+            FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/microchip/
+)
+install(
+    TARGETS mepa_lan80xx_headers
+    EXPORT mepaTargets
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mepa/microchip/
+)
+
+foreach(_tgt mepa_drv_lan80xx_ts mepa_drv_lan80xx_ts)
+    target_include_directories(${_tgt} PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/mepa/microchip>)
+endforeach()

@@ -109,3 +109,20 @@ if (${MEPA_vtss})
     set(mepa_defs ${mepa_defs} -DMEPA_HAS_VTSS CACHE INTERNAL "")
 endif()
 
+add_library(mepa_vtss_headers INTERFACE)
+target_sources(mepa_vtss_headers
+    PUBLIC
+        FILE_SET HEADERS
+            TYPE HEADERS
+            BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+            FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/
+)
+install(
+    TARGETS mepa_vtss_headers
+    EXPORT mepaTargets
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mepa/vtss
+)
+
+foreach(_tgt mepa_drv_vtss mepa_drv_vtss_10g_only mepa_drv_vtss_ts mepa_drv_vtss_10g_ts mepa_drv_vtss_10g_macsec_ts mepa_drv_vtss_custom)
+    target_include_directories(${_tgt} PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/mepa/vtss>)
+endforeach()

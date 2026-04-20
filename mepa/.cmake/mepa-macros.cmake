@@ -17,7 +17,6 @@ macro(MEPA_DRV)
     target_include_directories(${A_LIB_NAME} 
         PUBLIC 
             $<BUILD_INTERFACE:${public_includes}>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         PRIVATE
             $<BUILD_INTERFACE:${private_includes}>
     )
@@ -38,11 +37,10 @@ macro(MEPA_DRV)
     if (${BUILD_${A_LIB_NAME}})
         message(STATUS "Build ${A_LIB_NAME} including ${A_MEPA_DEFINES}")
         set_target_properties(${A_LIB_NAME} PROPERTIES EXCLUDE_FROM_ALL FALSE)
+        install_targets(TARGETS ${A_LIB_NAME})
     else()
         set_target_properties(${A_LIB_NAME} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     endif()
-
-    install_targets(TARGETS ${A_LIB_NAME})
 endmacro()
 
 macro(mepa_merge_static_libs)

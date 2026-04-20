@@ -32,3 +32,20 @@ if (${MEPA_lan8814} AND ${MEPA_lan8814_light})
     message(FATAL_ERROR "MEPA_lan8814 and MEPA_lan8814_light are mutually exclusive")
 endif()
 
+add_library(mepa_lan8814_headers INTERFACE)
+target_sources(mepa_lan8814_headers
+    PUBLIC
+        FILE_SET HEADERS
+            TYPE HEADERS
+            BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+            FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/microchip/
+)
+install(
+    TARGETS mepa_lan8814_headers
+    EXPORT mepaTargets
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mepa/microchip/
+)
+
+foreach(_tgt mepa_drv_lan8814 mepa_drv_lan8814_light)
+    target_include_directories(${_tgt} PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/mepa/microchip>)
+endforeach()

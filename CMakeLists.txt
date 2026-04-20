@@ -257,10 +257,6 @@ foreach(f ${API_MEPA_HDR})
     configure_file("mepa/include/${f}" "${CMAKE_CURRENT_BINARY_DIR}/include_common/${f}" COPYONLY)
 endforeach()
 
-foreach(f ${API_MEPA_VTSS_HDR})
-    configure_file("mepa/vtss/include/${f}" "${CMAKE_CURRENT_BINARY_DIR}/include_common/${f}" COPYONLY)
-endforeach()
-
 foreach(f ${API_ME_HDR})
     # Add all me headers
     configure_file("sw-mesa/me/include/${f}" "${CMAKE_CURRENT_BINARY_DIR}/include_common/${f}" COPYONLY)
