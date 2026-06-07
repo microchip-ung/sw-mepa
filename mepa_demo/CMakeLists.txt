@@ -99,7 +99,7 @@ file(GLOB_RECURSE MEPA_APP_SRC
 
 add_library(mepa_demo_lib STATIC trace.c cli.c port.c mac.c vlan.c packet.c ip.c
                                  debug.c symreg.c test.c spi.c uio.c ${MESA_RPC} json_rpc.c
-                                 example.c kr.c intr.c  ${MEPA_APP_SRC})
+                                 example.c kr.c intr.c phy_only.c ${MEPA_APP_SRC})
 target_include_directories(mepa_demo_lib PUBLIC ${CMAKE_BINARY_DIR}/mesa-ag/)
 
 file(GLOB_RECURSE EXAMPLE_SRC
