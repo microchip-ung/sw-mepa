@@ -22,6 +22,9 @@
 #include "trace.h"
 #include "phy_only.h"
 #include "spi_proxy/spiproxy.h"
+#include <linux/gpio.h>
+#include <poll.h>
+#include "lan80xx_mcu.h"        // gpio_callback_t, lan80xx_MB_INTR_register_callback
 
 // by default, keep legacy mode
 mesa_bool_t phy_only_mode = 0;
@@ -410,4 +413,205 @@ mesa_rc phy_only_spi_rw(mepa_port_no_t port_no, mesa_bool_t read,
         return phy_only_xfer(slot, 1, addr, data);
     }
     return phy_only_xfer(slot, 0, addr, data);
+}
+
+// LAN80xx mailbox host-interrupt (MDINT) over a Linux GPIO line.
+//
+// The LAN80xx asserts its mailbox "response ready" host interrupt on an INTR
+// pin. On a switch-less board (no MESA switch) that pin is wired to a host SoC
+// GPIO instead of a MESA-switch GPIO, so register a MEPA gpio callback backed
+// by that GPIO through the Linux character-device uAPI (v2) with falling-edge
+// events: the mailbox then waits on the real interrupt instead of polling the
+// flag over SPI.
+#define PHY_ONLY_MDINT_ENV  "LAN80XX_MDINT"
+#define PHY_ONLY_MDINT_DEF  "lan8023-mdint"   // DT gpio-line-names; probed across all gpiochips
+
+#define PHY_ONLY_MDINT_POLL_MS  8
+
+static int phy_only_mdint_fd = -1;   // line-request fd (edge events + values)
+
+// Find the gpiochip line whose DTS name (gpio-line-names) is name by scanning
+// /dev/gpiochip0..63 and matching each line's name. On a match fill chip with
+// the owning "/dev/gpiochipN" path and *off with the line offset, return 0;
+// return -1 if no chip carries that name. Same probing pattern as the SPI-proxy
+// daemon's gpio_open_line_by_name().
+static int gpio_find_line_by_name(const char *name, char *chip, size_t chipsz,
+                                  unsigned int *off)
+{
+    int n;
+
+    for (n = 0; n < 64; n++) {
+        struct gpiochip_info ci;
+        uint32_t o;
+        int cfd;
+
+        snprintf(chip, chipsz, "/dev/gpiochip%d", n);
+        cfd = open(chip, O_RDONLY | O_CLOEXEC);
+        if (cfd < 0) {
+            continue;
+        }
+        memset(&ci, 0, sizeof(ci));
+        if (ioctl(cfd, GPIO_GET_CHIPINFO_IOCTL, &ci) == 0) {
+            for (o = 0; o < ci.lines; o++) {
+                struct gpio_v2_line_info li;
+
+                memset(&li, 0, sizeof(li));
+                li.offset = o;
+                if (ioctl(cfd, GPIO_V2_GET_LINEINFO_IOCTL, &li) == 0 &&
+                    strcmp(li.name, name) == 0) {
+                    *off = o;
+                    close(cfd);
+                    return 0;
+                }
+            }
+        }
+        close(cfd);
+    }
+    return -1;
+}
+
+// Open the INTR line and request it: input, falling-edge events. cfg is either
+//   - a DT line name from gpio-line-names (e.g. "lan8023-mdint"), probed across
+//     every gpiochip (preferred: chip numbers/offsets are not stable, names are);
+//   - or an explicit "<chip-path>:<line>" (e.g. "/dev/gpiochip2:0"), recognised
+//     by the '/' it contains.
+// NULL uses $LAN80XX_MDINT, else the built-in default. Idempotent; 0 on success.
+static int phy_only_mdint_open(const char *cfg)
+{
+    char chip[64];
+    unsigned int line = 0;
+    const char *s, *colon;
+    int cfd;
+    struct gpio_v2_line_request req;
+
+    if (phy_only_mdint_fd >= 0) {
+        return 0;
+    }
+    s = (cfg && *cfg) ? cfg : getenv(PHY_ONLY_MDINT_ENV);
+    if (!s || !*s) {
+        s = PHY_ONLY_MDINT_DEF;
+    }
+    if (strchr(s, '/')) {
+        // explicit "<chip-path>:<line>", e.g. "/dev/gpiochip2:0"
+        colon = strrchr(s, ':');
+        if (colon) {
+            size_t n = (size_t)(colon - s);
+            if (n >= sizeof(chip)) {
+                n = sizeof(chip) - 1;
+            }
+            memcpy(chip, s, n);
+            chip[n] = '\0';
+            line = (unsigned int)strtoul(colon + 1, NULL, 0);
+        } else {
+            snprintf(chip, sizeof(chip), "%s", s);
+        }
+    } else {
+        // a DT line name (gpio-line-names), e.g. "lan8023-mdint": find which
+        // gpiochip/offset currently carries it.
+        if (gpio_find_line_by_name(s, chip, sizeof(chip), &line) != 0) {
+            fprintf(stderr, "MDINT: GPIO line '%s' not found on any gpiochip\n", s);
+            return -1;
+        }
+    }
+
+    cfd = open(chip, O_RDONLY | O_CLOEXEC);
+    if (cfd < 0) {
+        fprintf(stderr, "MDINT: open %s: %s\n", chip, strerror(errno));
+        return -1;
+    }
+    // INTR is active-low (its DT line name ends in '#'):
+    // asserted = physical low = a falling edge.
+    // Do NOT set GPIO_V2_LINE_FLAG_ACTIVE_LOW here: that would
+    // turn the logical falling edge into a physical rising edge, which some GPIO
+    // irqchips reject (e.g. mpc8xxx: irq_set_type mode 1 fails). Request the
+    // physical falling edge and invert the level in software instead (the
+    // active-low sense is handled in phy_only_mdint_gpio_cb()).
+    memset(&req, 0, sizeof(req));
+    req.offsets[0] = line;
+    req.num_lines  = 1;
+    snprintf(req.consumer, sizeof(req.consumer), "lan80xx-mdint");
+    req.config.flags = GPIO_V2_LINE_FLAG_INPUT | GPIO_V2_LINE_FLAG_EDGE_FALLING;
+    if (ioctl(cfd, GPIO_V2_GET_LINE_IOCTL, &req) < 0 || req.fd < 0) {
+        // Some GPIO controllers can't deliver edge events on this line. Fall
+        // back to a level-only request: the callback still reads the real pin
+        // (the driver's mailbox loop provides the polling cadence).
+        memset(&req, 0, sizeof(req));
+        req.offsets[0] = line;
+        req.num_lines  = 1;
+        snprintf(req.consumer, sizeof(req.consumer), "lan80xx-mdint");
+        req.config.flags = GPIO_V2_LINE_FLAG_INPUT;
+        if (ioctl(cfd, GPIO_V2_GET_LINE_IOCTL, &req) < 0 || req.fd < 0) {
+            fprintf(stderr, "MDINT: request %s line %u: %s\n", chip, line, strerror(errno));
+            close(cfd);
+            return -1;
+        }
+        close(cfd);
+        phy_only_mdint_fd = req.fd;
+        (void)fcntl(phy_only_mdint_fd, F_SETFL, O_NONBLOCK);
+        printf("MDINT: %s line %u (level, no edge events) ready, fd=%d\n",
+               chip, line, phy_only_mdint_fd);
+        return 0;
+    }
+    close(cfd);                  // req.fd is the live line handle
+    phy_only_mdint_fd = req.fd;
+    (void)fcntl(phy_only_mdint_fd, F_SETFL, O_NONBLOCK);   // non-blocking event drain
+    printf("MDINT: %s line %u (falling-edge events) ready, fd=%d\n",
+           chip, line, phy_only_mdint_fd);
+    return 0;
+}
+
+// MEPA gpio_callback_t
+//
+// Block in poll() on the line-event fd for up to PHY_ONLY_MDINT_POLL_MS,
+// sleeping the calling thread until the INTR edge fires (returns within
+// microseconds of the edge) or the window elapses. A falling edge means the
+// line went active (INTR asserted), so return 1 and drain the queued events
+// (fd is O_NONBLOCK). If no edge arrives in the window, fall back to reading
+// the current level: covers a steadily-asserted line and the level-only
+// request (no edge events). The INTR is active-low (no ACTIVE_LOW flag on the
+// request): asserted == physical 0.
+//
+// No thread and no central loop is used here on purpose: the mailbox wait is
+// synchronous inside a CLI command, so the demo's select() loop
+// (fd_read_register/main.c) is blocked meanwhile and cannot service this fd.
+// For ASYNC PHY events (link/PTP) that same fd can instead be handed to
+// fd_read_register() so the central loop dispatches edges while idle.
+static uint8_t phy_only_mdint_gpio_cb(const mepa_device_t *dev)
+{
+    struct gpio_v2_line_values vals;
+    struct pollfd pfd;
+
+    (void)dev;
+    if (phy_only_mdint_fd < 0 && phy_only_mdint_open(NULL) != 0) {
+        return 0;
+    }
+    pfd.fd = phy_only_mdint_fd;
+    pfd.events = POLLIN;
+    if (poll(&pfd, 1, PHY_ONLY_MDINT_POLL_MS) > 0 && (pfd.revents & POLLIN)) {
+        struct gpio_v2_line_event ev;
+        while (read(phy_only_mdint_fd, &ev, sizeof(ev)) > 0) {
+            // drain (O_NONBLOCK): read() returns -1/EAGAIN when empty
+        }
+        return 1;                // falling edge == host interrupt asserted
+    }
+    memset(&vals, 0, sizeof(vals));
+    vals.mask = 1;               // line index 0 in this request
+    if (ioctl(phy_only_mdint_fd, GPIO_V2_LINE_GET_VALUES_IOCTL, &vals) < 0) {
+        return 0;
+    }
+    return (vals.bits & 1) ? 0 : 1;
+}
+
+mesa_rc phy_only_mdint_register(const mepa_device_t *dev, const char *gpiochip_line)
+{
+    if (phy_only_mdint_open(gpiochip_line) != 0) {
+        return MESA_RC_ERROR;
+    }
+    // XXX TODO: for ASYNC PHY events (link change, PTP, MACsec) hand
+    // phy_only_mdint_fd to fd_read_register() so the demo's central select()
+    // loop (main.c) dispatches INTR edges while idle, then poll the PHY event
+    // status in that handler. Not wired yet: there is no async consumer, and
+    // the mailbox path above must not share the fd with the central loop while
+    // a synchronous CLI command is in flight.
+    return lan80xx_MB_INTR_register_callback(dev, phy_only_mdint_gpio_cb);
 }

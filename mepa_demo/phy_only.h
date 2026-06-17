@@ -51,4 +51,16 @@ mesa_rc phy_only_slots_open(void);    // open the configured spidev nodes
 mesa_rc phy_only_spi_rw(mepa_port_no_t port_no, mesa_bool_t read,
                         uint8_t mmd, uint16_t reg_num, uint32_t *const data);
 
+// LAN80xx mailbox host-interrupt (MDINT) over a host GPIO line (board-portable):
+// bind the MEPA gpio callback to a GPIO chardev edge-event line, so the mailbox
+// waits on the real INTR instead of polling the flag over SPI. The INTR pin is
+// board-specific:
+//   gpiochip_line = a DTS line name (gpio-line-names, e.g. "lan8023-mdint"),
+//                   probed across every gpiochip, or an explicit
+//                   "<chip-path>:<line>" (e.g. "/dev/gpiochip2:0").
+//   NULL          -> use $LAN80XX_MDINT, else the built-in default.
+struct mepa_device;
+mesa_rc phy_only_mdint_register(const struct mepa_device *dev,
+                                const char *gpiochip_line);
+
 #endif /* _PHY_ONLY_H_ */
