@@ -2447,6 +2447,25 @@ mepa_rc lan80xx_serdes_configuration(mepa_device_t *dev, mepa_port_no_t port_no,
     if (lan80xx_serdes_loopback_check(dev, port_no) != MEPA_RC_OK) {
         T_E(MEPA_TRACE_GRP_GEN, "Error in configuring Serdes Loopback on port no : %d\n", port_no);
     }
+
+    /* Optional config-driven SerDes EQ override */
+    if (data->conf.host_tx_eq.apply) {
+        const mepa_phy_tx_eq_t *e = &data->conf.host_tx_eq;
+        phy25g_tx_rx_equa_conf_t equa = {0};
+
+        equa.equalizer_conf = (phy25g_equa_t)e->eq_dir;
+        equa.dfe_adp_ena    = e->dfe_adp_ena;
+        equa.dfe_man_ena    = e->dfe_man_ena;
+        equa.amp_code       = e->amp_code;
+        equa.tx_tap_dly     = e->tx_tap_dly;
+        equa.tx_tap_adv     = e->tx_tap_adv;
+        equa.rx_vga         = e->rx_vga;
+        equa.rx_ctle_c      = e->rx_ctle_c;
+        equa.rx_ctle_r      = e->rx_ctle_r;
+        if (lan80xx_phy_tx_rx_equalization_set_priv(dev, port_no, e->is_line, &equa) != MEPA_RC_OK) {
+            T_E(MEPA_TRACE_GRP_GEN, "host_tx_eq apply failed on port : %d\n", port_no);
+        }
+    }
     return MEPA_RC_OK;
 }
 

@@ -346,6 +346,22 @@ typedef struct {
 } phy25g_conf_t;
 
 
+/** \brief Optional config-driven SerDes equalizer override (host_tx_eq)  */
+typedef struct {
+    mepa_bool_t apply;        /**< FALSE: driver defaults; TRUE: apply the fields below */
+    mepa_bool_t is_line;      /**< FALSE: host side; TRUE: line side */
+    uint8_t     eq_dir;       /**< equalizer direction: 0=TX, 1=RX, 2=TX+RX */
+    mepa_bool_t dfe_adp_ena;  /**< RX DFE adaptive enable */
+    mepa_bool_t dfe_man_ena;  /**< RX DFE manual enable (unsupported on some ports) */
+    uint8_t     amp_code;     /**< TX amplitude 0..101 (calibrated IPDRIVER+VC_DRIVER) */
+    uint8_t     tx_tap_dly;   /**< TX post-cursor TAP_DLY 0..31 */
+    uint8_t     tx_tap_adv;   /**< TX pre-cursor TAP_ADV 0..15 */
+    uint8_t     rx_vga;       /**< RX VGA 0..31 */
+    uint8_t     rx_ctle_c;    /**< RX CTLE C 0..15 */
+    uint8_t     rx_ctle_r;    /**< RX CTLE R 0..15 */
+} mepa_phy_tx_eq_t;
+
+
 /** \brief Represents the configuration that is applied to PHY. */
 typedef struct {
     mepa_port_speed_t               speed;               /**< Forced port speed */
@@ -361,6 +377,7 @@ typedef struct {
     mepa_cl37_conf_t                cl37_conf;           /**< Clause 37 Configuration for 1000BASE-X for supported PHYs */
     phy10g_conf_t                   conf_10g;
     phy25g_conf_t                   conf_25g;            /**< 25G PHY config structure */
+    mepa_phy_tx_eq_t                host_tx_eq;          /**< Optional SerDes EQ override applied at Dev conf (delegates to lan80xx_phy_tx_rx_equalization_set) */
 } mepa_conf_t;
 
 /** \brief  MEPA event mask */
