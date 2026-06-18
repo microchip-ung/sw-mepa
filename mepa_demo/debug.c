@@ -11,7 +11,7 @@
 #include "cli.h"
 #include "symreg.h"
 
-static meba_inst_t meba_global_inst;
+extern meba_inst_t meba_global_inst;
 
 extern uint16_t slot1_map[];
 extern uint16_t slot2_map[];
